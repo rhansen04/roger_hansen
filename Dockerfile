@@ -30,7 +30,7 @@ COPY . .
 # Instalar dependências PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissões
-RUN chown -R www-data:www-data storage public/uploads
+# Criar diretórios e permissões
+RUN mkdir -p storage public/uploads && chown -R www-data:www-data storage public/uploads
 
 EXPOSE 80
