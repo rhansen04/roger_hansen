@@ -1,0 +1,10 @@
+.git
+docs
+*.md
+*.txt
+*.bat
+*.ps1
+storage/*.db
+tests
+_nul
+nul
