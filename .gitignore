@@ -1,0 +1,103 @@
+# ======================
+# Hansen Educacional - .gitignore
+# ======================
+
+# --- Environment & Secrets ---
+.env
+*.env.local
+
+# --- Dependencies ---
+/vendor/
+composer.phar
+composer.lock
+
+# --- Storage (logs, cache, database) ---
+/storage/*
+!/storage/.gitignore
+
+# --- Uploads (user content) ---
+/public/uploads/**/*
+!/public/uploads/**/.gitkeep
+
+# --- IDE & OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+Desktop.ini
+.DS_Store
+_nul
+nul
+
+# --- Claude Code ---
+.claude/
+
+# --- Migration/Setup scripts (one-time use, not part of app) ---
+SETUP_XAMPP.ps1
+SETUP_XAMPP_SIMPLES.ps1
+VERIFICACAO_RAPIDA.ps1
+EXECUTAR_SETUP.bat
+iniciar_apache.bat
+restart_server.bat
+
+# --- Root-level DB setup scripts (not part of app runtime) ---
+inicializar_banco.php
+criar_banco.php
+create_admin_tables.php
+create_users_table.php
+seed_admin.php
+reset_and_populate.php
+recreate_tables.php
+add_last_login_column.php
+add_last_login_column.py
+add_last_login_column.sql
+setup_banco.sql
+clear_cache.php
+clear_cache_cli.php
+limpar_cache.php
+download_images.php
+verificar_gemini.php
+verificar_observacoes.php
+
+# --- Migration/status documentation (not needed in repo) ---
+ARQUIVOS_CONFIGURACAO.md
+AUDITORIA_AREA_ADMIN.md
+CHECKLIST_IMPLEMENTACAO.md
+CHECKLIST_OBSERVACOES.md
+COMO_VER_MUDANCAS.md
+CONCLUSAO_100_PORCENTO.md
+CONFIGURACAO_LOCAL.md
+CORES_OFICIAIS.md
+CRUD_USUARIOS_IMPLEMENTADO.md
+EXEMPLOS_API_GEMINI.md
+GAP_MIGRACAO_SEM_WORDPRESS.md
+IMAGENS_REFERENCIAS.md
+IMPLEMENTACAO_STATUS.md
+MIGRACAO_SQLITE_PARA_MYSQL.md
+README_OBSERVACOES.md
+RESUMO_IA_IMPLEMENTADO.md
+STATUS_INSTALACAO.md
+TESTE_RESUMO_IA.md
+VALIDACAO_SITE.md
+video_tracking_integration.md
+PROJETO_ESTRUTURA.md
+
+# --- Guide/temp text files ---
+COMECE_AQUI.txt
+INDICE_ARQUIVOS.txt
+LEIA_ME_GEMINI.txt
+LEIA_PRIMEIRO.txt
+QUICK_REFERENCE.txt
+RESUMO_EXECUTIVO_GEMINI.txt
+SUMARIO_FINAL.txt
+
+# --- Misplaced/garbage files ---
+publicuploadsstudents/
+publicuploadsstudents.gitkeep
+
+# --- Test scripts in scripts/ (keep only migration runner) ---
+scripts/test_*.php
+scripts/install_composer.bat
+scripts/run_course_migrations.php

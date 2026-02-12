@@ -1,0 +1,37 @@
+-- migrations/007_create_enrollments.sql
+
+CREATE TABLE IF NOT EXISTS enrollments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL COMMENT 'ID do usuário',
+    course_id INT NOT NULL COMMENT 'ID do curso',
+    enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Data de matrícula',
+    start_date TIMESTAMP NULL COMMENT 'Data em que começou o curso',
+    completion_date TIMESTAMP NULL COMMENT 'Data de conclusão',
+    status ENUM('pending', 'active', 'completed', 'cancelled', 'suspended') DEFAULT 'pending' COMMENT 'Status da matrícula',
+    payment_status ENUM('pending', 'paid', 'free', 'refunded') DEFAULT 'pending' COMMENT 'Status do pagamento',
+    payment_method VARCHAR(50) COMMENT 'Método de pagamento',
+    transaction_id VARCHAR(255) COMMENT 'ID da transação',
+    certificate_issued TINYINT(1) DEFAULT 0 COMMENT 'Certificado emitido?',
+    certificate_url VARCHAR(255) COMMENT 'URL do certificado',
+    overall_progress_percentage DECIMAL(5,2) DEFAULT 0.00 COMMENT '% de conclusão do curso (0-100)',
+    lessons_completed_count INT DEFAULT 0 COMMENT 'Número de lições completadas',
+    total_lessons_count INT DEFAULT 0 COMMENT 'Total de lições do curso',
+    videos_completed_count INT DEFAULT 0 COMMENT 'Número de vídeos completados (100%)',
+    total_videos_count INT DEFAULT 0 COMMENT 'Total de vídeos do curso',
+    total_watch_time INT DEFAULT 0 COMMENT 'Tempo total assistido em segundos',
+    first_activity_at TIMESTAMP NULL COMMENT 'Primeira atividade do aluno',
+    last_activity_at TIMESTAMP NULL COMMENT 'Última atividade do aluno',
+    completion_percentage DECIMAL(5,2) DEFAULT 0.00 COMMENT '% de conclusão calculado automaticamente',
+    is_course_completed TINYINT(1) DEFAULT 0 COMMENT 'Curso 100% completado?',
+    course_completed_at TIMESTAMP NULL COMMENT 'Data/hora de conclusão do curso',
+    certificate_eligible TINYINT(1) DEFAULT 0 COMMENT 'Aluno elegível para certificado?',
+    UNIQUE KEY unique_enrollment (user_id, course_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+    INDEX idx_enrollments_user (user_id),
+    INDEX idx_enrollments_course (course_id),
+    INDEX idx_enrollments_status (status),
+    INDEX idx_enrollments_progress (overall_progress_percentage),
+    INDEX idx_enrollments_completion (is_course_completed)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Tabela de matrículas nos cursos';

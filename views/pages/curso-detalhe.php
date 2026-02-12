@@ -1,0 +1,192 @@
+<section class="py-5">
+    <div class="container">
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i><?php echo $_SESSION['success_message']; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+        <div class="row">
+            <!-- Info do Curso -->
+            <div class="col-lg-8">
+                <?php if (!empty($course['cover_image'])): ?>
+                    <img src="<?= htmlspecialchars($course['cover_image']) ?>" class="img-fluid rounded mb-4" alt="<?= htmlspecialchars($course['title']) ?>">
+                <?php else: ?>
+                    <div class="rounded mb-4 d-flex align-items-center justify-content-center" style="height: 300px; background: linear-gradient(135deg, var(--primary-color), var(--dark-teal));">
+                        <div class="text-center text-white">
+                            <i class="fas fa-graduation-cap fa-4x mb-3"></i>
+                            <h2><?= htmlspecialchars($course['title']) ?></h2>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <h1 class="mb-3"><?= htmlspecialchars($course['title']) ?></h1>
+
+                <?php if (!empty($course['description'])): ?>
+                    <p class="lead text-muted"><?= htmlspecialchars($course['description']) ?></p>
+                <?php endif; ?>
+
+                <!-- Detalhes -->
+                <div class="row g-3 my-4">
+                    <?php if (!empty($course['level'])): ?>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark border px-3 py-2">
+                                <i class="fas fa-signal me-1"></i>
+                                <?= ucfirst($course['level']) ?>
+                            </span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($course['duration_hours'])): ?>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark border px-3 py-2">
+                                <i class="fas fa-clock me-1"></i>
+                                <?= $course['duration_hours'] ?> horas
+                            </span>
+                        </div>
+                    <?php endif; ?>
+                    <?php
+                    $totalLessons = 0;
+                    foreach ($sections as $s) { $totalLessons += count($s['lessons']); }
+                    ?>
+                    <div class="col-auto">
+                        <span class="badge bg-light text-dark border px-3 py-2">
+                            <i class="fas fa-play-circle me-1"></i>
+                            <?= $totalLessons ?> licoes
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-light text-dark border px-3 py-2">
+                            <i class="fas fa-folder me-1"></i>
+                            <?= count($sections) ?> modulos
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Conteudo do Curso -->
+                <h3 class="mt-5 mb-3">Conteudo do Curso</h3>
+                <div class="accordion" id="courseContent">
+                    <?php foreach ($sections as $i => $section): ?>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button <?= $i > 0 ? 'collapsed' : '' ?>"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#section-<?= $section['id'] ?>">
+                                    <strong><?= htmlspecialchars($section['title']) ?></strong>
+                                    <span class="badge bg-secondary ms-2"><?= count($section['lessons']) ?> licoes</span>
+                                </button>
+                            </h2>
+                            <div id="section-<?= $section['id'] ?>"
+                                 class="accordion-collapse collapse <?= $i === 0 ? 'show' : '' ?>"
+                                 data-bs-parent="#courseContent">
+                                <div class="accordion-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <?php foreach ($section['lessons'] as $lessonItem): ?>
+                                            <li class="list-group-item d-flex align-items-center">
+                                                <i class="fas fa-play-circle text-muted me-3"></i>
+                                                <div class="flex-grow-1">
+                                                    <?= htmlspecialchars($lessonItem['title']) ?>
+                                                </div>
+                                                <?php if (!empty($lessonItem['video_duration'])): ?>
+                                                    <small class="text-muted">
+                                                        <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
+                                                    </small>
+                                                <?php endif; ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+                <!-- Quizzes Disponíveis -->
+                <?php if ($enrollment && !empty($quizzes)): ?>
+                <h3 class="mt-5 mb-3">Avaliações</h3>
+                <div class="list-group">
+                    <?php foreach ($quizzes as $quiz): ?>
+                    <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/quiz/<?= $quiz['id'] ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            <strong><?= htmlspecialchars($quiz['title']) ?></strong>
+                            <?php if (!empty($quiz['description'])): ?>
+                                <small class="text-muted d-block ms-4"><?= htmlspecialchars($quiz['description']) ?></small>
+                            <?php endif; ?>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary"><?= $quiz['passing_score'] ?>% min</span>
+                            <?php if ($quiz['attempts_allowed'] > 0): ?>
+                                <span class="badge bg-info"><?= $quiz['attempts_allowed'] ?> tentativas</span>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Sidebar: Card de Acao -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top: 90px;">
+                    <div class="card-body text-center p-4">
+                        <?php if ($course['is_free']): ?>
+                            <span class="badge bg-success fs-6 mb-3 px-3 py-2">GRATUITO</span>
+                        <?php elseif (!empty($course['price']) && $course['price'] > 0): ?>
+                            <h3 class="text-green mb-3">R$ <?= number_format($course['price'], 2, ',', '.') ?></h3>
+                        <?php endif; ?>
+
+                        <?php if ($enrollment): ?>
+                            <!-- Ja matriculado -->
+                            <div class="mb-3">
+                                <div class="progress" style="height: 25px; border-radius: 12px;">
+                                    <div class="progress-bar"
+                                         style="width: <?= $enrollment['overall_progress_percentage'] ?? 0 ?>%; background-color: var(--primary-color);">
+                                        <?= round($enrollment['overall_progress_percentage'] ?? 0) ?>%
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    <?= $enrollment['videos_completed_count'] ?? 0 ?>/<?= $enrollment['total_videos_count'] ?? $totalLessons ?> licoes concluidas
+                                </small>
+                            </div>
+
+                            <?php
+                            // Encontrar primeira licao nao concluida ou a primeira
+                            $firstLesson = null;
+                            foreach ($sections as $s) {
+                                foreach ($s['lessons'] as $l) {
+                                    if (!$firstLesson) $firstLesson = $l;
+                                }
+                            }
+                            ?>
+                            <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $firstLesson['id'] ?? 1 ?>"
+                               class="btn btn-hansen btn-lg w-100">
+                                <i class="fas fa-play me-2"></i>
+                                <?= ($enrollment['overall_progress_percentage'] ?? 0) > 0 ? 'Continuar' : 'Comecar' ?>
+                            </a>
+                        <?php elseif (isset($_SESSION['user_id'])): ?>
+                            <!-- Logado mas nao matriculado -->
+                            <form action="/curso/<?= htmlspecialchars($course['slug']) ?>/matricular" method="POST">
+                                <button type="submit" class="btn btn-hansen btn-lg w-100">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    <?= $course['is_free'] ? 'Matricular-se Gratuitamente' : 'Matricular-se' ?>
+                                </button>
+                            </form>
+                            <?php if (!$course['is_free'] && $course['price'] > 0): ?>
+                                <small class="text-muted d-block mt-2">Apos a matricula, voce recebera instrucoes de pagamento.</small>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <!-- Nao logado -->
+                            <a href="/login" class="btn btn-hansen btn-lg w-100 mb-2">
+                                <i class="fas fa-sign-in-alt me-2"></i> Entrar para Acessar
+                            </a>
+                            <small class="text-muted d-block">Nao tem conta? <a href="/registro" class="fw-bold">Cadastre-se</a></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,95 @@
+/**
+ * HANSEN EDUCACIONAL - ESQUEMA DE CORES OFICIAL
+ * Baseado em hanseneducacional.com.br
+ * Atualizado: 2026-02-10
+ */
+
+:root {
+    /* === CORES PRIMÁRIAS === */
+    --hansen-primary: #007e66;          /* Teal/Verde Escuro - Cor Principal da Marca */
+    --hansen-secondary: #ffb606;        /* Amarelo Dourado - Accent/Destaque */
+
+    /* === CORES SECUNDÁRIAS === */
+    --hansen-dark-teal: #04574A;        /* Teal Escuro - Secundária */
+    --hansen-medium-teal: #256c5d;      /* Teal Médio */
+
+    /* === CORES DE TEXTO === */
+    --hansen-text-dark: #181a1b;        /* Texto Principal Escuro */
+    --hansen-text-light: #e8e6e3;       /* Texto Claro */
+    --hansen-text-secondary: #333;      /* Texto Secundário */
+
+    /* === BACKGROUNDS === */
+    --hansen-bg-light: #e8e6e3;         /* Background Bege Claro */
+    --hansen-bg-dark: #181a1b;          /* Background Escuro (Dark Mode) */
+    --hansen-bg-white: #ffffff;         /* Background Branco */
+    --hansen-pale-mint: #d9ede9;        /* Pale Mint - Section Highlights */
+
+    /* === BUTTONS === */
+    --hansen-btn-primary-bg: #007e66;
+    --hansen-btn-primary-hover: #056d5d;
+    --hansen-btn-secondary-bg: #ffb606;
+    --hansen-btn-secondary-hover: #e6a305;
+
+    /* === SHADOWS & BORDERS === */
+    --hansen-shadow-sm: 0 2px 4px rgba(0, 126, 102, 0.1);
+    --hansen-shadow-md: 0 4px 15px rgba(0, 126, 102, 0.15);
+    --hansen-shadow-lg: 0 6px 20px rgba(0, 126, 102, 0.2);
+    --hansen-border-radius: 8px;
+}
+
+/* === CLASSES DE UTILIDADE === */
+
+/* Cores de Texto */
+.text-hansen-primary { color: var(--hansen-primary) !important; }
+.text-hansen-secondary { color: var(--hansen-secondary) !important; }
+.text-hansen-dark-teal { color: var(--hansen-dark-teal) !important; }
+
+/* Backgrounds */
+.bg-hansen-primary { background-color: var(--hansen-primary) !important; }
+.bg-hansen-secondary { background-color: var(--hansen-secondary) !important; }
+.bg-hansen-light { background-color: var(--hansen-bg-light) !important; }
+.bg-hansen-pale-mint { background-color: var(--hansen-pale-mint) !important; }
+
+/* Botões Personalizados */
+.btn-hansen-primary {
+    background-color: var(--hansen-btn-primary-bg);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: var(--hansen-shadow-md);
+}
+
+.btn-hansen-primary:hover {
+    background-color: var(--hansen-btn-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--hansen-shadow-lg);
+}
+
+.btn-hansen-secondary {
+    background-color: var(--hansen-btn-secondary-bg);
+    color: var(--hansen-text-dark);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.btn-hansen-secondary:hover {
+    background-color: var(--hansen-btn-secondary-hover);
+    transform: translateY(-2px);
+}
+
+/* Borders */
+.border-hansen-primary { border-color: var(--hansen-primary) !important; }
+.border-hansen-secondary { border-color: var(--hansen-secondary) !important; }
+
+/* Shadows */
+.shadow-hansen-sm { box-shadow: var(--hansen-shadow-sm); }
+.shadow-hansen-md { box-shadow: var(--hansen-shadow-md); }
+.shadow-hansen-lg { box-shadow: var(--hansen-shadow-lg); }
