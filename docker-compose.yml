@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   app:
-    build: .
+    image: ghcr.io/rhansen04/roger_hansen:latest
     ports:
       - "8080:80"
     environment:
@@ -33,7 +33,6 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-SenhaSegura123!}
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./setup_banco.sql:/docker-entrypoint-initdb.d/setup.sql
     restart: unless-stopped
 
   redis:

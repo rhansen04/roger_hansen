@@ -1,7 +1,10 @@
 FROM php:8.2-apache
 
+# Dependências do sistema
+RUN apt-get update && apt-get install -y unzip git libzip-dev && rm -rf /var/lib/apt/lists/*
+
 # Extensões PHP
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 RUN pecl install redis && docker-php-ext-enable redis
 
 # Habilitar mod_rewrite
