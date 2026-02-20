@@ -64,12 +64,15 @@
     <a href="/admin/students" class="nav-link-admin"><i class="fas fa-user-graduate me-2"></i> Alunos</a>
     <a href="/admin/schools" class="nav-link-admin"><i class="fas fa-school me-2"></i> Escolas</a>
     <a href="/admin/users" class="nav-link-admin"><i class="fas fa-users me-2"></i> Usuários</a>
+    <a href="/admin/parents" class="nav-link-admin"><i class="fas fa-user-friends me-2"></i> Responsáveis</a>
     <a href="/admin/courses" class="nav-link-admin"><i class="fas fa-book me-2"></i> Cursos</a>
     <a href="/admin/observations" class="nav-link-admin"><i class="fas fa-clipboard-list me-2"></i> Observações</a>
     <a href="/admin/contacts" class="nav-link-admin"><i class="fas fa-envelope me-2"></i> Contatos</a>
+    <a href="/admin/messages" class="nav-link-admin"><i class="fas fa-comments me-2"></i> Perguntas</a>
     <a href="/admin/video-dashboard" class="nav-link-admin"><i class="fas fa-chart-line me-2"></i> Videos / Tracking</a>
     <a href="/admin/enrollments" class="nav-link-admin"><i class="fas fa-user-check me-2"></i> Matrículas</a>
     <a href="/admin/reports" class="nav-link-admin"><i class="fas fa-chart-bar me-2"></i> Relatórios</a>
+    <a href="/admin/reports/low-scores" class="nav-link-admin" style="font-size:0.8rem; padding-left:35px; color:rgba(255,200,200,0.9)"><i class="fas fa-exclamation-triangle me-2"></i>Notas Baixas</a>
     <div style="position: absolute; bottom: 20px; width: 100%;">
         <hr class="bg-white opacity-25">
         <a href="/logout" class="nav-link-admin text-danger"><i class="fas fa-sign-out-alt me-2"></i> Sair do Sistema</a>

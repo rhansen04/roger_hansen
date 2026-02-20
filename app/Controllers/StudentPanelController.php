@@ -24,7 +24,44 @@ class StudentPanelController
             $enrollment['course'] = $course;
         }
 
-        return $this->render('dashboard', ['enrollments' => $enrollments]);
+        // Cursos onde aluno esta abaixo da nota minima
+        $failedQuizEnrollments = [];
+        try {
+            $db = Connection::getInstance();
+            $stmt = $db->prepare("
+                SELECT DISTINCT
+                    e.id AS enrollment_id,
+                    e.course_id,
+                    c.title AS course_title,
+                    c.slug AS course_slug,
+                    e.overall_progress_percentage,
+                    q.title AS quiz_title,
+                    q.passing_score,
+                    MAX(qa.score) AS best_score,
+                    COUNT(qa.id) AS attempt_count,
+                    q.attempts_allowed
+                FROM enrollments e
+                JOIN courses c ON e.course_id = c.id
+                JOIN sections s ON s.course_id = c.id
+                JOIN quizzes q ON q.section_id = s.id
+                JOIN quiz_attempts qa ON qa.quiz_id = q.id AND qa.user_id = e.user_id
+                WHERE e.user_id = ?
+                  AND e.status = 'active'
+                  AND qa.passed = 0
+                GROUP BY e.id, q.id
+                HAVING MAX(qa.score) < q.passing_score
+                ORDER BY e.id DESC
+            ");
+            $stmt->execute([$userId]);
+            $failedQuizEnrollments = $stmt->fetchAll();
+        } catch (\Exception $ex) {
+            $failedQuizEnrollments = [];
+        }
+
+        return $this->render('dashboard', [
+            'enrollments' => $enrollments,
+            'failedQuizEnrollments' => $failedQuizEnrollments,
+        ]);
     }
 
     public function profile()

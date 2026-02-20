@@ -83,15 +83,30 @@
                                 <div class="accordion-body p-0">
                                     <ul class="list-group list-group-flush">
                                         <?php foreach ($section['lessons'] as $lessonItem): ?>
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-play-circle text-muted me-3"></i>
-                                                <div class="flex-grow-1">
-                                                    <?= htmlspecialchars($lessonItem['title']) ?>
-                                                </div>
-                                                <?php if (!empty($lessonItem['video_duration'])): ?>
-                                                    <small class="text-muted">
-                                                        <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
-                                                    </small>
+                                            <li class="list-group-item d-flex align-items-center <?= $enrollment ? 'list-group-item-action' : '' ?>">
+                                                <?php if ($enrollment): ?>
+                                                    <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $lessonItem['id'] ?>"
+                                                       class="d-flex align-items-center w-100 text-decoration-none text-dark">
+                                                        <i class="fas fa-play-circle text-success me-3"></i>
+                                                        <div class="flex-grow-1">
+                                                            <?= htmlspecialchars($lessonItem['title']) ?>
+                                                        </div>
+                                                        <?php if (!empty($lessonItem['video_duration'])): ?>
+                                                            <small class="text-muted">
+                                                                <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <i class="fas fa-lock text-muted me-3"></i>
+                                                    <div class="flex-grow-1 text-muted">
+                                                        <?= htmlspecialchars($lessonItem['title']) ?>
+                                                    </div>
+                                                    <?php if (!empty($lessonItem['video_duration'])): ?>
+                                                        <small class="text-muted">
+                                                            <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
+                                                        </small>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </li>
                                         <?php endforeach; ?>
@@ -166,6 +181,11 @@
                                 <i class="fas fa-play me-2"></i>
                                 <?= ($enrollment['overall_progress_percentage'] ?? 0) > 0 ? 'Continuar' : 'Comecar' ?>
                             </a>
+                            <?php if (!empty($materialCount) && $materialCount > 0): ?>
+                            <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/materiais" class="btn btn-outline-secondary w-100 mt-2">
+                                <i class="fas fa-paperclip me-2"></i>Materiais de Apoio (<?= $materialCount ?>)
+                            </a>
+                            <?php endif; ?>
                         <?php elseif (isset($_SESSION['user_id'])): ?>
                             <!-- Logado mas nao matriculado -->
                             <form action="/curso/<?= htmlspecialchars($course['slug']) ?>/matricular" method="POST">

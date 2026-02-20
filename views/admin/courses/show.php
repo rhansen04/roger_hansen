@@ -24,6 +24,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary fw-bold mb-0"><?php echo htmlspecialchars($course['title']); ?></h2>
     <div>
+        <a href="/admin/courses/<?php echo $course['id']; ?>/materials" class="btn btn-outline-info"><i class="fas fa-paperclip me-1"></i> Materiais</a>
         <a href="/admin/courses/<?php echo $course['id']; ?>/quizzes" class="btn btn-outline-success"><i class="fas fa-question-circle me-1"></i> Quizzes</a>
         <a href="/admin/courses/<?php echo $course['id']; ?>/edit" class="btn btn-outline-primary"><i class="fas fa-edit me-1"></i> Editar</a>
         <a href="/admin/courses" class="btn btn-outline-secondary ms-2">Voltar</a>

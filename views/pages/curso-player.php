@@ -113,10 +113,13 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- Voltar ao curso -->
-                <div class="mt-4">
+                <!-- Voltar ao curso e Perguntas -->
+                <div class="mt-4 d-flex gap-2 flex-wrap">
                     <a href="/curso/<?= htmlspecialchars($course['slug']) ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Voltar ao Curso
+                    </a>
+                    <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/perguntas" class="btn btn-outline-primary">
+                        <i class="fas fa-comments me-1"></i> Perguntas e Respostas
                     </a>
                 </div>
             </div>

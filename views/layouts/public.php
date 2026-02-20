@@ -78,7 +78,37 @@
                 <li class="nav-item"><a class="nav-link" href="/livros">Livros</a></li>
                 <li class="nav-item"><a class="nav-link" href="/contato">Contato</a></li>
                 <li class="nav-item ms-lg-2"><button class="dark-mode-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button></li>
-                <li class="nav-item ms-lg-2"><a class="btn btn-hansen py-2" href="/login">Área do Aluno</a></li>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'parent'): ?>
+                        <li class="nav-item ms-lg-2 dropdown">
+                            <a class="btn btn-hansen py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'Minha Area') ?>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/minha-area"><i class="fas fa-home me-2"></i> Inicio</a></li>
+                                <li><a class="dropdown-item" href="/minha-area/perfil"><i class="fas fa-user me-2"></i> Meu Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
+                            </ul>
+                        </li>
+                    <?php elseif (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'student'): ?>
+                        <li class="nav-item ms-lg-2"><a class="btn btn-hansen py-2" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-1"></i> Painel Admin</a></li>
+                    <?php else: ?>
+                        <li class="nav-item ms-lg-2 dropdown">
+                            <a class="btn btn-hansen py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'Minha Conta') ?>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/minha-conta"><i class="fas fa-book me-2"></i> Meus Cursos</a></li>
+                                <li><a class="dropdown-item" href="/minha-conta/perfil"><i class="fas fa-user me-2"></i> Meu Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <li class="nav-item ms-lg-2"><a class="btn btn-hansen py-2" href="/login">Área do Aluno</a></li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>

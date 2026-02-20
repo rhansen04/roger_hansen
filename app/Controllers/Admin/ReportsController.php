@@ -81,6 +81,57 @@ class ReportsController
         ]);
     }
 
+    public function lowScores()
+    {
+        $stmt = $this->db->query("
+            SELECT
+                u.id AS user_id,
+                u.name AS student_name,
+                c.id AS course_id,
+                c.title AS course_title,
+                c.slug AS course_slug,
+                q.id AS quiz_id,
+                q.title AS quiz_title,
+                q.passing_score,
+                q.attempts_allowed,
+                e.id AS enrollment_id,
+                MAX(qa.score) AS best_score,
+                COUNT(qa.id) AS attempt_count
+            FROM quiz_attempts qa
+            JOIN users u ON qa.user_id = u.id
+            JOIN quizzes q ON qa.quiz_id = q.id
+            JOIN sections s ON q.section_id = s.id
+            JOIN courses c ON s.course_id = c.id
+            JOIN enrollments e ON e.user_id = u.id AND e.course_id = c.id
+            WHERE qa.passed = 0
+            GROUP BY u.id, q.id, e.id
+            HAVING MAX(qa.score) < q.passing_score
+            ORDER BY best_score ASC, u.name ASC
+        ");
+        $lowScores = $stmt->fetchAll();
+
+        return $this->render('reports/low-scores', ['lowScores' => $lowScores]);
+    }
+
+    public function resetAttempts($quizId)
+    {
+        $userId       = (int)($_POST['user_id'] ?? 0);
+        $enrollmentId = (int)($_POST['enrollment_id'] ?? 0);
+
+        if (!$userId || !$quizId) {
+            header('Location: /admin/reports/low-scores');
+            exit;
+        }
+
+        // Delete all attempts for this user+quiz so they can retry
+        $stmt = $this->db->prepare("DELETE FROM quiz_attempts WHERE quiz_id = ? AND user_id = ?");
+        $stmt->execute([$quizId, $userId]);
+
+        $_SESSION['success_message'] = 'Tentativas resetadas. O aluno pode refazer o quiz agora.';
+        header('Location: /admin/reports/low-scores');
+        exit;
+    }
+
     protected function render($view, $data = [])
     {
         extract($data);

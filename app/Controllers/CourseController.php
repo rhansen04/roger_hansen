@@ -61,12 +61,18 @@ class CourseController
         $stmt->execute([$course['id']]);
         $quizzes = $stmt->fetchAll();
 
+        // Contar materiais de apoio ativos
+        $stmtMat = $this->db->prepare("SELECT COUNT(*) FROM course_materials WHERE course_id = ? AND is_active = 1");
+        $stmtMat->execute([$course['id']]);
+        $materialCount = (int)$stmtMat->fetchColumn();
+
         $this->render('curso-detalhe', [
             'title' => $course['title'] . ' | Hansen Educacional',
             'course' => $course,
             'sections' => $sections,
             'enrollment' => $enrollment,
             'quizzes' => $quizzes,
+            'materialCount' => $materialCount,
         ]);
     }
 

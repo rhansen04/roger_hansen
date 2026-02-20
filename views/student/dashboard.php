@@ -48,6 +48,7 @@
                                 <a href="/certificado/gerar/<?php echo $enrollment['id']; ?>" class="btn btn-outline-success btn-sm me-1" title="Certificado"><i class="fas fa-certificate"></i></a>
                             <?php endif; ?>
                             <a href="/curso/<?php echo $enrollment['course_slug']; ?>" class="btn btn-hansen btn-sm text-white">Continuar</a>
+                            <a href="/curso/<?php echo $enrollment['course_slug']; ?>/perguntas" class="btn btn-outline-secondary btn-sm ms-1" title="Perguntas e Respostas"><i class="fas fa-comments"></i></a>
                         </div>
                     </div>
                 </div>
@@ -55,4 +56,51 @@
         </div>
         <?php endforeach; ?>
     </div>
+<?php endif; ?>
+
+<?php if (!empty($failedQuizEnrollments)): ?>
+<div class="mt-5">
+    <h4 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Atenção: Abaixo da Nota Mínima</h4>
+    <div class="row">
+        <?php foreach ($failedQuizEnrollments as $fq): ?>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card border-danger border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-2">
+                        <i class="fas fa-times-circle text-danger fa-2x me-3 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1"><?= htmlspecialchars($fq['course_title']) ?></h6>
+                            <small class="text-muted">Quiz: <?= htmlspecialchars($fq['quiz_title']) ?></small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>Sua nota</small>
+                            <small class="fw-bold text-danger"><?= round($fq['best_score']) ?>%</small>
+                        </div>
+                        <div class="progress" style="height:8px">
+                            <div class="progress-bar bg-danger" style="width:<?= $fq['best_score'] ?>%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted"><?= $fq['attempt_count'] ?> tentativa(s)</small>
+                            <small class="text-muted">Mínimo: <?= $fq['passing_score'] ?>%</small>
+                        </div>
+                    </div>
+                    <?php $canRetry = $fq['attempts_allowed'] == 0 || $fq['attempt_count'] < $fq['attempts_allowed']; ?>
+                    <?php if ($canRetry): ?>
+                        <a href="/curso/<?= htmlspecialchars($fq['course_slug']) ?>" class="btn btn-danger btn-sm w-100">
+                            <i class="fas fa-redo me-2"></i>Refazer Curso / Quiz
+                        </a>
+                    <?php else: ?>
+                        <div class="alert alert-warning py-2 mb-0 text-center small">
+                            <i class="fas fa-lock me-1"></i>Limite de tentativas atingido.<br>
+                            <strong>Solicite ao professor para liberar nova tentativa.</strong>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
 <?php endif; ?>

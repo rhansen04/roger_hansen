@@ -46,6 +46,12 @@ use App\Controllers\Admin\QuizAdminController;
 use App\Controllers\Admin\ReportsController;
 use App\Controllers\Admin\EnrollmentAdminController;
 use App\Controllers\Admin\ContactController as AdminContactController;
+use App\Controllers\Admin\CourseMaterialController;
+use App\Controllers\StudentMaterialController;
+use App\Controllers\ParentPanelController;
+use App\Controllers\Admin\ParentLinkController;
+use App\Controllers\CourseMessageController;
+use App\Controllers\Admin\MessageController as AdminMessageController;
 
 $router = new Router();
 
@@ -84,6 +90,14 @@ if (strpos($uri, '/admin/') === 0) {
 
 // Rotas Minha Conta (Protegidas - qualquer usuário logado)
 if (strpos($uri, '/minha-conta') === 0) {
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: /login');
+        exit;
+    }
+}
+
+// Rotas Minha Area (Protegidas - apenas parent)
+if (strpos($uri, '/minha-area') === 0) {
     if (!isset($_SESSION['user_id'])) {
         header('Location: /login');
         exit;
@@ -137,6 +151,13 @@ $router->get('/admin/courses/{id}/edit', [CourseAdminController::class, 'edit'])
 $router->post('/admin/courses/{id}/update', [CourseAdminController::class, 'update']);
 $router->post('/admin/courses/{id}/delete', [CourseAdminController::class, 'delete']);
 
+// Rotas Admin - Materiais de Apoio
+$router->get('/admin/courses/{courseId}/materials', [CourseMaterialController::class, 'index']);
+$router->get('/admin/courses/{courseId}/materials/create', [CourseMaterialController::class, 'create']);
+$router->post('/admin/courses/{courseId}/materials/create', [CourseMaterialController::class, 'store']);
+$router->post('/admin/materials/{id}/delete', [CourseMaterialController::class, 'delete']);
+$router->get('/admin/materials/{id}/download', [CourseMaterialController::class, 'download']);
+
 // Rotas Admin - Seções
 $router->post('/admin/courses/{courseId}/sections', [SectionAdminController::class, 'store']);
 $router->post('/admin/sections/{id}/update', [SectionAdminController::class, 'update']);
@@ -169,6 +190,8 @@ $router->post('/admin/contacts/{id}/delete', [AdminContactController::class, 'de
 
 // Rotas Admin - Relatórios
 $router->get('/admin/reports', [ReportsController::class, 'index']);
+$router->get('/admin/reports/low-scores', [ReportsController::class, 'lowScores']);
+$router->post('/admin/quiz/{quizId}/reset-attempts', [ReportsController::class, 'resetAttempts']);
 
 // Rotas Admin - Matrículas
 $router->get('/admin/enrollments', [EnrollmentAdminController::class, 'index']);
@@ -176,6 +199,10 @@ $router->post('/admin/enrollments/store', [EnrollmentAdminController::class, 'st
 $router->post('/admin/enrollments/{id}/activate', [EnrollmentAdminController::class, 'activate']);
 $router->post('/admin/enrollments/{id}/deactivate', [EnrollmentAdminController::class, 'deactivate']);
 $router->post('/admin/enrollments/{id}/delete', [EnrollmentAdminController::class, 'delete']);
+
+// Rotas Materiais (Aluno)
+$router->get('/curso/{slug}/materiais', [StudentMaterialController::class, 'index']);
+$router->get('/material/{id}/download', [StudentMaterialController::class, 'download']);
 
 // Rotas de Cursos (Player)
 $router->get('/curso/{slug}', [CourseController::class, 'show']);
@@ -202,6 +229,27 @@ $router->get('/minha-conta', [StudentPanelController::class, 'dashboard']);
 $router->get('/minha-conta/perfil', [StudentPanelController::class, 'profile']);
 $router->post('/minha-conta/perfil', [StudentPanelController::class, 'updateProfile']);
 $router->post('/minha-conta/senha', [StudentPanelController::class, 'changePassword']);
+
+// Rotas Painel dos Pais
+$router->get('/minha-area', [ParentPanelController::class, 'dashboard']);
+$router->get('/minha-area/perfil', [ParentPanelController::class, 'profile']);
+$router->post('/minha-area/perfil', [ParentPanelController::class, 'updateProfile']);
+$router->get('/minha-area/filho/{studentId}', [ParentPanelController::class, 'childDetail']);
+
+// Course Q&A (student + staff)
+$router->get('/curso/{slug}/perguntas', [CourseMessageController::class, 'index']);
+$router->get('/curso/{slug}/pergunta/{messageId}', [CourseMessageController::class, 'thread']);
+$router->post('/curso/{slug}/perguntas/nova', [CourseMessageController::class, 'ask']);
+$router->post('/curso/{slug}/pergunta/{messageId}/responder', [CourseMessageController::class, 'reply']);
+
+// Admin messages
+$router->get('/admin/messages', [AdminMessageController::class, 'index']);
+
+// Rotas Admin - Responsaveis
+$router->get('/admin/parents', [ParentLinkController::class, 'index']);
+$router->get('/admin/parents/{parentId}/link', [ParentLinkController::class, 'linkForm']);
+$router->post('/admin/parents/{parentId}/link', [ParentLinkController::class, 'link']);
+$router->post('/admin/parents/unlink/{linkId}', [ParentLinkController::class, 'unlink']);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $router->dispatch($method, $uri);

@@ -209,10 +209,16 @@ class AuthController
 
     private function redirectByRole($role)
     {
-        if ($role === 'student') {
-            header('Location: /minha-conta');
-        } else {
-            header('Location: /admin/dashboard');
+        switch ($role) {
+            case 'student':
+                header('Location: /minha-conta');
+                break;
+            case 'parent':
+                header('Location: /minha-area');
+                break;
+            default:
+                header('Location: /admin/dashboard');
+                break;
         }
         exit;
     }
