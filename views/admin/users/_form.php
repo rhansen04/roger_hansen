@@ -70,6 +70,12 @@ $isEdit = isset($user);
             <option value="coordenador" <?php echo $role === 'coordenador' ? 'selected' : ''; ?>>
                 Coordenador - Visualizar relatórios e dados
             </option>
+            <option value="student" <?php echo $role === 'student' ? 'selected' : ''; ?>>
+                Aluno - Acesso à área do aluno e cursos
+            </option>
+            <option value="parent" <?php echo $role === 'parent' ? 'selected' : ''; ?>>
+                Responsável - Acesso ao portal dos pais
+            </option>
         </select>
     </div>
 </div>
@@ -83,6 +89,8 @@ $isEdit = isset($user);
                 <li><strong>Administrador:</strong> Acesso total ao sistema, incluindo gerenciar usuários, escolas e configurações</li>
                 <li><strong>Professor:</strong> Pode gerenciar alunos e registrar observações</li>
                 <li><strong>Coordenador:</strong> Pode visualizar relatórios e dados dos alunos</li>
+                <li><strong>Aluno:</strong> Acesso à área do aluno e aos cursos matriculados</li>
+                <li><strong>Responsável:</strong> Acesso ao portal dos pais para acompanhar os filhos</li>
             </ul>
         </div>
     </div>
