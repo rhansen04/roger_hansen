@@ -51,7 +51,7 @@ class UserController
 
         if (empty($_POST['role'])) {
             $errors[] = 'O perfil é obrigatório.';
-        } elseif (!in_array($_POST['role'], ['admin', 'professor', 'coordenador'])) {
+        } elseif (!in_array($_POST['role'], ['admin', 'professor', 'coordenador', 'student', 'parent'])) {
             $errors[] = 'Perfil inválido.';
         }
 
@@ -137,7 +137,7 @@ class UserController
 
         if (empty($_POST['role'])) {
             $errors[] = 'O perfil é obrigatório.';
-        } elseif (!in_array($_POST['role'], ['admin', 'professor', 'coordenador'])) {
+        } elseif (!in_array($_POST['role'], ['admin', 'professor', 'coordenador', 'student', 'parent'])) {
             $errors[] = 'Perfil inválido.';
         }
 
