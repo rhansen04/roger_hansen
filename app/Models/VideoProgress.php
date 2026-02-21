@@ -48,7 +48,7 @@ class VideoProgress
             // Se não existe, cria novo
             $sql = "INSERT INTO video_progress
                         (enrollment_id, lesson_id, total_duration, created_at)
-                        VALUES (:enrollment_id, :lesson_id, :total_duration, NOW())";
+                        VALUES (?, ?, ?, NOW())";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$enrollmentId, $lessonId, $videoDuration]);
             
@@ -243,14 +243,38 @@ class VideoProgress
     
     /**
      * Atualizar progresso da matrícula
+     * Calcula a partir de course_progress (fonte de verdade)
      */
     public function updateEnrollmentProgress($enrollmentId)
     {
         try {
-            $progress = $this->calculateCourseProgress($enrollmentId);
-            
+            // Total de lições do curso desta matrícula
+            $stmtTotal = $this->db->prepare("
+                SELECT COUNT(l.id)
+                FROM lessons l
+                JOIN sections s ON l.section_id = s.id
+                JOIN enrollments e ON s.course_id = e.course_id
+                WHERE e.id = ?
+            ");
+            $stmtTotal->execute([$enrollmentId]);
+            $totalLessons = (int) $stmtTotal->fetchColumn();
+
+            // Lições concluídas
+            $stmtDone = $this->db->prepare("
+                SELECT COUNT(*) FROM course_progress
+                WHERE enrollment_id = ? AND completed = 1
+            ");
+            $stmtDone->execute([$enrollmentId]);
+            $completedLessons = (int) $stmtDone->fetchColumn();
+
+            $progressPercentage = $totalLessons > 0
+                ? round($completedLessons / $totalLessons * 100, 2)
+                : 0;
+            $isCompleted = ($totalLessons > 0 && $completedLessons >= $totalLessons);
+
             $sql = "UPDATE enrollments
                     SET overall_progress_percentage = ?,
+                        lessons_completed_count = ?,
                         videos_completed_count = ?,
                         total_videos_count = ?,
                         completion_percentage = ?,
@@ -260,23 +284,29 @@ class VideoProgress
                         course_completed_at = ?
                     WHERE id = ?";
             $stmt = $this->db->prepare($sql);
-            $result = $stmt->execute([
-                $progress['progress_percentage'],
-                $progress['completed_videos'],
-                $progress['total_videos'],
-                $progress['progress_percentage'],
-                $progress['is_completed'] ? 1 : 0,
+            $stmt->execute([
+                $progressPercentage,
+                $completedLessons,
+                $completedLessons,
+                $totalLessons,
+                $progressPercentage,
+                $isCompleted ? 1 : 0,
                 date('Y-m-d H:i:s'),
-                $progress['is_completed'] ? 1 : 0,
-                $progress['is_completed'] ? date('Y-m-d H:i:s') : null,
+                $isCompleted ? 1 : 0,
+                $isCompleted ? date('Y-m-d H:i:s') : null,
                 $enrollmentId
             ]);
-            
+
             // Limpar caches
             $this->cache->delete("videos:enrollment:{$enrollmentId}");
             $this->cache->delete("course_progress:enrollment:{$enrollmentId}");
-            
-            return $progress;
+
+            return [
+                'total_videos'       => $totalLessons,
+                'completed_videos'   => $completedLessons,
+                'progress_percentage' => $progressPercentage,
+                'is_completed'       => $isCompleted,
+            ];
         } catch (PDOException $e) {
             error_log("Erro ao atualizar progresso da matrícula: " . $e->getMessage());
             return [

@@ -40,21 +40,37 @@ class Enrollment
     }
     
     /**
-     * Buscar matrículas de um usuário
+     * Buscar matrículas de um usuário com progresso real calculado
      */
     public function getByUser($userId)
     {
         try {
             $sql = "SELECT e.*,
                            c.title as course_title,
-                           c.slug as course_slug
+                           c.slug as course_slug,
+                           (SELECT COUNT(l.id)
+                            FROM lessons l
+                            JOIN sections s ON l.section_id = s.id
+                            WHERE s.course_id = e.course_id) AS real_total_lessons,
+                           (SELECT COUNT(*)
+                            FROM course_progress cp
+                            WHERE cp.enrollment_id = e.id AND cp.completed = 1) AS real_completed_lessons
                     FROM enrollments e
                     JOIN courses c ON e.course_id = c.id
                     WHERE e.user_id = ?
                     ORDER BY e.enrollment_date DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$userId]);
-            return $stmt->fetchAll();
+            $rows = $stmt->fetchAll();
+            // Calcular percentual real e sobrescrever o campo cacheado
+            foreach ($rows as &$row) {
+                $total = (int) $row['real_total_lessons'];
+                $done  = (int) $row['real_completed_lessons'];
+                $row['overall_progress_percentage'] = $total > 0
+                    ? round($done / $total * 100, 0)
+                    : 0;
+            }
+            return $rows;
         } catch (PDOException $e) {
             error_log("Erro ao buscar matrículas: " . $e->getMessage());
             return [];
