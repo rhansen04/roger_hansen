@@ -1,5 +1,5 @@
 <?php
-
+// Deploy test - 2026-02-21
 session_start();
 
 // Gerar CSRF token se nao existir
