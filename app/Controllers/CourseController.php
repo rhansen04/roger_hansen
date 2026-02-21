@@ -66,6 +66,17 @@ class CourseController
         $stmtMat->execute([$course['id']]);
         $materialCount = (int)$stmtMat->fetchColumn();
 
+        // Buscar licoes concluidas pelo aluno
+        $completedLessons = [];
+        if ($enrollment) {
+            $stmtProg = $this->db->prepare("
+                SELECT lesson_id FROM course_progress
+                WHERE enrollment_id = ? AND completed = 1
+            ");
+            $stmtProg->execute([$enrollment['id']]);
+            $completedLessons = array_column($stmtProg->fetchAll(), 'lesson_id');
+        }
+
         $this->render('curso-detalhe', [
             'title' => $course['title'] . ' | Hansen Educacional',
             'course' => $course,
@@ -73,6 +84,7 @@ class CourseController
             'enrollment' => $enrollment,
             'quizzes' => $quizzes,
             'materialCount' => $materialCount,
+            'completedLessons' => $completedLessons,
         ]);
     }
 

@@ -75,6 +75,13 @@
                                         data-bs-target="#section-<?= $section['id'] ?>">
                                     <strong><?= htmlspecialchars($section['title']) ?></strong>
                                     <span class="badge bg-secondary ms-2"><?= count($section['lessons']) ?> licoes</span>
+                                    <?php
+                                    if ($enrollment && !empty($completedLessons)) {
+                                        $doneSec = count(array_filter($section['lessons'], fn($l) => in_array($l['id'], $completedLessons)));
+                                        if ($doneSec > 0):
+                                    ?>
+                                        <span class="badge bg-success ms-2"><?= $doneSec ?>/<?= count($section['lessons']) ?> concluidas</span>
+                                    <?php endif; } ?>
                                 </button>
                             </h2>
                             <div id="section-<?= $section['id'] ?>"
@@ -83,18 +90,26 @@
                                 <div class="accordion-body p-0">
                                     <ul class="list-group list-group-flush">
                                         <?php foreach ($section['lessons'] as $lessonItem): ?>
-                                            <li class="list-group-item d-flex align-items-center <?= $enrollment ? 'list-group-item-action' : '' ?>">
+                                            <?php $isDone = in_array($lessonItem['id'], $completedLessons ?? []); ?>
+                                            <li class="list-group-item d-flex align-items-center <?= $enrollment ? 'list-group-item-action' : '' ?> <?= $isDone ? 'bg-light' : '' ?>">
                                                 <?php if ($enrollment): ?>
                                                     <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $lessonItem['id'] ?>"
                                                        class="d-flex align-items-center w-100 text-decoration-none text-dark">
-                                                        <i class="fas fa-play-circle text-success me-3"></i>
-                                                        <div class="flex-grow-1">
+                                                        <?php if ($isDone): ?>
+                                                            <i class="fas fa-check-circle text-success me-3"></i>
+                                                        <?php else: ?>
+                                                            <i class="fas fa-play-circle text-secondary me-3"></i>
+                                                        <?php endif; ?>
+                                                        <div class="flex-grow-1 <?= $isDone ? 'text-muted' : '' ?>">
                                                             <?= htmlspecialchars($lessonItem['title']) ?>
                                                         </div>
                                                         <?php if (!empty($lessonItem['video_duration'])): ?>
                                                             <small class="text-muted">
                                                                 <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
                                                             </small>
+                                                        <?php endif; ?>
+                                                        <?php if ($isDone): ?>
+                                                            <span class="badge bg-success ms-2">Concluída</span>
                                                         <?php endif; ?>
                                                     </a>
                                                 <?php else: ?>
