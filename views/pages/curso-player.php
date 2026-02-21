@@ -113,7 +113,7 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- Voltar ao curso e Perguntas -->
+                <!-- Voltar ao curso, Perguntas e Materiais -->
                 <div class="mt-4 d-flex gap-2 flex-wrap">
                     <a href="/curso/<?= htmlspecialchars($course['slug']) ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Voltar ao Curso
@@ -121,6 +121,12 @@
                     <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/perguntas" class="btn btn-outline-primary">
                         <i class="fas fa-comments me-1"></i> Perguntas e Respostas
                     </a>
+                    <?php if (!empty($materials)): ?>
+                        <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/materiais" class="btn btn-outline-info">
+                            <i class="fas fa-paperclip me-1"></i> Materiais de Apoio
+                            <span class="badge bg-info text-white ms-1"><?= count($materials) ?></span>
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -146,6 +152,25 @@
                         <?= $enrollment['videos_completed_count'] ?? 0 ?>/<?= $enrollment['total_videos_count'] ?? 0 ?> videos
                     </small>
                 </div>
+
+                <!-- Materiais de Apoio -->
+                <?php if (!empty($materials)): ?>
+                    <div class="section-header">
+                        <i class="fas fa-paperclip me-1"></i> Materiais de Apoio
+                    </div>
+                    <?php foreach ($materials as $mat): ?>
+                        <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/materiais/<?= $mat['id'] ?>/download"
+                           class="lesson-item" style="font-size: 0.85rem;">
+                            <i class="fas fa-download text-muted"></i>
+                            <div class="flex-grow-1">
+                                <div><?= htmlspecialchars($mat['title']) ?></div>
+                                <?php if (!empty($mat['file_size'])): ?>
+                                    <small class="text-muted"><?= round($mat['file_size'] / 1024) ?> KB</small>
+                                <?php endif; ?>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
 
                 <!-- Lista de Secoes e Licoes -->
                 <?php

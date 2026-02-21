@@ -49,6 +49,12 @@
                             <?php endif; ?>
                             <a href="/curso/<?php echo $enrollment['course_slug']; ?>" class="btn btn-hansen btn-sm text-white">Continuar</a>
                             <a href="/curso/<?php echo $enrollment['course_slug']; ?>/perguntas" class="btn btn-outline-secondary btn-sm ms-1" title="Perguntas e Respostas"><i class="fas fa-comments"></i></a>
+                            <?php if (!empty($enrollment['material_count'])): ?>
+                                <a href="/curso/<?php echo $enrollment['course_slug']; ?>/materiais" class="btn btn-outline-secondary btn-sm ms-1" title="Materiais de Apoio">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span class="badge bg-primary rounded-pill ms-1"><?php echo $enrollment['material_count']; ?></span>
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

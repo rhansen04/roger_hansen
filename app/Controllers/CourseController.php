@@ -179,6 +179,11 @@ class CourseController
             }
         }
 
+        // Buscar materiais de apoio do curso
+        $stmtMat = $this->db->prepare("SELECT * FROM course_materials WHERE course_id = ? AND is_active = 1 ORDER BY sort_order, created_at");
+        $stmtMat->execute([$course['id']]);
+        $materials = $stmtMat->fetchAll();
+
         $this->render('curso-player', [
             'title' => $lesson['title'] . ' | ' . $course['title'],
             'course' => $course,
@@ -188,6 +193,7 @@ class CourseController
             'currentProgress' => $currentProgress,
             'prevLesson' => $prevLesson,
             'nextLesson' => $nextLesson,
+            'materials' => $materials,
             'csrfToken' => $_SESSION['csrf_token'] ?? '',
         ]);
     }

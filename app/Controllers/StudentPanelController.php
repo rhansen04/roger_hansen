@@ -17,11 +17,16 @@ class StudentPanelController
         $enrollmentModel = new Enrollment();
         $enrollments = $enrollmentModel->getByUser($userId);
 
-        // Enrich with course data
+        // Enrich with course data and material counts
         $courseModel = new Course();
+        $db = Connection::getInstance();
         foreach ($enrollments as &$enrollment) {
             $course = $courseModel->find($enrollment['course_id']);
             $enrollment['course'] = $course;
+
+            $stmtMat = $db->prepare("SELECT COUNT(*) FROM course_materials WHERE course_id = ? AND is_active = 1");
+            $stmtMat->execute([$enrollment['course_id']]);
+            $enrollment['material_count'] = (int) $stmtMat->fetchColumn();
         }
 
         // Cursos onde aluno esta abaixo da nota minima
