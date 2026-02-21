@@ -2,9 +2,18 @@ version: "3.8"
 
 services:
   app:
-    image: ghcr.io/rhansen04/roger_hansen:latest
+    build: .
     ports:
       - "8080:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.roger-site.rule=Host(`rogerhansen.com.br`)"
+      - "traefik.http.routers.roger-site.entrypoints=websecure"
+      - "traefik.http.routers.roger-site.tls.certresolver=letsencrypt"
+      - "traefik.http.services.roger-site.loadbalancer.server.port=80"
+    networks:
+      - default
+      - traefik-public
     environment:
       DB_CONNECTION: mysql
       DB_HOST: db
@@ -43,3 +52,7 @@ volumes:
   mysql_data:
   uploads:
   storage:
+
+networks:
+  traefik-public:
+    external: true
