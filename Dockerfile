@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y unzip git libzip-dev && rm -rf /var/lib
 RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 RUN pecl install redis && docker-php-ext-enable redis
 
+# PHP upload limits
+RUN echo "upload_max_filesize=64M\npost_max_size=64M\nmemory_limit=256M" > /usr/local/etc/php/conf.d/uploads.ini
+
 # Habilitar mod_rewrite
 RUN a2enmod rewrite
 
