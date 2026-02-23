@@ -44,10 +44,12 @@
                                 <?php endif; ?>
                             </div>
 
-                            <?php if ($course['is_free']): ?>
-                                <span class="badge bg-success fs-6 mb-3">GRATUITO</span>
-                            <?php elseif (!empty($course['price']) && $course['price'] > 0): ?>
-                                <p class="text-green fw-bold fs-5 mb-3">R$ <?php echo number_format($course['price'], 2, ',', '.'); ?></p>
+                            <?php if (!isset($_SESSION['user_id'])): ?>
+                                <?php if ($course['is_free']): ?>
+                                    <span class="badge bg-success fs-6 mb-3">GRATUITO</span>
+                                <?php elseif (!empty($course['price']) && $course['price'] > 0): ?>
+                                    <p class="text-green fw-bold fs-5 mb-3">R$ <?php echo number_format($course['price'], 2, ',', '.'); ?></p>
+                                <?php endif; ?>
                             <?php endif; ?>
 
                             <a href="/curso/<?php echo htmlspecialchars($course['slug']); ?>" class="btn btn-hansen mt-2 px-4">VER CURSO</a>

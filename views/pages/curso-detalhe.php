@@ -131,28 +131,48 @@
                         </div>
                     <?php endforeach; ?>
                 </div>
-            </div>
 
                 <!-- Quizzes Disponíveis -->
                 <?php if ($enrollment && !empty($quizzes)): ?>
-                <h3 class="mt-5 mb-3">Avaliações</h3>
-                <div class="list-group">
+                <h3 class="mt-5 mb-3"><i class="fas fa-clipboard-check me-2 text-primary"></i>Avaliações</h3>
+                <div class="row g-3">
                     <?php foreach ($quizzes as $quiz): ?>
-                    <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/quiz/<?= $quiz['id'] ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-question-circle text-primary me-2"></i>
-                            <strong><?= htmlspecialchars($quiz['title']) ?></strong>
-                            <?php if (!empty($quiz['description'])): ?>
-                                <small class="text-muted d-block ms-4"><?= htmlspecialchars($quiz['description']) ?></small>
-                            <?php endif; ?>
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm" style="border-left: 4px solid var(--primary-color) !important;">
+                            <div class="card-body d-flex align-items-center justify-content-between gap-3 py-3 px-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                         style="width:48px;height:48px;background:var(--pale-mint);">
+                                        <i class="fas fa-pen-alt" style="color:var(--primary-color);font-size:1.1rem;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold"><?= htmlspecialchars($quiz['title']) ?></div>
+                                        <?php if (!empty($quiz['description'])): ?>
+                                            <small class="text-muted"><?= htmlspecialchars($quiz['description']) ?></small>
+                                        <?php endif; ?>
+                                        <div class="mt-1 d-flex gap-2 flex-wrap">
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="fas fa-star me-1 text-warning"></i><?= $quiz['passing_score'] ?>% para aprovação
+                                            </span>
+                                            <?php if ($quiz['attempts_allowed'] > 0): ?>
+                                                <span class="badge bg-light text-dark border">
+                                                    <i class="fas fa-redo me-1 text-info"></i><?= $quiz['attempts_allowed'] ?> tentativa(s)
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-dark border">
+                                                    <i class="fas fa-infinity me-1 text-success"></i>Tentativas ilimitadas
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/quiz/<?= $quiz['id'] ?>"
+                                   class="btn btn-hansen btn-sm px-4 flex-shrink-0">
+                                    <i class="fas fa-play me-1"></i> Iniciar
+                                </a>
+                            </div>
                         </div>
-                        <div>
-                            <span class="badge bg-secondary"><?= $quiz['passing_score'] ?>% min</span>
-                            <?php if ($quiz['attempts_allowed'] > 0): ?>
-                                <span class="badge bg-info"><?= $quiz['attempts_allowed'] ?> tentativas</span>
-                            <?php endif; ?>
-                        </div>
-                    </a>
+                    </div>
                     <?php endforeach; ?>
                 </div>
                 <?php endif; ?>
