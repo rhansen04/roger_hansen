@@ -182,10 +182,12 @@
             <div class="col-lg-4">
                 <div class="card shadow-sm sticky-top" style="top: 90px;">
                     <div class="card-body text-center p-4">
-                        <?php if ($course['is_free']): ?>
-                            <span class="badge bg-success fs-6 mb-3 px-3 py-2">GRATUITO</span>
-                        <?php elseif (!empty($course['price']) && $course['price'] > 0): ?>
-                            <h3 class="text-green mb-3">R$ <?= number_format($course['price'], 2, ',', '.') ?></h3>
+                        <?php if (!isset($_SESSION['user_id'])): ?>
+                            <?php if ($course['is_free']): ?>
+                                <span class="badge bg-success fs-6 mb-3 px-3 py-2">GRATUITO</span>
+                            <?php elseif (!empty($course['price']) && $course['price'] > 0): ?>
+                                <h3 class="text-green mb-3">R$ <?= number_format($course['price'], 2, ',', '.') ?></h3>
+                            <?php endif; ?>
                         <?php endif; ?>
 
                         <?php if ($enrollment): ?>
