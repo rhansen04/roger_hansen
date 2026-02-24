@@ -23,13 +23,21 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="">Todos</option>
                     <option value="active" <?php echo $filterStatus === 'active' ? 'selected' : ''; ?>>Ativo</option>
                     <option value="pending" <?php echo $filterStatus === 'pending' ? 'selected' : ''; ?>>Pendente</option>
                     <option value="inactive" <?php echo $filterStatus === 'inactive' ? 'selected' : ''; ?>>Inativo</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Conclusão</label>
+                <select name="completed" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="1" <?php echo $filterCompleted === '1' ? 'selected' : ''; ?>>Concluído</option>
+                    <option value="0" <?php echo $filterCompleted === '0' ? 'selected' : ''; ?>>Não Concluído</option>
                 </select>
             </div>
             <div class="col-md-2">

@@ -53,7 +53,9 @@
                         <p class="mb-1"><strong>Duração:</strong> <?php echo $course['duration_hours'] ?? 0; ?>h</p>
                         <p class="mb-0">
                             <?php if ($course['is_active']): ?><span class="badge bg-success">Ativo</span><?php else: ?><span class="badge bg-danger">Inativo</span><?php endif; ?>
-                            <?php if ($course['is_free']): ?><span class="badge bg-info ms-1">Gratuito</span><?php else: ?><span class="badge bg-warning text-dark ms-1">R$ <?php echo number_format($course['price'], 2, ',', '.'); ?></span><?php endif; ?>
+                            <?php if (($_SESSION['user_role'] ?? '') !== 'professor'): ?>
+                                <?php if ($course['is_free']): ?><span class="badge bg-info ms-1">Gratuito</span><?php else: ?><span class="badge bg-warning text-dark ms-1">R$ <?php echo number_format($course['price'], 2, ',', '.'); ?></span><?php endif; ?>
+                            <?php endif; ?>
                         </p>
                     </div>
                 </div>

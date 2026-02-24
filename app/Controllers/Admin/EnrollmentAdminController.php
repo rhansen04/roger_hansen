@@ -21,8 +21,9 @@ class EnrollmentAdminController
      */
     public function index()
     {
-        $filterCourse = $_GET['course_id'] ?? '';
-        $filterStatus = $_GET['status'] ?? '';
+        $filterCourse    = $_GET['course_id'] ?? '';
+        $filterStatus    = $_GET['status'] ?? '';
+        $filterCompleted = $_GET['completed'] ?? '';
 
         $sql = "
             SELECT e.*, u.name as student_name, u.email as student_email,
@@ -42,6 +43,10 @@ class EnrollmentAdminController
             $sql .= " AND e.status = ?";
             $params[] = $filterStatus;
         }
+        if ($filterCompleted !== '') {
+            $sql .= " AND e.is_course_completed = ?";
+            $params[] = (int) $filterCompleted;
+        }
 
         $sql .= " ORDER BY e.enrollment_date DESC";
 
@@ -53,10 +58,11 @@ class EnrollmentAdminController
         $courses = $this->db->query("SELECT id, title FROM courses ORDER BY title")->fetchAll();
 
         return $this->render('enrollments/index', [
-            'enrollments' => $enrollments,
-            'courses' => $courses,
-            'filterCourse' => $filterCourse,
-            'filterStatus' => $filterStatus,
+            'enrollments'     => $enrollments,
+            'courses'         => $courses,
+            'filterCourse'    => $filterCourse,
+            'filterStatus'    => $filterStatus,
+            'filterCompleted' => $filterCompleted,
         ]);
     }
 
