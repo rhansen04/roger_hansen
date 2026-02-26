@@ -26,6 +26,10 @@
     <a href="/admin/courses/create" class="btn btn-hansen text-white text-decoration-none"><i class="fas fa-plus me-2"></i> Novo Curso</a>
 </div>
 
+<div class="mb-3">
+    <input type="text" id="courseSearch" class="form-control" placeholder="Buscar por título ou instrutor...">
+</div>
+
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -100,4 +104,13 @@ function confirmDelete(id, name) {
         form.submit();
     }
 }
+
+document.getElementById('courseSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('table tbody tr').forEach(function(row) {
+        const title = (row.children[1]?.textContent || '').toLowerCase();
+        const instructor = (row.children[2]?.textContent || '').toLowerCase();
+        row.style.display = title.includes(q) || instructor.includes(q) ? '' : 'none';
+    });
+});
 </script>

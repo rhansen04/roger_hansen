@@ -25,6 +25,7 @@ class LessonAdminController
         return $this->render('lessons/create', [
             'section' => $section,
             'course' => $course,
+            'pageTitle' => 'Nova Lição — ' . $section['title'],
         ]);
     }
 
@@ -91,6 +92,7 @@ class LessonAdminController
 
         return $this->render('lessons/edit', [
             'lesson' => $lesson,
+            'pageTitle' => 'Editar: ' . $lesson['title'],
         ]);
     }
 
@@ -145,6 +147,42 @@ class LessonAdminController
 
         $_SESSION['error_message'] = 'Erro ao atualizar lição.';
         return $this->edit($id);
+    }
+
+    public function reorder($id)
+    {
+        $lessonModel = new Lesson();
+        $lesson = $lessonModel->find($id);
+
+        if (!$lesson) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Lição não encontrada']);
+            return;
+        }
+
+        $direction = $_POST['direction'] ?? '';
+        $lessons = $lessonModel->getBySection($lesson['section_id']);
+
+        $currentIndex = null;
+        foreach ($lessons as $i => $l) {
+            if ($l['id'] == $id) { $currentIndex = $i; break; }
+        }
+
+        $targetIndex = $direction === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+
+        if ($targetIndex < 0 || $targetIndex >= count($lessons)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Limite atingido']);
+            return;
+        }
+
+        $currentOrder = $lessons[$currentIndex]['sort_order'];
+        $targetOrder = $lessons[$targetIndex]['sort_order'];
+
+        $lessonModel->updateSortOrder($lessons[$currentIndex]['id'], $targetOrder);
+        $lessonModel->updateSortOrder($lessons[$targetIndex]['id'], $currentOrder);
+
+        echo json_encode(['success' => true]);
     }
 
     public function delete($id)

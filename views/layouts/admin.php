@@ -110,7 +110,10 @@
     <a href="/admin/parents" class="nav-link-admin <?= $isActive('/admin/parents') ?>"><i class="fas fa-user-friends me-2"></i> Responsáveis</a>
 
     <div class="sidebar-section">Ensino</div>
-    <a href="/admin/courses" class="nav-link-admin <?= $isActive('/admin/courses') ?>"><i class="fas fa-book me-2"></i> Cursos</a>
+    <?php
+        $coursesActive = $isActive('/admin/courses') || $isActive('/admin/sections') || $isActive('/admin/lessons');
+    ?>
+    <a href="/admin/courses" class="nav-link-admin <?= $coursesActive ? 'active' : '' ?>"><i class="fas fa-book me-2"></i> Cursos</a>
     <a href="/admin/enrollments" class="nav-link-admin <?= $isActive('/admin/enrollments') ?>"><i class="fas fa-user-check me-2"></i> Matrículas</a>
     <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list me-2"></i> Observações</a>
 
@@ -131,11 +134,17 @@
 <div id="content">
     <nav class="navbar navbar-light bg-white mb-4 shadow-sm rounded p-3">
         <div class="container-fluid">
-            <span class="navbar-text">
-                <i class="fas fa-user-circle me-2 text-primary"></i> 
-                Logado como: <strong><?php echo $_SESSION['user_name'] ?? 'Usuário'; ?></strong> 
-                <span class="badge bg-secondary ms-2 text-uppercase"><?php echo $_SESSION['user_role'] ?? 'admin'; ?></span>
-            </span>
+            <div class="d-flex align-items-center">
+                <?php if (!empty($pageTitle)): ?>
+                    <h5 class="mb-0 fw-bold text-primary me-3"><?= htmlspecialchars($pageTitle) ?></h5>
+                    <div class="vr me-3"></div>
+                <?php endif; ?>
+                <span class="navbar-text mb-0">
+                    <i class="fas fa-user-circle me-2 text-primary"></i>
+                    Logado como: <strong><?php echo $_SESSION['user_name'] ?? 'Usuário'; ?></strong>
+                    <span class="badge bg-secondary ms-2 text-uppercase"><?php echo $_SESSION['user_role'] ?? 'admin'; ?></span>
+                </span>
+            </div>
             <div class="d-flex">
                 <button class="dark-mode-toggle me-2" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
                 <a href="/" class="btn btn-outline-primary btn-sm" target="_blank">Ver Site Público</a>

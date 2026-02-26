@@ -64,6 +64,43 @@ class SectionAdminController
         exit;
     }
 
+    public function reorder($id)
+    {
+        $sectionModel = new Section();
+        $section = $sectionModel->find($id);
+
+        if (!$section) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Seção não encontrada']);
+            return;
+        }
+
+        $direction = $_POST['direction'] ?? '';
+        $courseId = $section['course_id'];
+        $sections = $sectionModel->getByCourse($courseId);
+
+        $currentIndex = null;
+        foreach ($sections as $i => $s) {
+            if ($s['id'] == $id) { $currentIndex = $i; break; }
+        }
+
+        $targetIndex = $direction === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+
+        if ($targetIndex < 0 || $targetIndex >= count($sections)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Limite atingido']);
+            return;
+        }
+
+        $currentOrder = $sections[$currentIndex]['sort_order'];
+        $targetOrder = $sections[$targetIndex]['sort_order'];
+
+        $sectionModel->updateSortOrder($sections[$currentIndex]['id'], $targetOrder);
+        $sectionModel->updateSortOrder($sections[$targetIndex]['id'], $currentOrder);
+
+        echo json_encode(['success' => true]);
+    }
+
     public function delete($id)
     {
         $sectionModel = new Section();

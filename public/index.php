@@ -162,6 +162,7 @@ $router->get('/admin/materials/{id}/download', [CourseMaterialController::class,
 $router->post('/admin/courses/{courseId}/sections', [SectionAdminController::class, 'store']);
 $router->post('/admin/sections/{id}/update', [SectionAdminController::class, 'update']);
 $router->post('/admin/sections/{id}/delete', [SectionAdminController::class, 'delete']);
+$router->post('/admin/sections/{id}/reorder', [SectionAdminController::class, 'reorder']);
 
 // Rotas Admin - Lições
 $router->get('/admin/sections/{sectionId}/lessons/create', [LessonAdminController::class, 'create']);
@@ -169,6 +170,7 @@ $router->post('/admin/sections/{sectionId}/lessons', [LessonAdminController::cla
 $router->get('/admin/lessons/{id}/edit', [LessonAdminController::class, 'edit']);
 $router->post('/admin/lessons/{id}/update', [LessonAdminController::class, 'update']);
 $router->post('/admin/lessons/{id}/delete', [LessonAdminController::class, 'delete']);
+$router->post('/admin/lessons/{id}/reorder', [LessonAdminController::class, 'reorder']);
 
 // Rotas Admin - Video Dashboard
 $router->get('/admin/video-dashboard', [VideoAdminController::class, 'index']);

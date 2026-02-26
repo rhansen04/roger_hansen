@@ -98,6 +98,20 @@ class Lesson
     }
     
     /**
+     * Atualizar sort_order de uma lição
+     */
+    public function updateSortOrder($id, $order)
+    {
+        try {
+            $stmt = $this->db->prepare("UPDATE lessons SET sort_order = ? WHERE id = ?");
+            return $stmt->execute([$order, $id]);
+        } catch (PDOException $e) {
+            error_log("Erro ao reordenar lição: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Deletar lição
      */
     public function delete($id)

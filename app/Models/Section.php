@@ -91,6 +91,20 @@ class Section
     }
     
     /**
+     * Atualizar sort_order de uma seção
+     */
+    public function updateSortOrder($id, $order)
+    {
+        try {
+            $stmt = $this->db->prepare("UPDATE sections SET sort_order = ? WHERE id = ?");
+            return $stmt->execute([$order, $id]);
+        } catch (PDOException $e) {
+            error_log("Erro ao reordenar seção: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Deletar seção (e suas lições por CASCADE)
      */
     public function delete($id)

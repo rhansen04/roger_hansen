@@ -3,12 +3,12 @@
         <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="/admin/courses" class="text-decoration-none">Cursos</a></li>
         <li class="breadcrumb-item"><a href="/admin/courses/<?php echo $course['id']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($course['title']); ?></a></li>
+        <li class="breadcrumb-item"><span class="text-muted"><?php echo htmlspecialchars($section['title']); ?></span></li>
         <li class="breadcrumb-item active">Nova Lição</li>
     </ol>
 </nav>
 
 <h2 class="text-primary fw-bold mb-2">NOVA LIÇÃO</h2>
-<p class="text-muted mb-4">Seção: <strong><?php echo htmlspecialchars($section['title']); ?></strong></p>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-4">

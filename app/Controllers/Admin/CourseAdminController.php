@@ -30,7 +30,7 @@ class CourseAdminController
         $stmt = $db->query($sql);
         $courses = $stmt->fetchAll();
 
-        return $this->render('courses/index', ['courses' => $courses]);
+        return $this->render('courses/index', ['courses' => $courses, 'pageTitle' => 'Gestão de Cursos']);
     }
 
     public function create()
@@ -112,6 +112,7 @@ class CourseAdminController
             'sections' => $sections,
             'sectionLessons' => $sectionLessons,
             'enrollments' => $enrollments,
+            'pageTitle' => 'Curso: ' . $course['title'],
         ]);
     }
 
