@@ -213,11 +213,17 @@
                                 }
                             }
                             ?>
-                            <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $firstLesson['id'] ?? 1 ?>"
+                            <?php if ($firstLesson): ?>
+                            <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $firstLesson['id'] ?>"
                                class="btn btn-hansen btn-lg w-100">
                                 <i class="fas fa-play me-2"></i>
                                 <?= ($enrollment['overall_progress_percentage'] ?? 0) > 0 ? 'Continuar' : 'Comecar' ?>
                             </a>
+                            <?php else: ?>
+                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                <i class="fas fa-clock me-2"></i> Em breve
+                            </button>
+                            <?php endif; ?>
                             <?php if (!empty($materialCount) && $materialCount > 0): ?>
                             <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/materiais" class="btn btn-outline-secondary w-100 mt-2">
                                 <i class="fas fa-paperclip me-2"></i>Materiais de Apoio (<?= $materialCount ?>)

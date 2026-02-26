@@ -28,7 +28,8 @@
         body { font-family: 'Open Sans', sans-serif; color: var(--text-dark); background-color: var(--bg-light); }
         h1, h2, h3, h4, h5, .navbar-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         
-        .navbar { padding: 15px 0; border-bottom: 4px solid var(--primary-color); background-color: white !important; }
+        .navbar { padding: 15px 0; border-bottom: 4px solid var(--primary-color); background-color: white !important; z-index: 1030; }
+        .navbar .dropdown-menu { z-index: 1031; }
         .navbar-brand { line-height: 1; }
         .nav-link { color: var(--primary-color) !important; text-transform: uppercase; font-size: 0.85rem; font-weight: 700; margin: 0 12px; transition: 0.3s; }
         .nav-link:hover { color: var(--dark-teal) !important; }
@@ -79,35 +80,51 @@
                 <li class="nav-item"><a class="nav-link" href="/contato">Contato</a></li>
                 <li class="nav-item ms-lg-2"><button class="dark-mode-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'parent'): ?>
-                        <li class="nav-item ms-lg-2 dropdown">
-                            <a class="btn btn-hansen py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'Minha Area') ?>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/minha-area"><i class="fas fa-home me-2"></i> Inicio</a></li>
-                                <li><a class="dropdown-item" href="/minha-area/perfil"><i class="fas fa-user me-2"></i> Meu Perfil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
-                            </ul>
-                        </li>
-                    <?php elseif (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'student'): ?>
-                        <li class="nav-item ms-lg-2"><a class="btn btn-hansen py-2" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-1"></i> Painel Admin</a></li>
-                    <?php else: ?>
-                        <li class="nav-item ms-lg-2 dropdown">
-                            <a class="btn btn-hansen py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'Minha Conta') ?>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/minha-conta"><i class="fas fa-book me-2"></i> Meus Cursos</a></li>
-                                <li><a class="dropdown-item" href="/minha-conta/perfil"><i class="fas fa-user me-2"></i> Meu Perfil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
-                            </ul>
-                        </li>
-                    <?php endif; ?>
+                    <?php
+                        $role = $_SESSION['user_role'] ?? 'student';
+                        $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Usuario');
+                        if ($role === 'admin' || $role === 'teacher') {
+                            $roleLabel = $role === 'admin' ? 'Admin' : 'Professor';
+                            $roleIcon = $role === 'admin' ? 'fas fa-shield-alt' : 'fas fa-chalkboard-teacher';
+                            $roleBadgeClass = $role === 'admin' ? 'bg-danger' : 'bg-info text-dark';
+                            $panelUrl = '/admin/dashboard';
+                            $panelLabel = 'Painel Admin';
+                        } elseif ($role === 'parent') {
+                            $roleLabel = 'Responsavel';
+                            $roleIcon = 'fas fa-users';
+                            $roleBadgeClass = 'bg-warning text-dark';
+                            $panelUrl = '/minha-area';
+                            $panelLabel = 'Minha Area';
+                        } else {
+                            $roleLabel = 'Aluno';
+                            $roleIcon = 'fas fa-user-graduate';
+                            $roleBadgeClass = 'bg-success';
+                            $panelUrl = '/minha-conta';
+                            $panelLabel = 'Meus Cursos';
+                        }
+                    ?>
+                    <li class="nav-item ms-lg-2 dropdown">
+                        <a class="btn btn-hansen py-2 dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="<?= $roleIcon ?>"></i>
+                            <span><?= $userName ?></span>
+                            <span class="badge <?= $roleBadgeClass ?>" style="font-size: 0.65rem;"><?= $roleLabel ?></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 220px;">
+                            <li class="px-3 py-2 text-muted" style="font-size: 0.75rem;">
+                                <i class="<?= $roleIcon ?> me-1"></i> Conectado como <strong><?= $roleLabel ?></strong>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item py-2" href="<?= $panelUrl ?>"><i class="fas fa-th-large me-2"></i> <?= $panelLabel ?></a></li>
+                            <?php if ($role === 'admin' || $role === 'teacher'): ?>
+                            <li><a class="dropdown-item py-2" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+                            <?php endif; ?>
+                            <li><a class="dropdown-item py-2" href="<?= $role === 'parent' ? '/minha-area/perfil' : '/minha-conta/perfil' ?>"><i class="fas fa-user-cog me-2"></i> Meu Perfil</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
+                        </ul>
+                    </li>
                 <?php else: ?>
-                    <li class="nav-item ms-lg-2"><a class="btn btn-hansen py-2" href="/login">Área do Aluno</a></li>
+                    <li class="nav-item ms-lg-2"><a class="btn btn-hansen py-2" href="/login"><i class="fas fa-sign-in-alt me-1"></i> Area do Aluno</a></li>
                 <?php endif; ?>
             </ul>
         </div>
