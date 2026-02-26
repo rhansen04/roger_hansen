@@ -8,17 +8,17 @@
     </ol>
 </nav>
 
-<h2 class="text-primary fw-bold mb-2">NOVA LIÇÃO</h2>
-
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-        <form action="/admin/sections/<?php echo $section['id']; ?>/lessons" method="POST" enctype="multipart/form-data">
-            <?php $lesson = []; include __DIR__ . '/_form.php'; ?>
-            <hr>
-            <div class="d-flex justify-content-between">
-                <a href="/admin/courses/<?php echo $course['id']; ?>" class="btn btn-outline-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-hansen text-white"><i class="fas fa-save me-2"></i> Salvar Lição</button>
-            </div>
-        </form>
-    </div>
+<div class="d-flex align-items-center mb-3">
+    <a href="/admin/courses/<?php echo $course['id']; ?>" class="btn btn-outline-secondary btn-sm me-3">
+        <i class="fas fa-arrow-left me-1"></i> Voltar ao Curso
+    </a>
+    <h2 class="text-primary fw-bold mb-0">NOVA LIÇÃO</h2>
 </div>
+
+<form action="/admin/sections/<?php echo $section['id']; ?>/lessons" method="POST" enctype="multipart/form-data">
+    <?php $lesson = []; include __DIR__ . '/_form.php'; ?>
+    <div class="d-flex justify-content-between">
+        <a href="/admin/courses/<?php echo $course['id']; ?>" class="btn btn-outline-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-hansen text-white"><i class="fas fa-save me-2"></i> Salvar Lição</button>
+    </div>
+</form>
