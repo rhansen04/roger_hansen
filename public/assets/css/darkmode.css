@@ -249,7 +249,14 @@
 }
 
 [data-theme="dark"] #sidebar {
-    background-color: #0d1b2a !important;
+    background: linear-gradient(175deg, #0f2027 0%, #0d1b2a 40%, #091520 100%) !important;
+}
+[data-theme="dark"] .sidebar-header,
+[data-theme="dark"] .sidebar-footer {
+    border-color: rgba(255,255,255,.06) !important;
+}
+[data-theme="dark"] .sidebar-toggle {
+    background: #0d1b2a !important;
 }
 
 [data-theme="dark"] .student-topbar {
@@ -343,5 +350,69 @@
 }
 [data-theme="dark"] .dark-mode-toggle:hover {
     border-color: rgba(255,255,255,0.6) !important;
+    color: #fff !important;
+}
+
+/* ===== DRIVER.JS TOUR POPOVER (DARK MODE) ===== */
+[data-theme="dark"] .driver-popover,
+[data-theme="dark"] div.driver-popover,
+[data-theme="dark"] .driver-popover.hansen-tour-popover {
+    background-color: #1f2b47 !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #2a3a5c !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-title,
+[data-theme="dark"] .driver-popover .driver-popover-title * {
+    color: #4db8a4 !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-description,
+[data-theme="dark"] .driver-popover .driver-popover-description * {
+    color: #c0c8d8 !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-description strong {
+    color: #e0e8f0 !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-description a {
+    color: #4db8a4 !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-progress-text {
+    color: #9a9a9a !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-prev-btn {
+    background-color: transparent !important;
+    color: #b0b0b0 !important;
+    border: 1px solid #4a5a7c !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-prev-btn:hover {
+    color: #fff !important;
+    background-color: #2a3a5c !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-next-btn,
+[data-theme="dark"] .driver-popover .driver-popover-close-btn {
+    background-color: #007e66 !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-next-btn:hover {
+    background-color: #04574A !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-arrow-side-left.driver-popover-arrow,
+[data-theme="dark"] .driver-popover .driver-popover-arrow-side-right.driver-popover-arrow,
+[data-theme="dark"] .driver-popover .driver-popover-arrow-side-top.driver-popover-arrow,
+[data-theme="dark"] .driver-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-color: #1f2b47 !important;
+}
+[data-theme="dark"] .driver-popover-arrow,
+[data-theme="dark"] .driver-popover .driver-popover-arrow {
+    background-color: #1f2b47 !important;
+    border: 1px solid #2a3a5c !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-footer {
+    border-top-color: #2a3a5c !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-close-btn {
+    color: #b0b0b0 !important;
+}
+[data-theme="dark"] .driver-popover .driver-popover-close-btn:hover {
     color: #fff !important;
 }
