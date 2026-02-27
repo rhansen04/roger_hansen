@@ -65,72 +65,129 @@
 
                 <!-- Conteudo do Curso -->
                 <h3 class="mt-5 mb-3">Conteudo do Curso</h3>
-                <div class="accordion" id="courseContent">
-                    <?php foreach ($sections as $i => $section): ?>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button <?= $i > 0 ? 'collapsed' : '' ?>"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#section-<?= $section['id'] ?>">
-                                    <strong><?= htmlspecialchars($section['title']) ?></strong>
-                                    <span class="badge bg-secondary ms-2"><?= count($section['lessons']) ?> licoes</span>
-                                    <?php
-                                    if ($enrollment && !empty($completedLessons)) {
-                                        $doneSec = count(array_filter($section['lessons'], fn($l) => in_array($l['id'], $completedLessons)));
-                                        if ($doneSec > 0):
-                                    ?>
-                                        <span class="badge bg-success ms-2"><?= $doneSec ?>/<?= count($section['lessons']) ?> concluidas</span>
-                                    <?php endif; } ?>
-                                </button>
-                            </h2>
-                            <div id="section-<?= $section['id'] ?>"
-                                 class="accordion-collapse collapse <?= $i === 0 ? 'show' : '' ?>"
-                                 data-bs-parent="#courseContent">
-                                <div class="accordion-body p-0">
-                                    <ul class="list-group list-group-flush">
-                                        <?php foreach ($section['lessons'] as $lessonItem): ?>
-                                            <?php $isDone = in_array($lessonItem['id'], $completedLessons ?? []); ?>
-                                            <li class="list-group-item d-flex align-items-center <?= $enrollment ? 'list-group-item-action' : '' ?> <?= $isDone ? 'bg-light' : '' ?>">
-                                                <?php if ($enrollment): ?>
-                                                    <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $lessonItem['id'] ?>"
-                                                       class="d-flex align-items-center w-100 text-decoration-none text-dark">
-                                                        <?php if ($isDone): ?>
-                                                            <i class="fas fa-check-circle text-success me-3"></i>
-                                                        <?php else: ?>
-                                                            <i class="fas fa-play-circle text-secondary me-3"></i>
-                                                        <?php endif; ?>
-                                                        <div class="flex-grow-1 <?= $isDone ? 'text-muted' : '' ?>">
-                                                            <?= htmlspecialchars($lessonItem['title']) ?>
-                                                        </div>
-                                                        <?php if (!empty($lessonItem['video_duration'])): ?>
-                                                            <small class="text-muted">
-                                                                <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
-                                                            </small>
-                                                        <?php endif; ?>
-                                                        <?php if ($isDone): ?>
-                                                            <span class="badge bg-success ms-2">Concluída</span>
-                                                        <?php endif; ?>
-                                                    </a>
+
+                <?php
+                // Organizar seções por módulo
+                $hasModules = !empty($modules);
+                $orphanSections = [];
+                $moduleSectionsMap = [];
+                if ($hasModules) {
+                    foreach ($sections as $sec) {
+                        if (empty($sec['module_id'])) {
+                            $orphanSections[] = $sec;
+                        } else {
+                            $moduleSectionsMap[$sec['module_id']][] = $sec;
+                        }
+                    }
+                }
+
+                // Helper para renderizar lista de lições de uma seção
+                function renderSectionLessons($section, $course, $enrollment, $completedLessons, $sectionId, $collapsed = true, $parentId = 'courseContent') {
+                ?>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button <?= $collapsed ? 'collapsed' : '' ?>"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#section-<?= $sectionId ?>">
+                            <strong><?= htmlspecialchars($section['title']) ?></strong>
+                            <span class="badge bg-secondary ms-2"><?= count($section['lessons']) ?> licoes</span>
+                            <?php
+                            if ($enrollment && !empty($completedLessons)) {
+                                $doneSec = count(array_filter($section['lessons'], fn($l) => in_array($l['id'], $completedLessons)));
+                                if ($doneSec > 0):
+                            ?>
+                                <span class="badge bg-success ms-2"><?= $doneSec ?>/<?= count($section['lessons']) ?> concluidas</span>
+                            <?php endif; } ?>
+                        </button>
+                    </h2>
+                    <div id="section-<?= $sectionId ?>"
+                         class="accordion-collapse collapse <?= !$collapsed ? 'show' : '' ?>">
+                        <div class="accordion-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <?php foreach ($section['lessons'] as $lessonItem): ?>
+                                    <?php $isDone = in_array($lessonItem['id'], $completedLessons ?? []); ?>
+                                    <li class="list-group-item d-flex align-items-center <?= $enrollment ? 'list-group-item-action' : '' ?> <?= $isDone ? 'bg-light' : '' ?>">
+                                        <?php if ($enrollment): ?>
+                                            <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $lessonItem['id'] ?>"
+                                               class="d-flex align-items-center w-100 text-decoration-none text-dark">
+                                                <?php if ($isDone): ?>
+                                                    <i class="fas fa-check-circle text-success me-3"></i>
                                                 <?php else: ?>
-                                                    <i class="fas fa-lock text-muted me-3"></i>
-                                                    <div class="flex-grow-1 text-muted">
-                                                        <?= htmlspecialchars($lessonItem['title']) ?>
-                                                    </div>
-                                                    <?php if (!empty($lessonItem['video_duration'])): ?>
-                                                        <small class="text-muted">
-                                                            <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
-                                                        </small>
-                                                    <?php endif; ?>
+                                                    <i class="fas fa-play-circle text-secondary me-3"></i>
                                                 <?php endif; ?>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
+                                                <div class="flex-grow-1 <?= $isDone ? 'text-muted' : '' ?>">
+                                                    <?= htmlspecialchars($lessonItem['title']) ?>
+                                                </div>
+                                                <?php if (!empty($lessonItem['video_duration'])): ?>
+                                                    <small class="text-muted">
+                                                        <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
+                                                    </small>
+                                                <?php endif; ?>
+                                                <?php if ($isDone): ?>
+                                                    <span class="badge bg-success ms-2">Concluída</span>
+                                                <?php endif; ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <i class="fas fa-lock text-muted me-3"></i>
+                                            <div class="flex-grow-1 text-muted">
+                                                <?= htmlspecialchars($lessonItem['title']) ?>
+                                            </div>
+                                            <?php if (!empty($lessonItem['video_duration'])): ?>
+                                                <small class="text-muted">
+                                                    <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <?php } ?>
+
+                <?php if ($hasModules): ?>
+                    <?php // Seções órfãs primeiro ?>
+                    <?php if (!empty($orphanSections)): ?>
+                        <div class="accordion mb-3" id="courseContentOrphan">
+                            <?php foreach ($orphanSections as $i => $section): ?>
+                                <?php renderSectionLessons($section, $course, $enrollment, $completedLessons, $section['id'], $i > 0, 'courseContentOrphan'); ?>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php // Módulos ?>
+                    <?php foreach ($modules as $mi => $module):
+                        $modSections = $moduleSectionsMap[$module['id']] ?? [];
+                    ?>
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-header bg-light border-bottom">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-layer-group me-2 text-warning"></i>
+                                    <?= htmlspecialchars($module['title']) ?>
+                                    <span class="badge bg-secondary ms-2"><?= count($modSections) ?> seções</span>
+                                </h5>
+                                <?php if (!empty($module['description'])): ?>
+                                    <small class="text-muted"><?= htmlspecialchars($module['description']) ?></small>
+                                <?php endif; ?>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="accordion" id="moduleContent<?= $module['id'] ?>">
+                                    <?php foreach ($modSections as $si => $section): ?>
+                                        <?php renderSectionLessons($section, $course, $enrollment, $completedLessons, $section['id'], $si > 0 || $mi > 0, 'moduleContent' . $module['id']); ?>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
-                </div>
+                <?php else: ?>
+                    <div class="accordion" id="courseContent">
+                        <?php foreach ($sections as $i => $section): ?>
+                            <?php renderSectionLessons($section, $course, $enrollment, $completedLessons, $section['id'], $i > 0, 'courseContent'); ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Quizzes Disponíveis -->
                 <?php if ($enrollment && !empty($quizzes)): ?>

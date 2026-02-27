@@ -59,8 +59,8 @@ class Section
     public function create($data)
     {
         try {
-            $sql = "INSERT INTO sections (course_id, title, description, sort_order)
-                    VALUES (:course_id, :title, :description, :sort_order)";
+            $sql = "INSERT INTO sections (course_id, module_id, title, description, sort_order)
+                    VALUES (:course_id, :module_id, :title, :description, :sort_order)";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute($data);
         } catch (PDOException $e) {
@@ -78,6 +78,7 @@ class Section
             $data['id'] = $id;
             $sql = "UPDATE sections
                     SET course_id = :course_id,
+                        module_id = :module_id,
                         title = :title,
                         description = :description,
                         sort_order = :sort_order

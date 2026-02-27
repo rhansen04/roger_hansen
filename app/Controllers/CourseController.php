@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Lesson;
+use App\Models\Module;
 use App\Models\Section;
 use App\Models\VideoProgress;
 use App\Models\CourseProgress;
@@ -33,6 +34,10 @@ class CourseController
             echo "Curso nao encontrado";
             return;
         }
+
+        // Buscar modulos
+        $moduleModel = new Module();
+        $modules = $moduleModel->getByCourse($course['id']);
 
         // Buscar secoes com licoes
         $sectionModel = new Section();
@@ -80,6 +85,7 @@ class CourseController
         $this->render('curso-detalhe', [
             'title' => $course['title'] . ' | Hansen Educacional',
             'course' => $course,
+            'modules' => $modules,
             'sections' => $sections,
             'enrollment' => $enrollment,
             'quizzes' => $quizzes,
@@ -131,7 +137,10 @@ class CourseController
             return;
         }
 
-        // Buscar todas as secoes com licoes para a sidebar
+        // Buscar modulos e secoes para a sidebar
+        $moduleModel = new Module();
+        $modules = $moduleModel->getByCourse($course['id']);
+
         $sectionModel = new Section();
         $sections = $sectionModel->getByCourse($course['id']);
 
@@ -187,6 +196,7 @@ class CourseController
         $this->render('curso-player', [
             'title' => $lesson['title'] . ' | ' . $course['title'],
             'course' => $course,
+            'modules' => $modules,
             'lesson' => $lesson,
             'sections' => $sections,
             'enrollment' => $enrollment,

@@ -16,6 +16,7 @@
     .lesson-item.completed .lesson-number { background: #198754; color: white; }
 
     .section-header { background: var(--bg-light); padding: 8px 15px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--dark-teal); letter-spacing: 0.5px; border-bottom: 1px solid #ddd; }
+    .section-header + .section-header { border-top: none; }
 
     .progress { height: 8px; border-radius: 4px; }
     .progress-lg { height: 20px; border-radius: 10px; }
@@ -175,7 +176,10 @@
                 <!-- Lista de Secoes e Licoes -->
                 <?php
                 $lessonCounter = 0;
-                foreach ($sections as $section):
+                $hasModules = !empty($modules);
+
+                // Helper para renderizar lições de uma seção na sidebar
+                function renderSidebarSection($section, $course, $lesson, &$lessonCounter) {
                 ?>
                     <div class="section-header">
                         <i class="fas fa-folder-open me-1"></i>
@@ -217,7 +221,45 @@
                             </span>
                         </a>
                     <?php endforeach; ?>
-                <?php endforeach; ?>
+                <?php }
+
+                if ($hasModules):
+                    // Organizar seções por módulo
+                    $orphanSections = [];
+                    $moduleSectionsMap = [];
+                    foreach ($sections as $sec) {
+                        if (empty($sec['module_id'])) {
+                            $orphanSections[] = $sec;
+                        } else {
+                            $moduleSectionsMap[$sec['module_id']][] = $sec;
+                        }
+                    }
+
+                    // Seções sem módulo
+                    foreach ($orphanSections as $section):
+                        renderSidebarSection($section, $course, $lesson, $lessonCounter);
+                    endforeach;
+
+                    // Módulos
+                    foreach ($modules as $module):
+                        $modSections = $moduleSectionsMap[$module['id']] ?? [];
+                ?>
+                    <div class="section-header" style="background: #fff3cd; color: #856404;">
+                        <i class="fas fa-layer-group me-1"></i>
+                        <?= htmlspecialchars($module['title']) ?>
+                    </div>
+                    <?php foreach ($modSections as $section):
+                        renderSidebarSection($section, $course, $lesson, $lessonCounter);
+                    endforeach; ?>
+                <?php
+                    endforeach;
+                else:
+                    // Sem módulos - layout original
+                    foreach ($sections as $section):
+                        renderSidebarSection($section, $course, $lesson, $lessonCounter);
+                    endforeach;
+                endif;
+                ?>
             </div>
         </div>
     </div>

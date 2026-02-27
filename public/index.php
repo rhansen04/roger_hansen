@@ -37,6 +37,7 @@ use App\Controllers\Api\VideoTrackingController;
 use App\Controllers\CourseController;
 use App\Controllers\Admin\VideoAdminController;
 use App\Controllers\Admin\CourseAdminController;
+use App\Controllers\Admin\ModuleAdminController;
 use App\Controllers\Admin\SectionAdminController;
 use App\Controllers\Admin\LessonAdminController;
 use App\Controllers\StudentPanelController;
@@ -157,6 +158,12 @@ $router->get('/admin/courses/{courseId}/materials/create', [CourseMaterialContro
 $router->post('/admin/courses/{courseId}/materials/create', [CourseMaterialController::class, 'store']);
 $router->post('/admin/materials/{id}/delete', [CourseMaterialController::class, 'delete']);
 $router->get('/admin/materials/{id}/download', [CourseMaterialController::class, 'download']);
+
+// Rotas Admin - Módulos
+$router->post('/admin/courses/{courseId}/modules', [ModuleAdminController::class, 'store']);
+$router->post('/admin/modules/{id}/update', [ModuleAdminController::class, 'update']);
+$router->post('/admin/modules/{id}/delete', [ModuleAdminController::class, 'delete']);
+$router->post('/admin/modules/{id}/reorder', [ModuleAdminController::class, 'reorder']);
 
 // Rotas Admin - Seções
 $router->post('/admin/courses/{courseId}/sections', [SectionAdminController::class, 'store']);

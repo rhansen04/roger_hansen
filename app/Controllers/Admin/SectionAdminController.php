@@ -18,8 +18,10 @@ class SectionAdminController
             exit;
         }
 
+        $moduleId = !empty($_POST['module_id']) ? $_POST['module_id'] : null;
         $data = [
             ':course_id' => $courseId,
+            ':module_id' => $moduleId,
             ':title' => $_POST['title'] ?? '',
             ':description' => $_POST['description'] ?? '',
             ':sort_order' => $_POST['sort_order'] ?? 0,
@@ -47,8 +49,10 @@ class SectionAdminController
             exit;
         }
 
+        $moduleId = !empty($_POST['module_id']) ? $_POST['module_id'] : null;
         $data = [
             ':course_id' => $section['course_id'],
+            ':module_id' => $moduleId,
             ':title' => $_POST['title'] ?? '',
             ':description' => $_POST['description'] ?? '',
             ':sort_order' => $_POST['sort_order'] ?? 0,

@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Models\Course;
+use App\Models\Module;
 use App\Models\Section;
 use App\Models\Lesson;
 use App\Models\Enrollment;
@@ -95,6 +96,9 @@ class CourseAdminController
             exit;
         }
 
+        $moduleModel = new Module();
+        $modules = $moduleModel->getByCourse($id);
+
         $sectionModel = new Section();
         $sections = $sectionModel->getByCourse($id);
 
@@ -109,6 +113,7 @@ class CourseAdminController
 
         return $this->render('courses/show', [
             'course' => $course,
+            'modules' => $modules,
             'sections' => $sections,
             'sectionLessons' => $sectionLessons,
             'enrollments' => $enrollments,
