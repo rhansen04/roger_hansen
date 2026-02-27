@@ -106,6 +106,23 @@ class Section
     }
 
     /**
+     * Mover seções para outro módulo (em lote)
+     */
+    public function moveToModule($sectionIds, $targetModuleId)
+    {
+        try {
+            $placeholders = implode(',', array_fill(0, count($sectionIds), '?'));
+            $sql = "UPDATE sections SET module_id = ? WHERE id IN ($placeholders)";
+            $stmt = $this->db->prepare($sql);
+            $params = array_merge([$targetModuleId ?: null], $sectionIds);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            error_log("Erro ao mover seções: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Deletar seção (e suas lições por CASCADE)
      */
     public function delete($id)

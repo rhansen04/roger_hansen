@@ -116,6 +116,10 @@
     <a href="/admin/courses" class="nav-link-admin <?= $coursesActive ? 'active' : '' ?>"><i class="fas fa-book me-2"></i> Cursos</a>
     <a href="/admin/enrollments" class="nav-link-admin <?= $isActive('/admin/enrollments') ?>"><i class="fas fa-user-check me-2"></i> Matrículas</a>
     <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list me-2"></i> Observações</a>
+    <a href="/admin/classrooms" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard me-2"></i> Turmas</a>
+    <a href="/admin/planning-templates" class="nav-link-admin <?= $isActive('/admin/planning-templates') ?>"><i class="fas fa-file-alt me-2"></i> Templates Planej.</a>
+    <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
+    <a href="/admin/planning" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt me-2"></i> Planejamentos</a>
 
     <div class="sidebar-section">Comunicação</div>
     <a href="/admin/contacts" class="nav-link-admin <?= $isActive('/admin/contacts') ?>"><i class="fas fa-envelope me-2"></i> Contatos</a>

@@ -105,6 +105,30 @@ class SectionAdminController
         echo json_encode(['success' => true]);
     }
 
+    public function moveModule()
+    {
+        $sectionIds = $_POST['section_ids'] ?? [];
+        $targetModuleId = $_POST['target_module_id'] ?? null;
+        $courseId = $_POST['course_id'] ?? null;
+
+        if (empty($sectionIds) || !$courseId) {
+            $_SESSION['error_message'] = 'Selecione ao menos uma seção.';
+            header('Location: /admin/courses/' . $courseId);
+            exit;
+        }
+
+        $sectionModel = new Section();
+        if ($sectionModel->moveToModule($sectionIds, $targetModuleId ?: null)) {
+            $count = count($sectionIds);
+            $_SESSION['success_message'] = "{$count} seção(ões) movida(s) com sucesso!";
+        } else {
+            $_SESSION['error_message'] = 'Erro ao mover seções.';
+        }
+
+        header('Location: /admin/courses/' . $courseId);
+        exit;
+    }
+
     public function delete($id)
     {
         $sectionModel = new Section();

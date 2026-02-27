@@ -198,8 +198,9 @@ function renderSection($section, $sectionLessons, $sectionIndex, $totalSections,
     <?php if (!empty($orphanSections)): ?>
         <?php if ($hasModules): ?>
             <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-folder me-2 text-secondary"></i>Seções Gerais <span class="badge bg-secondary"><?php echo count($orphanSections); ?></span></h5>
+                    <button class="btn btn-outline-info btn-sm" onclick="openMoveModal(0, 'Seções Gerais')" title="Mover seções para um módulo"><i class="fas fa-exchange-alt me-1"></i> Mover</button>
                 </div>
                 <div class="card-body p-2">
         <?php endif; ?>
@@ -237,6 +238,7 @@ function renderSection($section, $sectionLessons, $sectionIndex, $totalSections,
                         <button class="btn btn-outline-secondary btn-sm" onclick="reorderItem('modules', <?php echo $module['id']; ?>, 'up')" <?php echo $mi === 0 ? 'disabled' : ''; ?>><i class="fas fa-arrow-up"></i></button>
                         <button class="btn btn-outline-secondary btn-sm" onclick="reorderItem('modules', <?php echo $module['id']; ?>, 'down')" <?php echo $mi === count($modules) - 1 ? 'disabled' : ''; ?>><i class="fas fa-arrow-down"></i></button>
                         <button class="btn btn-outline-primary btn-sm" onclick="editModule(<?php echo $module['id']; ?>, '<?php echo htmlspecialchars($module['title'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($module['description'] ?? '', ENT_QUOTES); ?>', <?php echo $module['sort_order']; ?>)"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-outline-info btn-sm" onclick="openMoveModal(<?php echo $module['id']; ?>, '<?php echo htmlspecialchars($module['title'], ENT_QUOTES); ?>')" title="Mover seções para outro módulo"><i class="fas fa-exchange-alt"></i></button>
                         <button class="btn btn-outline-danger btn-sm" onclick="deleteModule(<?php echo $module['id']; ?>, '<?php echo htmlspecialchars($module['title'], ENT_QUOTES); ?>')"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
@@ -410,6 +412,49 @@ function renderSection($section, $sectionLessons, $sectionIndex, $totalSections,
     </div>
 </div>
 
+<!-- Move Sections Modal -->
+<div class="modal fade" id="moveSectionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admin/sections/move-module" method="POST">
+                <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-exchange-alt me-2"></i> Mover Seções</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Origem: <strong id="moveSourceName"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Selecione as seções para mover:</label>
+                        <div id="moveSectionsList" class="border rounded p-2" style="max-height:200px; overflow-y:auto;">
+                            <!-- populated by JS -->
+                        </div>
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                <a href="#" onclick="toggleAllMoveCheckboxes(true); return false;">Selecionar todas</a> |
+                                <a href="#" onclick="toggleAllMoveCheckboxes(false); return false;">Desmarcar todas</a>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mover para: <span class="text-danger">*</span></label>
+                        <select name="target_module_id" class="form-select" required>
+                            <option value="">-- Seções Gerais (sem módulo) --</option>
+                            <?php foreach ($modules as $mod): ?>
+                                <option value="<?php echo $mod['id']; ?>"><?php echo htmlspecialchars($mod['title']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info text-white"><i class="fas fa-exchange-alt me-1"></i> Mover</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Forms -->
 <form id="deleteModuleForm" method="POST" style="display:none;"></form>
 <form id="deleteSectionForm" method="POST" style="display:none;"></form>
@@ -487,6 +532,51 @@ function deleteLesson(id, name) {
         'deleteLessonForm',
         '/admin/lessons/' + id + '/delete'
     );
+}
+
+// Data for move modal - sections grouped by module
+var moduleSectionsData = <?php
+    $jsData = [];
+    foreach ($modules as $mod) {
+        $modSecs = $moduleSections[$mod['id']] ?? [];
+        $jsData[$mod['id']] = array_map(function($s) {
+            return ['id' => $s['id'], 'title' => $s['title']];
+        }, $modSecs);
+    }
+    // orphan sections (module_id = null) -> key "0"
+    $jsData[0] = array_map(function($s) {
+        return ['id' => $s['id'], 'title' => $s['title']];
+    }, $orphanSections);
+    echo json_encode($jsData);
+?>;
+
+function openMoveModal(moduleId, moduleName) {
+    document.getElementById('moveSourceName').textContent = moduleName;
+    var list = document.getElementById('moveSectionsList');
+    var sections = moduleSectionsData[moduleId] || [];
+    list.innerHTML = '';
+    if (sections.length === 0) {
+        list.innerHTML = '<p class="text-muted small mb-0">Nenhuma seção neste módulo.</p>';
+        return;
+    }
+    sections.forEach(function(sec) {
+        var div = document.createElement('div');
+        div.className = 'form-check';
+        div.innerHTML = '<input type="checkbox" name="section_ids[]" value="' + sec.id + '" class="form-check-input move-check" id="moveSec' + sec.id + '" checked>' +
+            '<label class="form-check-label" for="moveSec' + sec.id + '">' + sec.title + '</label>';
+        list.appendChild(div);
+    });
+    // Remove source module from target dropdown
+    var select = document.querySelector('#moveSectionsModal select[name="target_module_id"]');
+    Array.from(select.options).forEach(function(opt) {
+        opt.hidden = (opt.value == moduleId);
+    });
+    select.value = '';
+    new bootstrap.Modal(document.getElementById('moveSectionsModal')).show();
+}
+
+function toggleAllMoveCheckboxes(checked) {
+    document.querySelectorAll('.move-check').forEach(function(cb) { cb.checked = checked; });
 }
 
 function reorderItem(type, id, direction) {

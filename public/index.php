@@ -53,6 +53,9 @@ use App\Controllers\ParentPanelController;
 use App\Controllers\Admin\ParentLinkController;
 use App\Controllers\CourseMessageController;
 use App\Controllers\Admin\MessageController as AdminMessageController;
+use App\Controllers\Admin\ClassroomController as AdminClassroomController;
+use App\Controllers\Admin\PlanningTemplateController as AdminPlanningTemplateController;
+use App\Controllers\Admin\PlanningController as AdminPlanningController;
 
 $router = new Router();
 
@@ -167,6 +170,7 @@ $router->post('/admin/modules/{id}/reorder', [ModuleAdminController::class, 'reo
 
 // Rotas Admin - Seções
 $router->post('/admin/courses/{courseId}/sections', [SectionAdminController::class, 'store']);
+$router->post('/admin/sections/move-module', [SectionAdminController::class, 'moveModule']);
 $router->post('/admin/sections/{id}/update', [SectionAdminController::class, 'update']);
 $router->post('/admin/sections/{id}/delete', [SectionAdminController::class, 'delete']);
 $router->post('/admin/sections/{id}/reorder', [SectionAdminController::class, 'reorder']);
@@ -259,6 +263,36 @@ $router->get('/admin/parents', [ParentLinkController::class, 'index']);
 $router->get('/admin/parents/{parentId}/link', [ParentLinkController::class, 'linkForm']);
 $router->post('/admin/parents/{parentId}/link', [ParentLinkController::class, 'link']);
 $router->post('/admin/parents/unlink/{linkId}', [ParentLinkController::class, 'unlink']);
+
+// Rotas Admin - Turmas
+$router->get('/admin/classrooms', [AdminClassroomController::class, 'index']);
+$router->get('/admin/classrooms/create', [AdminClassroomController::class, 'create']);
+$router->post('/admin/classrooms', [AdminClassroomController::class, 'store']);
+$router->get('/admin/classrooms/{id}/edit', [AdminClassroomController::class, 'edit']);
+$router->post('/admin/classrooms/{id}/update', [AdminClassroomController::class, 'update']);
+$router->post('/admin/classrooms/{id}/delete', [AdminClassroomController::class, 'delete']);
+
+// Rotas Admin - Templates de Planejamento
+$router->get('/admin/planning-templates', [AdminPlanningTemplateController::class, 'index']);
+$router->get('/admin/planning-templates/create', [AdminPlanningTemplateController::class, 'create']);
+$router->post('/admin/planning-templates', [AdminPlanningTemplateController::class, 'store']);
+$router->get('/admin/planning-templates/{id}/edit', [AdminPlanningTemplateController::class, 'edit']);
+$router->post('/admin/planning-templates/{id}/update', [AdminPlanningTemplateController::class, 'update']);
+$router->post('/admin/planning-templates/{id}/delete', [AdminPlanningTemplateController::class, 'delete']);
+$router->post('/admin/planning-templates/{id}/sections', [AdminPlanningTemplateController::class, 'addSection']);
+$router->post('/admin/planning-templates/sections/{id}/update', [AdminPlanningTemplateController::class, 'updateSection']);
+$router->post('/admin/planning-templates/sections/{id}/delete', [AdminPlanningTemplateController::class, 'deleteSection']);
+$router->post('/admin/planning-templates/sections/{id}/fields', [AdminPlanningTemplateController::class, 'addField']);
+$router->post('/admin/planning-templates/fields/{id}/delete', [AdminPlanningTemplateController::class, 'deleteField']);
+
+// Rotas Admin - Planejamentos
+$router->get('/admin/planning', [AdminPlanningController::class, 'index']);
+$router->get('/admin/planning/create', [AdminPlanningController::class, 'create']);
+$router->post('/admin/planning', [AdminPlanningController::class, 'store']);
+$router->get('/admin/planning/{id}', [AdminPlanningController::class, 'show']);
+$router->get('/admin/planning/{id}/edit', [AdminPlanningController::class, 'edit']);
+$router->post('/admin/planning/{id}/update', [AdminPlanningController::class, 'update']);
+$router->post('/admin/planning/{id}/delete', [AdminPlanningController::class, 'delete']);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $router->dispatch($method, $uri);
