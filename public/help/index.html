@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Ajuda | Hansen Educacional</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+    <style>
+        :root {
+            --theme-color: #007e66;
+            --sidebar-background: #f8f9fa;
+            --sidebar-nav-link-color--active: #007e66;
+            --sidebar-nav-link-border-color--active: #007e66;
+            --sidebar-name-color: #007e66;
+            --heading-color: #04574A;
+            --link-color: #007e66;
+        }
+        .sidebar .app-name {
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .markdown-section img {
+            max-width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin: 12px 0;
+        }
+        .markdown-section blockquote {
+            border-left-color: #007e66;
+        }
+        .back-link {
+            display: inline-block;
+            margin: 12px 16px;
+            padding: 6px 14px;
+            background: #007e66;
+            color: #fff !important;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .back-link:hover { background: #04574A; }
+    </style>
+</head>
+<body>
+    <nav><a class="back-link" href="/admin/dashboard">← Voltar ao Painel</a></nav>
+    <div id="app"></div>
+    <script>
+        window.$docsify = {
+            name: 'Hansen Educacional',
+            repo: false,
+            loadSidebar: true,
+            subMaxLevel: 3,
+            search: {
+                placeholder: 'Buscar na ajuda...',
+                noData: 'Nenhum resultado encontrado.',
+                paths: 'auto'
+            },
+            auto2top: true,
+            notFoundPage: true
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/emoji.min.js"></script>
+</body>
+</html>
