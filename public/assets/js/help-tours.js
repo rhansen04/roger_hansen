@@ -10,7 +10,12 @@
         '/admin/dashboard':           { tour: 'dashboard',               script: 'dashboard.js' },
         '/admin/courses':             { tour: 'courses',                 script: 'courses.js' },
         '/admin/planning-templates':  { tour: 'planning-templates',      script: 'planning-templates.js' },
-        '/admin/planning':            { tour: 'planning',                script: 'planning.js' }
+        '/admin/planning':            { tour: 'planning',                script: 'planning.js' },
+        '/admin/students':            { tour: 'students',                script: 'students.js' },
+        '/admin/enrollments':         { tour: 'enrollments',             script: 'enrollments.js' },
+        '/admin/classrooms':          { tour: 'classrooms',              script: 'classrooms.js' },
+        '/admin/reports':             { tour: 'reports',                 script: 'reports.js' },
+        '/admin/help':                { tour: 'help',                    script: 'help.js' }
     };
 
     // Detecta sub-rotas (form/edit/create)

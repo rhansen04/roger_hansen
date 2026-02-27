@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/darkmode.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+    <link rel="stylesheet" href="/assets/css/help-center.css">
     <script src="/assets/js/darkmode.js"></script>
     <style>
         :root {
@@ -233,7 +234,7 @@
 
         <div class="sidebar-section">Ajuda</div>
         <a href="javascript:void(0)" onclick="HelpTours.start()" class="nav-link-admin"><i class="fas fa-route"></i> Tour desta Página</a>
-        <a href="/help/" class="nav-link-admin" target="_blank"><i class="fas fa-book-open"></i> Central de Ajuda</a>
+        <a href="/admin/help" class="nav-link-admin <?= $isActive('/admin/help') ?>"><i class="fas fa-life-ring"></i> Central de Ajuda</a>
     </nav>
 
     <!-- Footer (always visible, never overlaps) -->
@@ -257,7 +258,7 @@
                 </span>
             </div>
             <div class="d-flex">
-                <button class="btn btn-outline-secondary btn-sm me-2" onclick="HelpTours.start()" title="Tour desta página"><i class="fas fa-question-circle"></i></button>
+                <button class="btn btn-help-premium me-2" onclick="HelpTours.start()" title="Tour desta página"><i class="fas fa-question-circle"></i><span class="d-none d-md-inline">Ajuda</span></button>
                 <button class="dark-mode-toggle me-2" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
                 <a href="/" class="btn btn-outline-primary btn-sm" target="_blank">Ver Site Público</a>
             </div>

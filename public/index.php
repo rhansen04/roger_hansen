@@ -56,6 +56,7 @@ use App\Controllers\Admin\MessageController as AdminMessageController;
 use App\Controllers\Admin\ClassroomController as AdminClassroomController;
 use App\Controllers\Admin\PlanningTemplateController as AdminPlanningTemplateController;
 use App\Controllers\Admin\PlanningController as AdminPlanningController;
+use App\Controllers\Admin\HelpController as AdminHelpController;
 
 $router = new Router();
 
@@ -293,6 +294,11 @@ $router->get('/admin/planning/{id}', [AdminPlanningController::class, 'show']);
 $router->get('/admin/planning/{id}/edit', [AdminPlanningController::class, 'edit']);
 $router->post('/admin/planning/{id}/update', [AdminPlanningController::class, 'update']);
 $router->post('/admin/planning/{id}/delete', [AdminPlanningController::class, 'delete']);
+
+// Rotas Admin - Central de Ajuda
+$router->get('/admin/help', [AdminHelpController::class, 'index']);
+$router->get('/admin/help/{category}', [AdminHelpController::class, 'category']);
+$router->get('/admin/help/{category}/{article}', [AdminHelpController::class, 'article']);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $router->dispatch($method, $uri);
