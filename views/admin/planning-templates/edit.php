@@ -139,45 +139,72 @@
                                 </form>
                             </div>
 
-                            <!-- Existing fields -->
-                            <?php if (!empty($sec['fields'])): ?>
-                                <table class="table table-sm table-bordered mb-3">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th>Ordem</th>
-                                            <th>Rótulo</th>
-                                            <th>Tipo</th>
-                                            <th>Obrigatório</th>
-                                            <th>Opções</th>
-                                            <th class="text-center">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($sec['fields'] as $field): ?>
-                                        <tr>
-                                            <td><?= $field['sort_order'] ?></td>
-                                            <td><?= htmlspecialchars($field['label']) ?></td>
-                                            <td><span class="badge bg-info"><?= $field['field_type'] ?></span></td>
-                                            <td><?= $field['is_required'] ? '<i class="fas fa-check text-success"></i>' : '-' ?></td>
-                                            <td>
-                                                <?php if ($field['options_json']):
-                                                    $opts = json_decode($field['options_json'], true);
-                                                    if (is_array($opts)):
-                                                        echo '<small>' . count($opts) . ' opções</small>';
-                                                    endif;
-                                                else: echo '-'; endif; ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <form action="/admin/planning-templates/fields/<?= $field['id'] ?>/delete" method="POST" class="d-inline"
-                                                    onsubmit="return confirm('Excluir campo?')">
-                                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            <?php endif; ?>
+                            <!-- Existing fields - Visual Preview -->
+                            <?php if (!empty($sec['fields'])):
+                                $typeColors = [
+                                    'text' => '#0d6efd', 'textarea' => '#0d6efd',
+                                    'date' => '#fd7e14', 'select' => '#6f42c1',
+                                    'radio' => '#20c997', 'checkbox' => '#e83e8c', 'checklist' => '#e83e8c'
+                                ];
+                                foreach ($sec['fields'] as $field):
+                                    $color = $typeColors[$field['field_type']] ?? '#6c757d';
+                                    $opts = $field['options_json'] ? json_decode($field['options_json'], true) : [];
+                                    if (!is_array($opts)) $opts = [];
+                            ?>
+                                <div class="mb-3" style="border-left: 3px solid <?= $color ?>; padding: 12px 16px; background: var(--bs-tertiary-bg, #f8f9fa); border-radius: 0 8px 8px 0;">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <div>
+                                            <span class="text-muted small fw-bold me-2">#<?= $field['sort_order'] ?></span>
+                                            <span class="badge" style="background-color: <?= $color ?>"><?= $field['field_type'] ?></span>
+                                            <span class="fw-semibold ms-2"><?= htmlspecialchars($field['label']) ?></span>
+                                            <?php if ($field['is_required']): ?><span class="text-danger">*</span><?php endif; ?>
+                                        </div>
+                                        <form action="/admin/planning-templates/fields/<?= $field['id'] ?>/delete" method="POST" class="d-inline"
+                                            onsubmit="return confirm('Excluir campo?')">
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
+                                    <?php if (!empty($field['description'])): ?>
+                                        <p class="text-muted small mb-2"><?= htmlspecialchars($field['description']) ?></p>
+                                    <?php endif; ?>
+
+                                    <div class="mt-2">
+                                    <?php switch ($field['field_type']):
+                                        case 'text': ?>
+                                            <input type="text" class="form-control form-control-sm" disabled placeholder="<?= htmlspecialchars($field['label']) ?>">
+                                        <?php break; case 'textarea': ?>
+                                            <textarea class="form-control form-control-sm" rows="3" disabled placeholder="<?= htmlspecialchars($field['label']) ?>"></textarea>
+                                        <?php break; case 'date': ?>
+                                            <input type="date" class="form-control form-control-sm" disabled style="max-width: 220px;">
+                                        <?php break; case 'select': ?>
+                                            <select class="form-select form-select-sm" disabled style="max-width: 300px;">
+                                                <option value="">Selecione...</option>
+                                                <?php foreach ($opts as $opt): ?>
+                                                    <option><?= htmlspecialchars(is_array($opt) ? ($opt['label'] ?? $opt['value'] ?? '') : $opt) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php break; case 'radio': ?>
+                                            <?php foreach ($opts as $opt):
+                                                $label = htmlspecialchars(is_array($opt) ? ($opt['label'] ?? $opt['value'] ?? '') : $opt); ?>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" disabled>
+                                                    <label class="form-check-label"><?= $label ?></label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php break; case 'checkbox': case 'checklist': ?>
+                                            <?php foreach ($opts as $opt):
+                                                $label = htmlspecialchars(is_array($opt) ? ($opt['label'] ?? $opt['value'] ?? '') : $opt); ?>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" disabled>
+                                                    <label class="form-check-label"><?= $label ?></label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php break; default: ?>
+                                            <input type="text" class="form-control form-control-sm" disabled placeholder="<?= htmlspecialchars($field['label']) ?>">
+                                        <?php break; endswitch; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; endif; ?>
 
                             <!-- Add field form -->
                             <div class="card card-body bg-light">
