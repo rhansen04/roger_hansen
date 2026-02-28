@@ -219,8 +219,8 @@ class PlanningTemplate
     public function createField($data)
     {
         try {
-            $sql = "INSERT INTO planning_template_fields (section_id, field_type, label, description, options_json, is_required, sort_order)
-                    VALUES (:section_id, :field_type, :label, :description, :options_json, :is_required, :sort_order)";
+            $sql = "INSERT INTO planning_template_fields (section_id, field_type, label, description, options_json, is_required, sort_order, depends_on_field_id, depends_on_value)
+                    VALUES (:section_id, :field_type, :label, :description, :options_json, :is_required, :sort_order, :depends_on_field_id, :depends_on_value)";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':section_id' => $data['section_id'],
@@ -229,7 +229,9 @@ class PlanningTemplate
                 ':description' => $data['description'] ?? null,
                 ':options_json' => $data['options_json'] ?? null,
                 ':is_required' => $data['is_required'] ?? 0,
-                ':sort_order' => $data['sort_order'] ?? 0
+                ':sort_order' => $data['sort_order'] ?? 0,
+                ':depends_on_field_id' => !empty($data['depends_on_field_id']) ? $data['depends_on_field_id'] : null,
+                ':depends_on_value' => !empty($data['depends_on_value']) ? $data['depends_on_value'] : null
             ]);
             return $this->db->lastInsertId();
         } catch (PDOException $e) {
@@ -243,7 +245,8 @@ class PlanningTemplate
         try {
             $sql = "UPDATE planning_template_fields
                     SET field_type = :field_type, label = :label, description = :description,
-                        options_json = :options_json, is_required = :is_required, sort_order = :sort_order
+                        options_json = :options_json, is_required = :is_required, sort_order = :sort_order,
+                        depends_on_field_id = :depends_on_field_id, depends_on_value = :depends_on_value
                     WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
@@ -253,7 +256,9 @@ class PlanningTemplate
                 ':description' => $data['description'] ?? null,
                 ':options_json' => $data['options_json'] ?? null,
                 ':is_required' => $data['is_required'] ?? 0,
-                ':sort_order' => $data['sort_order'] ?? 0
+                ':sort_order' => $data['sort_order'] ?? 0,
+                ':depends_on_field_id' => !empty($data['depends_on_field_id']) ? $data['depends_on_field_id'] : null,
+                ':depends_on_value' => !empty($data['depends_on_value']) ? $data['depends_on_value'] : null
             ]);
         } catch (PDOException $e) {
             error_log("Erro ao atualizar campo: " . $e->getMessage());

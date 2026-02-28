@@ -158,6 +158,11 @@
                                             <span class="badge" style="background-color: <?= $color ?>"><?= $field['field_type'] ?></span>
                                             <span class="fw-semibold ms-2"><?= htmlspecialchars($field['label']) ?></span>
                                             <?php if ($field['is_required']): ?><span class="text-danger">*</span><?php endif; ?>
+                                            <?php if (!empty($field['depends_on_field_id'])): ?>
+                                                <span class="badge bg-info text-dark ms-1" title="Campo condicional">
+                                                    <i class="fas fa-link me-1"></i>Depende de #<?= $field['depends_on_field_id'] ?> = <?= htmlspecialchars($field['depends_on_value'] ?? '') ?>
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
                                         <form action="/admin/planning-templates/fields/<?= $field['id'] ?>/delete" method="POST" class="d-inline"
                                             onsubmit="return confirm('Excluir campo?')">
@@ -243,6 +248,25 @@
                                         </div>
                                         <div class="col-md-2">
                                             <button type="submit" class="btn btn-sm btn-primary w-100"><i class="fas fa-plus me-1"></i> Adicionar</button>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mt-1">
+                                        <div class="col-md-4">
+                                            <label class="form-label small text-muted"><i class="fas fa-link me-1"></i>Depende do campo (opcional)</label>
+                                            <select name="depends_on_field_id" class="form-select form-select-sm">
+                                                <option value="">Nenhuma dependência</option>
+                                                <?php if (!empty($template['sections'])):
+                                                    foreach ($template['sections'] as $depSec):
+                                                        foreach ($depSec['fields'] ?? [] as $depField): ?>
+                                                            <option value="<?= $depField['id'] ?>">#<?= $depField['id'] ?> — <?= htmlspecialchars($depField['label']) ?> (<?= $depField['field_type'] ?>)</option>
+                                                        <?php endforeach;
+                                                    endforeach;
+                                                endif; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small text-muted">Valor que habilita</label>
+                                            <input type="text" name="depends_on_value" class="form-control form-control-sm" placeholder="Ex: Manual">
                                         </div>
                                     </div>
                                 </form>

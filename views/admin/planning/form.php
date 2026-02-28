@@ -128,7 +128,7 @@ $template = $template ?? null;
                         $selectedIndices = $decoded['selected'] ?? [];
                     }
             ?>
-                <div class="mb-3">
+                <div class="mb-3"<?php if (!empty($field['depends_on_field_id'])): ?> data-depends-on="<?= $field['depends_on_field_id'] ?>" data-depends-value="<?= htmlspecialchars($field['depends_on_value'] ?? '') ?>" style="display:none"<?php endif; ?>>
                     <input type="hidden" name="answer_sections[<?= $field['id'] ?>]" value="<?= $section['id'] ?>">
                     <label class="form-label fw-bold">
                         <?= htmlspecialchars($field['label']) ?>
@@ -225,4 +225,27 @@ $template = $template ?? null;
         </div>
     </div>
 </form>
+
+<script>
+// Field dependency: show/hide fields based on controlling field value
+document.querySelectorAll('[data-depends-on]').forEach(function(wrapper) {
+    var controlId = wrapper.dataset.dependsOn;
+    var requiredVal = wrapper.dataset.dependsValue;
+    var inputs = document.querySelectorAll('[name="answers[' + controlId + ']"]');
+    function check() {
+        var val = '';
+        inputs.forEach(function(i) {
+            if (i.type === 'radio' && i.checked) val = i.value;
+            else if (i.tagName === 'SELECT') val = i.value;
+        });
+        var show = (val === requiredVal);
+        wrapper.style.display = show ? '' : 'none';
+        wrapper.querySelectorAll('input,textarea,select').forEach(function(el) {
+            el.disabled = !show;
+        });
+    }
+    inputs.forEach(function(i) { i.addEventListener('change', check); });
+    check();
+});
+</script>
 <?php endif; ?>
