@@ -70,8 +70,21 @@
     <div class="article-step">
         <div class="step-number">5</div>
         <div class="step-content">
+            <h6>Configurar Dependências entre Campos (opcional)</h6>
+            <p>Ao adicionar um campo, você pode torná-lo <strong>condicional</strong>: ele só aparece no formulário quando outro campo tiver um valor específico. Use os inputs na parte inferior do formulário "Adicionar Campo":</p>
+            <ul>
+                <li><strong>Depende do campo</strong> — selecione o campo controlador (ex: campo Radio "Eixo da Vivência")</li>
+                <li><strong>Valor que habilita</strong> — digite o valor exato que faz este campo aparecer (ex: <code>Musical</code>)</li>
+            </ul>
+            <p>Campos condicionais ficam marcados com um <strong>badge azul</strong> no preview da seção. <a href="/admin/help/planejamento/dependencia-campos">Saiba mais sobre dependência entre campos →</a></p>
+        </div>
+    </div>
+
+    <div class="article-step">
+        <div class="step-number">6</div>
+        <div class="step-content">
             <h6>Usar o Template ao criar Planejamentos</h6>
-            <p>Quando um professor cria um novo planejamento em <strong>Ensino → Planejamentos</strong>, ele seleciona o template desejado. O formulário é gerado automaticamente com todas as seções e campos definidos.</p>
+            <p>Quando um professor cria um novo planejamento em <strong>Ensino → Planejamentos</strong>, ele seleciona o template desejado. O formulário é gerado automaticamente com todas as seções e campos definidos — incluindo os campos condicionais, que aparecem dinamicamente conforme as seleções do professor.</p>
         </div>
     </div>
 </div>
