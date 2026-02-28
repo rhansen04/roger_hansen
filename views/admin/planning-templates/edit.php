@@ -151,7 +151,7 @@
                                     $opts = $field['options_json'] ? json_decode($field['options_json'], true) : [];
                                     if (!is_array($opts)) $opts = [];
                             ?>
-                                <div class="mb-3" data-bs-theme="light" style="border-left: 3px solid <?= $color ?>; padding: 12px 16px; background: #e9ecef; color: #212529; border-radius: 0 8px 8px 0;">
+                                <div class="mb-3 field-preview-card" style="border-left: 3px solid <?= $color ?>; padding: 12px 16px; background: #e9ecef; border-radius: 0 8px 8px 0;">
                                     <div class="d-flex justify-content-between align-items-start mb-1">
                                         <div>
                                             <span class="text-muted small fw-bold me-2">#<?= $field['sort_order'] ?></span>
@@ -281,6 +281,15 @@
     </div>
 </div>
 <?php endif; ?>
+
+<style>
+.field-preview-card,
+.field-preview-card *:not(.badge):not(.btn):not(.btn *) {
+    color: #212529 !important;
+}
+.field-preview-card .text-danger { color: #dc3545 !important; }
+.field-preview-card .text-muted  { color: #6c757d !important; }
+</style>
 
 <script>
 function toggleOptions(el) {
