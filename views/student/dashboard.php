@@ -39,7 +39,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="badge <?php echo $enrollment['status'] === 'active' ? 'bg-success' : 'bg-secondary'; ?>">
                             <?php echo $enrollment['status'] === 'active' ? 'Ativo' : ucfirst($enrollment['status']); ?>
                         </span>
@@ -47,8 +47,7 @@
                             <?php if (!empty($enrollment['is_course_completed'])): ?>
                                 <a href="/certificado/gerar/<?php echo $enrollment['id']; ?>" class="btn btn-outline-success btn-sm me-1" title="Certificado"><i class="fas fa-certificate"></i></a>
                             <?php endif; ?>
-                            <a href="/curso/<?php echo $enrollment['course_slug']; ?>" class="btn btn-hansen btn-sm text-white">Continuar</a>
-                            <a href="/curso/<?php echo $enrollment['course_slug']; ?>/perguntas" class="btn btn-outline-secondary btn-sm ms-1" title="Perguntas e Respostas"><i class="fas fa-comments"></i></a>
+                            <a href="/curso/<?php echo $enrollment['course_slug']; ?>/perguntas" class="btn btn-outline-secondary btn-sm" title="Perguntas e Respostas"><i class="fas fa-comments"></i></a>
                             <?php if (!empty($enrollment['material_count'])): ?>
                                 <a href="/curso/<?php echo $enrollment['course_slug']; ?>/materiais" class="btn btn-outline-secondary btn-sm ms-1" title="Materiais de Apoio">
                                     <i class="fas fa-paperclip"></i>
@@ -57,6 +56,10 @@
                             <?php endif; ?>
                         </div>
                     </div>
+                    <a href="/curso/<?php echo $enrollment['course_slug']; ?>" class="btn btn-hansen btn-sm text-white w-100">
+                        <i class="fas fa-play me-1"></i>
+                        <?php echo $progress > 0 ? 'Continuar curso' : 'Iniciar curso'; ?>
+                    </a>
                 </div>
             </div>
         </div>

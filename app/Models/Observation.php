@@ -10,56 +10,93 @@ class Observation
 {
     protected $db;
 
+    /**
+     * Campos dos eixos pedagogicos
+     */
+    protected $axisFields = [
+        'observation_general',
+        'axis_movement',
+        'axis_manual',
+        'axis_music',
+        'axis_stories',
+        'axis_pca'
+    ];
+
     public function __construct()
     {
         $this->db = Connection::getInstance();
     }
 
     /**
-     * Listar todas as observações
+     * Listar todas as observacoes
      */
     public function all()
     {
         try {
             $sql = "SELECT o.*,
-                           COALESCE(u.name, 'Usuário desconhecido') as teacher_name,
-                           COALESCE(s.name, 'Aluno não encontrado') as student_name
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
                     FROM observations o
                     LEFT JOIN users u ON o.user_id = u.id
                     LEFT JOIN students s ON o.student_id = s.id
-                    ORDER BY o.observation_date DESC, o.created_at DESC";
+                    ORDER BY o.created_at DESC";
             $stmt = $this->db->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao listar observações: " . $e->getMessage());
+            error_log("Erro ao listar observacoes: " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Buscar observação por ID
+     * Listar observacoes por usuario (professor)
+     */
+    public function allByUser($userId)
+    {
+        try {
+            $sql = "SELECT o.*,
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
+                    FROM observations o
+                    LEFT JOIN users u ON o.user_id = u.id
+                    LEFT JOIN students s ON o.student_id = s.id
+                    WHERE o.user_id = ?
+                    ORDER BY o.created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$userId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao listar observacoes por usuario: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Buscar observacao por ID
      */
     public function find($id)
     {
         try {
             $sql = "SELECT o.*,
-                           COALESCE(u.name, 'Usuário desconhecido') as teacher_name,
-                           COALESCE(s.name, 'Aluno não encontrado') as student_name
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name,
+                           COALESCE(uf.name, '') as finalized_by_name
                     FROM observations o
                     LEFT JOIN users u ON o.user_id = u.id
                     LEFT JOIN students s ON o.student_id = s.id
+                    LEFT JOIN users uf ON o.finalized_by = uf.id
                     WHERE o.id = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao buscar observação: " . $e->getMessage());
+            error_log("Erro ao buscar observacao: " . $e->getMessage());
             return null;
         }
     }
 
     /**
-     * Criar nova observação
+     * Criar nova observacao (compatibilidade)
      */
     public function create($data)
     {
@@ -81,13 +118,56 @@ class Observation
                 ':updated_at' => $now
             ]);
         } catch (PDOException $e) {
-            error_log("Erro ao criar observação: " . $e->getMessage());
+            error_log("Erro ao criar observacao: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Atualizar observação
+     * Criar observacao com eixos pedagogicos
+     */
+    public function createWithAxes($data)
+    {
+        try {
+            $sql = "INSERT INTO observations (
+                        student_id, user_id, semester, year, status,
+                        observation_general, axis_movement, axis_manual,
+                        axis_music, axis_stories, axis_pca,
+                        created_at, updated_at
+                    ) VALUES (
+                        :student_id, :user_id, :semester, :year, 'in_progress',
+                        :observation_general, :axis_movement, :axis_manual,
+                        :axis_music, :axis_stories, :axis_pca,
+                        :created_at, :updated_at
+                    )";
+
+            $stmt = $this->db->prepare($sql);
+            $now = date('Y-m-d H:i:s');
+
+            $stmt->execute([
+                ':student_id' => $data['student_id'],
+                ':user_id' => $data['user_id'],
+                ':semester' => $data['semester'],
+                ':year' => $data['year'],
+                ':observation_general' => $data['observation_general'] ?? '',
+                ':axis_movement' => $data['axis_movement'] ?? '',
+                ':axis_manual' => $data['axis_manual'] ?? '',
+                ':axis_music' => $data['axis_music'] ?? '',
+                ':axis_stories' => $data['axis_stories'] ?? '',
+                ':axis_pca' => $data['axis_pca'] ?? '',
+                ':created_at' => $now,
+                ':updated_at' => $now
+            ]);
+
+            return $this->db->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Erro ao criar observacao com eixos: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Atualizar observacao (compatibilidade)
      */
     public function update($id, $data)
     {
@@ -115,13 +195,219 @@ class Observation
                 ':updated_at' => date('Y-m-d H:i:s')
             ]);
         } catch (PDOException $e) {
-            error_log("Erro ao atualizar observação: " . $e->getMessage());
+            error_log("Erro ao atualizar observacao: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Deletar observação
+     * Atualizar observacao com eixos pedagogicos
+     */
+    public function updateWithAxes($id, $data)
+    {
+        try {
+            $sql = "UPDATE observations
+                    SET student_id = :student_id,
+                        semester = :semester,
+                        year = :year,
+                        observation_general = :observation_general,
+                        axis_movement = :axis_movement,
+                        axis_manual = :axis_manual,
+                        axis_music = :axis_music,
+                        axis_stories = :axis_stories,
+                        axis_pca = :axis_pca,
+                        updated_at = :updated_at
+                    WHERE id = :id AND status = 'in_progress'";
+
+            $stmt = $this->db->prepare($sql);
+
+            return $stmt->execute([
+                ':id' => $id,
+                ':student_id' => $data['student_id'],
+                ':semester' => $data['semester'],
+                ':year' => $data['year'],
+                ':observation_general' => $data['observation_general'] ?? '',
+                ':axis_movement' => $data['axis_movement'] ?? '',
+                ':axis_manual' => $data['axis_manual'] ?? '',
+                ':axis_music' => $data['axis_music'] ?? '',
+                ':axis_stories' => $data['axis_stories'] ?? '',
+                ':axis_pca' => $data['axis_pca'] ?? '',
+                ':updated_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao atualizar observacao com eixos: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Atualizar campo individual (auto-save)
+     */
+    public function updateField($id, $field, $value)
+    {
+        // Validar que o campo e permitido
+        $allowedFields = array_merge($this->axisFields, ['semester', 'year', 'student_id']);
+        if (!in_array($field, $allowedFields)) {
+            error_log("Campo nao permitido para auto-save: " . $field);
+            return false;
+        }
+
+        try {
+            $sql = "UPDATE observations
+                    SET {$field} = :value, updated_at = :updated_at
+                    WHERE id = :id AND status = 'in_progress'";
+
+            $stmt = $this->db->prepare($sql);
+
+            return $stmt->execute([
+                ':value' => $value,
+                ':updated_at' => date('Y-m-d H:i:s'),
+                ':id' => $id
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao atualizar campo {$field}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Finalizar observacao
+     */
+    public function finalize($id, $userId)
+    {
+        try {
+            $sql = "UPDATE observations
+                    SET status = 'finalized',
+                        finalized_at = :finalized_at,
+                        finalized_by = :finalized_by,
+                        updated_at = :updated_at
+                    WHERE id = :id AND status = 'in_progress'";
+
+            $stmt = $this->db->prepare($sql);
+
+            return $stmt->execute([
+                ':finalized_at' => date('Y-m-d H:i:s'),
+                ':finalized_by' => $userId,
+                ':updated_at' => date('Y-m-d H:i:s'),
+                ':id' => $id
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao finalizar observacao: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Reabrir observacao (coordenador)
+     */
+    public function reopen($id)
+    {
+        try {
+            $sql = "UPDATE observations
+                    SET status = 'in_progress',
+                        finalized_at = NULL,
+                        finalized_by = NULL,
+                        updated_at = :updated_at
+                    WHERE id = :id AND status = 'finalized'";
+
+            $stmt = $this->db->prepare($sql);
+
+            return $stmt->execute([
+                ':updated_at' => date('Y-m-d H:i:s'),
+                ':id' => $id
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao reabrir observacao: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Buscar observacao por aluno e semestre
+     */
+    public function findByStudentAndSemester($studentId, $semester, $year)
+    {
+        try {
+            $sql = "SELECT o.*,
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
+                    FROM observations o
+                    LEFT JOIN users u ON o.user_id = u.id
+                    LEFT JOIN students s ON o.student_id = s.id
+                    WHERE o.student_id = ? AND o.semester = ? AND o.year = ?
+                    ORDER BY o.created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$studentId, $semester, $year]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar observacoes por semestre: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Listar com filtros avancados
+     */
+    public function allFiltered($filters = [], $userId = null, $roleRestrict = false)
+    {
+        try {
+            $where = [];
+            $params = [];
+
+            // Restricao por role (professor ve apenas suas)
+            if ($roleRestrict && $userId) {
+                $where[] = "o.user_id = ?";
+                $params[] = $userId;
+            }
+
+            // Filtro por aluno
+            if (!empty($filters['student_id'])) {
+                $where[] = "o.student_id = ?";
+                $params[] = $filters['student_id'];
+            }
+
+            // Filtro por semestre
+            if (!empty($filters['semester'])) {
+                $where[] = "o.semester = ?";
+                $params[] = $filters['semester'];
+            }
+
+            // Filtro por ano
+            if (!empty($filters['year'])) {
+                $where[] = "o.year = ?";
+                $params[] = $filters['year'];
+            }
+
+            // Filtro por status
+            if (!empty($filters['status'])) {
+                $where[] = "o.status = ?";
+                $params[] = $filters['status'];
+            }
+
+            $sql = "SELECT o.*,
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
+                    FROM observations o
+                    LEFT JOIN users u ON o.user_id = u.id
+                    LEFT JOIN students s ON o.student_id = s.id";
+
+            if (!empty($where)) {
+                $sql .= " WHERE " . implode(" AND ", $where);
+            }
+
+            $sql .= " ORDER BY o.year DESC, o.semester DESC, s.name ASC, o.created_at DESC";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao listar observacoes filtradas: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Deletar observacao
      */
     public function delete($id)
     {
@@ -130,36 +416,36 @@ class Observation
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
-            error_log("Erro ao deletar observação: " . $e->getMessage());
+            error_log("Erro ao deletar observacao: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Buscar observações por aluno
+     * Buscar observacoes por aluno
      */
     public function findByStudent($student_id)
     {
         try {
             $sql = "SELECT o.*,
-                           COALESCE(s.name, 'Aluno não encontrado') as student_name,
-                           COALESCE(u.name, 'Usuário desconhecido') as teacher_name
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name,
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name
                     FROM observations o
                     LEFT JOIN students s ON o.student_id = s.id
                     LEFT JOIN users u ON o.user_id = u.id
                     WHERE o.student_id = ?
-                    ORDER BY o.observation_date DESC, o.created_at DESC";
+                    ORDER BY o.year DESC, o.semester DESC, o.created_at DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$student_id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao buscar observações por aluno: " . $e->getMessage());
+            error_log("Erro ao buscar observacoes por aluno: " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Alias para compatibilidade com código existente
+     * Alias para compatibilidade com codigo existente
      */
     public function allByStudent($studentId)
     {
@@ -167,7 +453,7 @@ class Observation
     }
 
     /**
-     * Contar total de observações
+     * Contar total de observacoes
      */
     public function countTotal()
     {
@@ -177,82 +463,82 @@ class Observation
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result['total'] ?? 0;
         } catch (PDOException $e) {
-            error_log("Erro ao contar observações: " . $e->getMessage());
+            error_log("Erro ao contar observacoes: " . $e->getMessage());
             return 0;
         }
     }
 
     /**
-     * Buscar observações recentes
+     * Buscar observacoes recentes
      */
     public function recentObservations($limit = 10)
     {
         try {
             $sql = "SELECT o.*,
-                           COALESCE(u.name, 'Usuário desconhecido') as teacher_name,
-                           COALESCE(s.name, 'Aluno não encontrado') as student_name
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
                     FROM observations o
                     LEFT JOIN users u ON o.user_id = u.id
                     LEFT JOIN students s ON o.student_id = s.id
-                    ORDER BY o.observation_date DESC, o.created_at DESC
+                    ORDER BY o.created_at DESC
                     LIMIT ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$limit]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao buscar observações recentes: " . $e->getMessage());
+            error_log("Erro ao buscar observacoes recentes: " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Buscar observações por tipo/categoria
+     * Buscar observacoes por tipo/categoria
      */
     public function findByType($category)
     {
         try {
             $sql = "SELECT o.*,
-                           COALESCE(u.name, 'Usuário desconhecido') as teacher_name,
-                           COALESCE(s.name, 'Aluno não encontrado') as student_name
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
                     FROM observations o
                     LEFT JOIN users u ON o.user_id = u.id
                     LEFT JOIN students s ON o.student_id = s.id
                     WHERE o.category = ?
-                    ORDER BY o.observation_date DESC, o.created_at DESC";
+                    ORDER BY o.created_at DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$category]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao buscar observações por categoria: " . $e->getMessage());
+            error_log("Erro ao buscar observacoes por categoria: " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Buscar observações por período
+     * Buscar observacoes por periodo
      */
     public function findByDateRange($dateFrom, $dateTo)
     {
         try {
             $sql = "SELECT o.*,
-                           COALESCE(u.name, 'Usuário desconhecido') as teacher_name,
-                           COALESCE(s.name, 'Aluno não encontrado') as student_name
+                           COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
+                           COALESCE(s.name, 'Aluno nao encontrado') as student_name
                     FROM observations o
                     LEFT JOIN users u ON o.user_id = u.id
                     LEFT JOIN students s ON o.student_id = s.id
                     WHERE o.observation_date BETWEEN ? AND ?
-                    ORDER BY o.observation_date DESC, o.created_at DESC";
+                    ORDER BY o.created_at DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$dateFrom, $dateTo]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao buscar observações por período: " . $e->getMessage());
+            error_log("Erro ao buscar observacoes por periodo: " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Contar observações por categoria
+     * Contar observacoes por categoria
      */
     public function countByCategory()
     {
@@ -264,7 +550,7 @@ class Observation
             $stmt = $this->db->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Erro ao contar observações por categoria: " . $e->getMessage());
+            error_log("Erro ao contar observacoes por categoria: " . $e->getMessage());
             return [];
         }
     }
@@ -275,5 +561,29 @@ class Observation
     public function countByType()
     {
         return $this->countByCategory();
+    }
+
+    /**
+     * Verificar se ja existe observacao para aluno/semestre/ano
+     */
+    public function existsForStudentSemester($studentId, $semester, $year, $excludeId = null)
+    {
+        try {
+            $sql = "SELECT id FROM observations
+                    WHERE student_id = ? AND semester = ? AND year = ?";
+            $params = [$studentId, $semester, $year];
+
+            if ($excludeId) {
+                $sql .= " AND id != ?";
+                $params[] = $excludeId;
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao verificar existencia: " . $e->getMessage());
+            return null;
+        }
     }
 }

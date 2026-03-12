@@ -36,6 +36,7 @@
                     <tr>
                         <th class="ps-4 py-3">ID</th>
                         <th class="py-3">Nome</th>
+                        <th class="py-3">Alunos</th>
                         <th class="py-3">Escola</th>
                         <th class="py-3">Professor</th>
                         <th class="py-3">Faixa Etária</th>
@@ -48,7 +49,7 @@
                 <tbody>
                     <?php if (empty($classrooms)): ?>
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="10" class="text-center py-5 text-muted">
                                 <i class="fas fa-chalkboard fa-3x mb-3"></i><br>
                                 Nenhuma turma cadastrada.
                             </td>
@@ -59,7 +60,16 @@
                         foreach ($classrooms as $c): ?>
                         <tr>
                             <td class="ps-4"><?= $c['id'] ?></td>
-                            <td class="fw-bold"><?= htmlspecialchars($c['name']) ?></td>
+                            <td class="fw-bold">
+                                <a href="/admin/classrooms/<?= $c['id'] ?>" class="text-decoration-none text-dark">
+                                    <?= htmlspecialchars($c['name']) ?>
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="fas fa-users me-1"></i><?= $studentCounts[$c['id']] ?? 0 ?>
+                                </span>
+                            </td>
                             <td><?= htmlspecialchars($c['school_name'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($c['teacher_name'] ?? '-') ?></td>
                             <td><span class="badge bg-info"><?= $c['age_group'] ?> anos</span></td>
@@ -77,9 +87,15 @@
                                     <a href="/admin/classrooms/<?= $c['id'] ?>/edit" class="btn btn-sm btn-outline-secondary" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button onclick="confirmDelete(<?= $c['id'] ?>, '<?= htmlspecialchars($c['name']) ?>')" class="btn btn-sm btn-outline-danger" title="Excluir">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <?php if ($c['status'] === 'active'): ?>
+                                        <button onclick="toggleStatus(<?= $c['id'] ?>, '<?= htmlspecialchars($c['name']) ?>', 'desativar')" class="btn btn-sm btn-outline-warning" title="Desativar">
+                                            <i class="fas fa-toggle-off"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button onclick="toggleStatus(<?= $c['id'] ?>, '<?= htmlspecialchars($c['name']) ?>', 'ativar')" class="btn btn-sm btn-outline-success" title="Ativar">
+                                            <i class="fas fa-toggle-on"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -91,13 +107,16 @@
     </div>
 </div>
 
-<form id="deleteForm" method="POST" style="display: none;"></form>
+<form id="toggleStatusForm" method="POST" style="display: none;"></form>
 
 <script>
-function confirmDelete(id, name) {
-    if (confirm(`Excluir turma "${name}"?\n\nAtenção: Esta ação não pode ser desfeita.`)) {
-        const form = document.getElementById('deleteForm');
-        form.action = `/admin/classrooms/${id}/delete`;
+function toggleStatus(id, name, action) {
+    const msg = action === 'desativar'
+        ? `Desativar turma "${name}"?\n\nA turma ficará inativa, mas todo o histórico será preservado.`
+        : `Ativar turma "${name}"?\n\nA turma voltará a ficar disponível.`;
+    if (confirm(msg)) {
+        const form = document.getElementById('toggleStatusForm');
+        form.action = `/admin/classrooms/${id}/toggle-status`;
         form.submit();
     }
 }

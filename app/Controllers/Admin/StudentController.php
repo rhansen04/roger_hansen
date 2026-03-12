@@ -78,10 +78,31 @@ class StudentController
         $today = new \DateTime();
         $age = $today->diff($birthDate)->y;
 
+        // Buscar turma atual do aluno (via classroom_students pivot)
+        $classroom = null;
+        try {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare("
+                SELECT c.*, u.name as teacher_name, s.name as school_name
+                FROM classroom_students cs
+                JOIN classrooms c ON cs.classroom_id = c.id
+                LEFT JOIN users u ON c.teacher_id = u.id
+                LEFT JOIN schools s ON c.school_id = s.id
+                WHERE cs.student_id = ? AND c.status = 'active'
+                ORDER BY c.school_year DESC
+                LIMIT 1
+            ");
+            $stmt->execute([$id]);
+            $classroom = $stmt->fetch(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            // Tabela pode não existir ainda
+        }
+
         return $this->render('students/show', [
             'student' => $student,
             'observations' => $observations,
-            'age' => $age
+            'age' => $age,
+            'classroom' => $classroom
         ]);
     }
 

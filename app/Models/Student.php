@@ -158,4 +158,27 @@ class Student
             return 0;
         }
     }
+
+    /**
+     * Buscar alunos de uma turma com idade calculada
+     */
+    public function findByClassroom($classroomId)
+    {
+        try {
+            $sql = "SELECT s.*, sch.name as school_name, cs.enrolled_at,
+                           TIMESTAMPDIFF(YEAR, s.birth_date, CURDATE()) as age_years,
+                           TIMESTAMPDIFF(MONTH, s.birth_date, CURDATE()) % 12 as age_months
+                    FROM classroom_students cs
+                    INNER JOIN students s ON cs.student_id = s.id
+                    LEFT JOIN schools sch ON s.school_id = sch.id
+                    WHERE cs.classroom_id = :classroom_id
+                    ORDER BY s.name ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':classroom_id' => $classroomId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar alunos por turma: " . $e->getMessage());
+            return [];
+        }
+    }
 }

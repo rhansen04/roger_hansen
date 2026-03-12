@@ -32,15 +32,18 @@
         <h2 class="text-primary fw-bold mb-0">DETALHES DO ALUNO</h2>
     </div>
     <div class="btn-group">
+        <a href="/admin/observations?student_id=<?php echo $student['id']; ?>" class="btn btn-outline-primary">
+            <i class="fas fa-clipboard-list me-2"></i> Observações
+        </a>
+        <a href="/admin/descriptive-reports?student_id=<?php echo $student['id']; ?>" class="btn btn-outline-info">
+            <i class="fas fa-file-alt me-2"></i> Parecer Descritivo
+        </a>
         <button id="btnResumoIA" class="btn btn-gradient-purple text-white">
             <i class="fas fa-magic me-2"></i> Resumo IA
         </button>
         <a href="/admin/students/<?php echo $student['id']; ?>/edit" class="btn btn-hansen text-white">
             <i class="fas fa-edit me-2"></i> Editar
         </a>
-        <button onclick="confirmDelete(<?php echo $student['id']; ?>, '<?php echo htmlspecialchars($student['name']); ?>')" class="btn btn-danger">
-            <i class="fas fa-trash me-2"></i> Excluir
-        </button>
     </div>
 </div>
 
@@ -72,7 +75,7 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <label class="text-muted small fw-bold d-block mb-1">Escola Vinculada</label>
                         <p class="mb-0">
                             <?php if ($student['school_name']): ?>
@@ -82,6 +85,30 @@
                                 </a>
                             <?php else: ?>
                                 <span class="text-muted">Não vinculada</span>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="text-muted small fw-bold d-block mb-1">Turma</label>
+                        <p class="mb-0">
+                            <?php if (!empty($classroom)): ?>
+                                <i class="fas fa-chalkboard text-primary me-2"></i>
+                                <a href="/admin/classrooms/<?php echo $classroom['id']; ?>" class="text-decoration-none fw-bold">
+                                    <?php echo htmlspecialchars($classroom['name']); ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="text-muted">Sem turma</span>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="text-muted small fw-bold d-block mb-1">Professor Responsável</label>
+                        <p class="mb-0">
+                            <?php if (!empty($classroom['teacher_name'])): ?>
+                                <i class="fas fa-user-tie text-primary me-2"></i>
+                                <?php echo htmlspecialchars($classroom['teacher_name']); ?>
+                            <?php else: ?>
+                                <span class="text-muted">—</span>
                             <?php endif; ?>
                         </p>
                     </div>

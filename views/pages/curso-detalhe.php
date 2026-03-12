@@ -81,7 +81,23 @@
                     }
                 }
 
-                // Helper para renderizar lista de lições de uma seção
+                // Helper: calculate module status
+                function getModuleStatus($modSections, $completedLessons) {
+                    $totalLessons = 0;
+                    $doneLessons = 0;
+                    foreach ($modSections as $sec) {
+                        foreach ($sec['lessons'] as $l) {
+                            $totalLessons++;
+                            if (in_array($l['id'], $completedLessons ?? [])) $doneLessons++;
+                        }
+                    }
+                    if ($totalLessons === 0) return ['status' => 'empty', 'done' => 0, 'total' => 0, 'pct' => 0];
+                    if ($doneLessons === 0) return ['status' => 'not_started', 'done' => 0, 'total' => $totalLessons, 'pct' => 0];
+                    if ($doneLessons >= $totalLessons) return ['status' => 'completed', 'done' => $doneLessons, 'total' => $totalLessons, 'pct' => 100];
+                    return ['status' => 'in_progress', 'done' => $doneLessons, 'total' => $totalLessons, 'pct' => round($doneLessons / $totalLessons * 100)];
+                }
+
+                // Helper para renderizar lista de licoes de uma secao
                 function renderSectionLessons($section, $course, $enrollment, $completedLessons, $sectionId, $collapsed = true, $parentId = 'courseContent') {
                 ?>
                 <div class="accordion-item">
@@ -112,29 +128,35 @@
                                             <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/licao/<?= $lessonItem['id'] ?>"
                                                class="d-flex align-items-center w-100 text-decoration-none text-dark">
                                                 <?php if ($isDone): ?>
-                                                    <i class="fas fa-check-circle text-success me-3"></i>
+                                                    <span class="me-3 d-inline-flex align-items-center justify-content-center rounded-circle" style="width:28px;height:28px;background:#d4edda;">
+                                                        <i class="fas fa-check text-success" style="font-size:.75rem;"></i>
+                                                    </span>
                                                 <?php else: ?>
-                                                    <i class="fas fa-play-circle text-secondary me-3"></i>
+                                                    <span class="me-3 d-inline-flex align-items-center justify-content-center rounded-circle" style="width:28px;height:28px;background:#e9ecef;">
+                                                        <i class="fas fa-play text-secondary" style="font-size:.65rem;"></i>
+                                                    </span>
                                                 <?php endif; ?>
-                                                <div class="flex-grow-1 <?= $isDone ? 'text-muted' : '' ?>">
+                                                <div class="flex-grow-1 <?= $isDone ? 'text-muted text-decoration-line-through' : '' ?>">
                                                     <?= htmlspecialchars($lessonItem['title']) ?>
                                                 </div>
                                                 <?php if (!empty($lessonItem['video_duration'])): ?>
-                                                    <small class="text-muted">
+                                                    <small class="text-muted ms-2">
                                                         <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
                                                     </small>
                                                 <?php endif; ?>
                                                 <?php if ($isDone): ?>
-                                                    <span class="badge bg-success ms-2">Concluída</span>
+                                                    <span class="badge bg-success ms-2">Concluida</span>
                                                 <?php endif; ?>
                                             </a>
                                         <?php else: ?>
-                                            <i class="fas fa-lock text-muted me-3"></i>
+                                            <span class="me-3 d-inline-flex align-items-center justify-content-center rounded-circle" style="width:28px;height:28px;background:#f8f9fa;">
+                                                <i class="fas fa-lock text-muted" style="font-size:.65rem;"></i>
+                                            </span>
                                             <div class="flex-grow-1 text-muted">
                                                 <?= htmlspecialchars($lessonItem['title']) ?>
                                             </div>
                                             <?php if (!empty($lessonItem['video_duration'])): ?>
-                                                <small class="text-muted">
+                                                <small class="text-muted ms-2">
                                                     <?= floor($lessonItem['video_duration'] / 60) ?>:<?= str_pad($lessonItem['video_duration'] % 60, 2, '0', STR_PAD_LEFT) ?>
                                                 </small>
                                             <?php endif; ?>
@@ -148,7 +170,53 @@
                 <?php } ?>
 
                 <?php if ($hasModules): ?>
-                    <?php // Seções órfãs primeiro ?>
+                    <!-- T-7.2: Module cards with status -->
+                    <?php if ($enrollment): ?>
+                    <div class="row g-3 mb-4">
+                        <?php foreach ($modules as $module):
+                            $modSections = $moduleSectionsMap[$module['id']] ?? [];
+                            $modStatus = getModuleStatus($modSections, $completedLessons);
+                            $statusColors = [
+                                'not_started' => ['bg' => '#f8f9fa', 'border' => '#dee2e6', 'text' => 'Nao iniciado', 'badge' => 'bg-secondary'],
+                                'in_progress' => ['bg' => '#fff3cd', 'border' => '#ffb606', 'text' => 'Em andamento', 'badge' => 'bg-warning text-dark'],
+                                'completed' => ['bg' => '#d4edda', 'border' => '#28a745', 'text' => 'Concluido', 'badge' => 'bg-success'],
+                                'empty' => ['bg' => '#f8f9fa', 'border' => '#dee2e6', 'text' => 'Vazio', 'badge' => 'bg-light text-dark'],
+                            ];
+                            $sc = $statusColors[$modStatus['status']];
+                            $lessonCountMod = 0;
+                            foreach ($modSections as $ms) { $lessonCountMod += count($ms['lessons']); }
+                        ?>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid <?= $sc['border'] ?> !important;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold mb-0">
+                                            <i class="fas fa-layer-group me-1 text-warning"></i>
+                                            <?= htmlspecialchars($module['title']) ?>
+                                        </h6>
+                                        <span class="badge <?= $sc['badge'] ?>"><?= $sc['text'] ?></span>
+                                    </div>
+                                    <?php if (!empty($module['description'])): ?>
+                                        <p class="small text-muted mb-2"><?= htmlspecialchars($module['description']) ?></p>
+                                    <?php endif; ?>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <small class="text-muted"><i class="fas fa-list me-1"></i><?= count($modSections) ?> secoes</small>
+                                        <small class="text-muted"><i class="fas fa-play-circle me-1"></i><?= $lessonCountMod ?> licoes</small>
+                                    </div>
+                                    <?php if ($modStatus['total'] > 0): ?>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: <?= $modStatus['pct'] ?>%"></div>
+                                    </div>
+                                    <small class="text-muted"><?= $modStatus['done'] ?>/<?= $modStatus['total'] ?> licoes concluidas</small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php // Secoes orfas primeiro ?>
                     <?php if (!empty($orphanSections)): ?>
                         <div class="accordion mb-3" id="courseContentOrphan">
                             <?php foreach ($orphanSections as $i => $section): ?>
@@ -157,7 +225,7 @@
                         </div>
                     <?php endif; ?>
 
-                    <?php // Módulos ?>
+                    <?php // Modulos with sections ?>
                     <?php foreach ($modules as $mi => $module):
                         $modSections = $moduleSectionsMap[$module['id']] ?? [];
                     ?>
@@ -166,7 +234,24 @@
                                 <h5 class="mb-0">
                                     <i class="fas fa-layer-group me-2 text-warning"></i>
                                     <?= htmlspecialchars($module['title']) ?>
-                                    <span class="badge bg-secondary ms-2"><?= count($modSections) ?> seções</span>
+                                    <span class="badge bg-secondary ms-2"><?= count($modSections) ?> secoes</span>
+                                    <?php if ($enrollment):
+                                        $ms = getModuleStatus($modSections, $completedLessons);
+                                        $statusColors2 = [
+                                            'not_started' => 'bg-secondary',
+                                            'in_progress' => 'bg-warning text-dark',
+                                            'completed' => 'bg-success',
+                                            'empty' => 'bg-light text-dark',
+                                        ];
+                                        $statusLabels2 = [
+                                            'not_started' => 'Nao iniciado',
+                                            'in_progress' => 'Em andamento',
+                                            'completed' => 'Concluido',
+                                            'empty' => 'Vazio',
+                                        ];
+                                    ?>
+                                        <span class="badge <?= $statusColors2[$ms['status']] ?> ms-2"><?= $statusLabels2[$ms['status']] ?></span>
+                                    <?php endif; ?>
                                 </h5>
                                 <?php if (!empty($module['description'])): ?>
                                     <small class="text-muted"><?= htmlspecialchars($module['description']) ?></small>
@@ -189,9 +274,60 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- Quizzes Disponíveis -->
+                <!-- T-7.4: Content categories navigation -->
+                <?php if ($enrollment): ?>
+                <div class="mt-5">
+                    <h3 class="mb-3"><i class="fas fa-th-large me-2 text-primary"></i>Categorias do Curso</h3>
+                    <div class="row g-3">
+                        <?php if ($hasModules && count($modules) > 0): ?>
+                        <div class="col-6 col-md-4 col-lg">
+                            <a href="#courseModules" class="card border-0 shadow-sm text-decoration-none h-100" data-bs-toggle="collapse" role="button" aria-expanded="false">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-layer-group fa-2x text-warning mb-2"></i>
+                                    <div class="fw-bold small">Modulos</div>
+                                    <small class="text-muted"><?= count($modules) ?></small>
+                                </div>
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                        <div class="col-6 col-md-4 col-lg">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-play-circle fa-2x text-primary mb-2"></i>
+                                    <div class="fw-bold small">Aulas</div>
+                                    <small class="text-muted"><?= $totalLessons ?> licoes</small>
+                                </div>
+                            </div>
+                        </div>
+                        <?php if (!empty($quizzes)): ?>
+                        <div class="col-6 col-md-4 col-lg">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-clipboard-check fa-2x text-success mb-2"></i>
+                                    <div class="fw-bold small">Testes Avaliativos</div>
+                                    <small class="text-muted"><?= count($quizzes) ?></small>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($materialCount) && $materialCount > 0): ?>
+                        <div class="col-6 col-md-4 col-lg">
+                            <a href="/curso/<?= htmlspecialchars($course['slug']) ?>/materiais" class="card border-0 shadow-sm text-decoration-none h-100">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-paperclip fa-2x text-info mb-2"></i>
+                                    <div class="fw-bold small">Material Complementar</div>
+                                    <small class="text-muted"><?= $materialCount ?> arquivo<?= $materialCount > 1 ? 's' : '' ?></small>
+                                </div>
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Quizzes Disponiveis (Testes Avaliativos) -->
                 <?php if ($enrollment && !empty($quizzes)): ?>
-                <h3 class="mt-5 mb-3"><i class="fas fa-clipboard-check me-2 text-primary"></i>Avaliações</h3>
+                <h3 class="mt-5 mb-3"><i class="fas fa-clipboard-check me-2 text-primary"></i>Testes Avaliativos</h3>
                 <div class="row g-3">
                     <?php foreach ($quizzes as $quiz): ?>
                     <div class="col-12">
@@ -199,7 +335,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between gap-3 py-3 px-4">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                         style="width:48px;height:48px;background:var(--pale-mint);">
+                                         style="width:48px;height:48px;background:#e8f5e9;">
                                         <i class="fas fa-pen-alt" style="color:var(--primary-color);font-size:1.1rem;"></i>
                                     </div>
                                     <div>
@@ -209,7 +345,7 @@
                                         <?php endif; ?>
                                         <div class="mt-1 d-flex gap-2 flex-wrap">
                                             <span class="badge bg-light text-dark border">
-                                                <i class="fas fa-star me-1 text-warning"></i><?= $quiz['passing_score'] ?>% para aprovação
+                                                <i class="fas fa-star me-1 text-warning"></i><?= $quiz['passing_score'] ?>% para aprovacao
                                             </span>
                                             <?php if ($quiz['attempts_allowed'] > 0): ?>
                                                 <span class="badge bg-light text-dark border">

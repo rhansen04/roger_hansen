@@ -105,6 +105,28 @@ Observações:
     }
 
     /**
+     * Corrige texto do parecer descritivo via IA
+     * Corrige ortografia/gramatica sem alterar conteudo pedagogico
+     */
+    public function correctDescriptiveText(string $text, string $studentName): string
+    {
+        $prompt = "Voce e um revisor de textos pedagogicos. Corrija APENAS erros de ortografia, gramatica e concordancia no texto abaixo, que faz parte do parecer descritivo do(a) aluno(a) {$studentName}.
+
+REGRAS IMPORTANTES:
+- NAO altere o conteudo, significado ou informacoes pedagogicas
+- NAO adicione novas informacoes ou interpretacoes
+- NAO remova nenhum trecho do texto original
+- Mantenha o tom profissional e acolhedor
+- Corrija acentuacao, pontuacao, concordancia verbal e nominal
+- Retorne APENAS o texto corrigido, sem explicacoes ou comentarios adicionais
+
+Texto para correcao:
+{$text}";
+
+        return $this->callAPI($prompt);
+    }
+
+    /**
      * Chama a API GLM (Z.AI)
      */
     private function callAPI(string $prompt): string
@@ -171,5 +193,15 @@ Observações:
         }
 
         return trim($text);
+    }
+
+    /**
+     * Corrige texto do portfolio (ortografia e gramática)
+     */
+    public function correctPortfolioText(string $text): string
+    {
+        $prompt = "Você é um revisor de textos em português brasileiro. Corrija APENAS erros de ortografia, gramática, pontuação e concordância no texto abaixo. Mantenha o estilo, tom e conteúdo original. Não adicione nem remova informações. Retorne APENAS o texto corrigido, sem explicações.\n\nTexto:\n{$text}";
+
+        return $this->callAPI($prompt);
     }
 }

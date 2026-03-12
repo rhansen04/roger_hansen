@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Models\Classroom;
 use App\Models\School;
+use App\Models\Student;
 use App\Models\User;
 
 class ClassroomController
@@ -12,9 +13,11 @@ class ClassroomController
     {
         $model = new Classroom();
         $classrooms = $model->all();
+        $studentCounts = $model->countStudentsByClassroom();
 
         return $this->render('classrooms/index', [
-            'classrooms' => $classrooms
+            'classrooms' => $classrooms,
+            'studentCounts' => $studentCounts
         ]);
     }
 
@@ -49,6 +52,83 @@ class ClassroomController
 
         $_SESSION['error_message'] = 'Erro ao criar turma.';
         header('Location: /admin/classrooms/create');
+        exit;
+    }
+
+    public function show($id)
+    {
+        $model = new Classroom();
+        $classroom = $model->find($id);
+
+        if (!$classroom) {
+            $_SESSION['error_message'] = 'Turma não encontrada.';
+            header('Location: /admin/classrooms');
+            exit;
+        }
+
+        $students = $model->students($id);
+        $availableStudents = $model->availableStudents($id);
+
+        return $this->render('classrooms/show', [
+            'classroom' => $classroom,
+            'students' => $students,
+            'availableStudents' => $availableStudents
+        ]);
+    }
+
+    public function addStudent($id)
+    {
+        $model = new Classroom();
+        $classroom = $model->find($id);
+
+        if (!$classroom) {
+            $_SESSION['error_message'] = 'Turma não encontrada.';
+            header('Location: /admin/classrooms');
+            exit;
+        }
+
+        $studentId = $_POST['student_id'] ?? null;
+        if (empty($studentId)) {
+            $_SESSION['error_message'] = 'Selecione um aluno.';
+            header("Location: /admin/classrooms/{$id}");
+            exit;
+        }
+
+        if ($model->addStudent($id, $studentId)) {
+            $_SESSION['success_message'] = 'Aluno adicionado à turma com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao adicionar aluno à turma.';
+        }
+
+        header("Location: /admin/classrooms/{$id}");
+        exit;
+    }
+
+    public function removeStudent($id)
+    {
+        $model = new Classroom();
+        $classroom = $model->find($id);
+
+        if (!$classroom) {
+            $_SESSION['error_message'] = 'Turma não encontrada.';
+            header('Location: /admin/classrooms');
+            exit;
+        }
+
+        $studentId = $_POST['student_id'] ?? null;
+        if (empty($studentId)) {
+            $_SESSION['error_message'] = 'Aluno não informado.';
+            header("Location: /admin/classrooms/{$id}");
+            exit;
+        }
+
+        if ($model->removeStudent($id, $studentId)) {
+            $_SESSION['success_message'] = 'Aluno removido da turma com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao remover aluno da turma.';
+        }
+
+        header("Location: /admin/classrooms/{$id}");
         exit;
     }
 
@@ -103,13 +183,22 @@ class ClassroomController
         exit;
     }
 
-    public function delete($id)
+    public function toggleStatus($id)
     {
         $model = new Classroom();
-        if ($model->delete($id)) {
-            $_SESSION['success_message'] = 'Turma excluída com sucesso!';
+        $classroom = $model->find($id);
+
+        if (!$classroom) {
+            $_SESSION['error_message'] = 'Turma não encontrada.';
+            header('Location: /admin/classrooms');
+            exit;
+        }
+
+        if ($model->toggleStatus($id)) {
+            $newStatus = $classroom['status'] === 'active' ? 'desativada' : 'ativada';
+            $_SESSION['success_message'] = "Turma {$newStatus} com sucesso!";
         } else {
-            $_SESSION['error_message'] = 'Erro ao excluir turma.';
+            $_SESSION['error_message'] = 'Erro ao alterar status da turma.';
         }
         header('Location: /admin/classrooms');
         exit;

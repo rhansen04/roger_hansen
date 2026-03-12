@@ -57,6 +57,11 @@ use App\Controllers\Admin\ClassroomController as AdminClassroomController;
 use App\Controllers\Admin\PlanningTemplateController as AdminPlanningTemplateController;
 use App\Controllers\Admin\PlanningController as AdminPlanningController;
 use App\Controllers\Admin\HelpController as AdminHelpController;
+use App\Controllers\Admin\NotificationController as AdminNotificationController;
+use App\Controllers\Admin\DescriptiveReportController as AdminDescriptiveReportController;
+use App\Controllers\Admin\ImageBankController as AdminImageBankController;
+use App\Controllers\Admin\PortfolioController as AdminPortfolioController;
+use App\Controllers\Admin\SupportMaterialController as AdminSupportMaterialController;
 
 $router = new Router();
 
@@ -137,6 +142,9 @@ $router->post('/admin/observations', [AdminObservationController::class, 'store'
 $router->get('/admin/observations/{id}', [AdminObservationController::class, 'show']);
 $router->get('/admin/observations/{id}/edit', [AdminObservationController::class, 'edit']);
 $router->post('/admin/observations/{id}/update', [AdminObservationController::class, 'update']);
+$router->post('/admin/observations/{id}/auto-save', [AdminObservationController::class, 'autoSave']);
+$router->post('/admin/observations/{id}/finalize', [AdminObservationController::class, 'finalize']);
+$router->post('/admin/observations/{id}/reopen', [AdminObservationController::class, 'reopen']);
 $router->post('/admin/observations/{id}/delete', [AdminObservationController::class, 'delete']);
 
 // Rotas de Usuários
@@ -202,9 +210,10 @@ $router->get('/admin/contacts', [AdminContactController::class, 'index']);
 $router->get('/admin/contacts/{id}', [AdminContactController::class, 'show']);
 $router->post('/admin/contacts/{id}/delete', [AdminContactController::class, 'delete']);
 
-// Rotas Admin - Relatórios
+// Rotas Admin - Relatorios
 $router->get('/admin/reports', [ReportsController::class, 'index']);
 $router->get('/admin/reports/low-scores', [ReportsController::class, 'lowScores']);
+$router->get('/admin/reports/courses', [ReportsController::class, 'courseReport']);
 $router->post('/admin/quiz/{quizId}/reset-attempts', [ReportsController::class, 'resetAttempts']);
 
 // Rotas Admin - Matrículas
@@ -269,9 +278,12 @@ $router->post('/admin/parents/unlink/{linkId}', [ParentLinkController::class, 'u
 $router->get('/admin/classrooms', [AdminClassroomController::class, 'index']);
 $router->get('/admin/classrooms/create', [AdminClassroomController::class, 'create']);
 $router->post('/admin/classrooms', [AdminClassroomController::class, 'store']);
+$router->get('/admin/classrooms/{id}', [AdminClassroomController::class, 'show']);
+$router->post('/admin/classrooms/{id}/add-student', [AdminClassroomController::class, 'addStudent']);
+$router->post('/admin/classrooms/{id}/remove-student', [AdminClassroomController::class, 'removeStudent']);
 $router->get('/admin/classrooms/{id}/edit', [AdminClassroomController::class, 'edit']);
 $router->post('/admin/classrooms/{id}/update', [AdminClassroomController::class, 'update']);
-$router->post('/admin/classrooms/{id}/delete', [AdminClassroomController::class, 'delete']);
+$router->post('/admin/classrooms/{id}/toggle-status', [AdminClassroomController::class, 'toggleStatus']);
 
 // Rotas Admin - Templates de Planejamento
 $router->get('/admin/planning-templates', [AdminPlanningTemplateController::class, 'index']);
@@ -295,10 +307,56 @@ $router->get('/admin/planning/{id}/edit', [AdminPlanningController::class, 'edit
 $router->post('/admin/planning/{id}/update', [AdminPlanningController::class, 'update']);
 $router->post('/admin/planning/{id}/delete', [AdminPlanningController::class, 'delete']);
 
+// Rotas Admin - Notificacoes
+$router->get('/admin/notifications', [AdminNotificationController::class, 'index']);
+$router->get('/admin/notifications/dropdown', [AdminNotificationController::class, 'dropdown']);
+$router->post('/admin/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead']);
+$router->post('/admin/notifications/{id}/read', [AdminNotificationController::class, 'markRead']);
+
 // Rotas Admin - Central de Ajuda
 $router->get('/admin/help', [AdminHelpController::class, 'index']);
 $router->get('/admin/help/{category}', [AdminHelpController::class, 'category']);
 $router->get('/admin/help/{category}/{article}', [AdminHelpController::class, 'article']);
+
+// Rotas Admin - Pareceres Descritivos
+$router->get('/admin/descriptive-reports', [AdminDescriptiveReportController::class, 'index']);
+$router->get('/admin/descriptive-reports/create', [AdminDescriptiveReportController::class, 'create']);
+$router->post('/admin/descriptive-reports', [AdminDescriptiveReportController::class, 'store']);
+$router->get('/admin/descriptive-reports/{id}', [AdminDescriptiveReportController::class, 'show']);
+$router->get('/admin/descriptive-reports/{id}/edit', [AdminDescriptiveReportController::class, 'edit']);
+$router->post('/admin/descriptive-reports/{id}/update', [AdminDescriptiveReportController::class, 'update']);
+$router->post('/admin/descriptive-reports/{id}/finalize', [AdminDescriptiveReportController::class, 'finalize']);
+$router->post('/admin/descriptive-reports/{id}/reopen', [AdminDescriptiveReportController::class, 'reopen']);
+$router->post('/admin/descriptive-reports/{id}/request-revision', [AdminDescriptiveReportController::class, 'requestRevision']);
+$router->post('/admin/descriptive-reports/{id}/correct-text', [AdminDescriptiveReportController::class, 'correctText']);
+
+// Rotas Admin - Banco de Imagens
+$router->get('/admin/image-bank', [AdminImageBankController::class, 'index']);
+$router->get('/admin/image-bank/{classroomId}', [AdminImageBankController::class, 'classroom']);
+$router->get('/admin/image-bank/folder/{folderId}', [AdminImageBankController::class, 'folder']);
+$router->post('/admin/image-bank/folder/{folderId}/upload', [AdminImageBankController::class, 'upload']);
+$router->post('/admin/image-bank/image/{id}/delete', [AdminImageBankController::class, 'deleteImage']);
+$router->post('/admin/image-bank/image/{id}/move', [AdminImageBankController::class, 'moveImage']);
+$router->post('/admin/image-bank/image/{id}/caption', [AdminImageBankController::class, 'updateCaption']);
+
+// Rotas Admin - Portfolios
+$router->get('/admin/portfolios', [AdminPortfolioController::class, 'index']);
+$router->get('/admin/portfolios/create', [AdminPortfolioController::class, 'create']);
+$router->post('/admin/portfolios', [AdminPortfolioController::class, 'store']);
+$router->get('/admin/portfolios/{id}', [AdminPortfolioController::class, 'show']);
+$router->get('/admin/portfolios/{id}/edit', [AdminPortfolioController::class, 'edit']);
+$router->post('/admin/portfolios/{id}/update', [AdminPortfolioController::class, 'update']);
+$router->post('/admin/portfolios/{id}/finalize', [AdminPortfolioController::class, 'finalize']);
+$router->post('/admin/portfolios/{id}/request-revision', [AdminPortfolioController::class, 'requestRevision']);
+$router->post('/admin/portfolios/{id}/reopen', [AdminPortfolioController::class, 'reopen']);
+$router->post('/admin/portfolios/{id}/correct-text', [AdminPortfolioController::class, 'correctText']);
+
+// Rotas Admin - Material de Apoio
+$router->get('/admin/support-materials', [AdminSupportMaterialController::class, 'index']);
+$router->get('/admin/support-materials/folder/{id}', [AdminSupportMaterialController::class, 'folder']);
+$router->post('/admin/support-materials/folder/{id}/upload', [AdminSupportMaterialController::class, 'upload']);
+$router->post('/admin/support-materials/{id}/delete', [AdminSupportMaterialController::class, 'deleteMaterial']);
+$router->get('/admin/support-materials/{id}/download', [AdminSupportMaterialController::class, 'download']);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $router->dispatch($method, $uri);

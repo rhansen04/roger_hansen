@@ -8,114 +8,140 @@ use App\Models\Student;
 class ObservationController
 {
     /**
-     * Listagem de observações com filtros
+     * Listagem de observacoes com filtros e controle de permissao
      */
     public function index()
     {
         $obsModel = new Observation();
         $studentModel = new Student();
 
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
         // Filtros
         $filters = [
             'student_id' => $_GET['student_id'] ?? null,
-            'category' => $_GET['category'] ?? null,
-            'date_from' => $_GET['date_from'] ?? null,
-            'date_to' => $_GET['date_to'] ?? null
+            'semester' => $_GET['semester'] ?? null,
+            'year' => $_GET['year'] ?? null,
+            'status' => $_GET['status'] ?? null,
         ];
 
-        // Se tiver filtro de aluno, buscar observações do aluno
-        if ($filters['student_id']) {
-            $observations = $obsModel->findByStudent($filters['student_id']);
-            $student = $studentModel->find($filters['student_id']);
-        } else {
-            $observations = $obsModel->all();
-            $student = null;
-        }
+        // Professor ve apenas suas observacoes; coordenador e admin veem todas
+        $roleRestrict = ($userRole === 'professor');
 
-        // Aplicar filtros adicionais
-        if ($filters['category']) {
-            $observations = array_filter($observations, function($obs) use ($filters) {
-                return $obs['category'] === $filters['category'];
-            });
-        }
-
-        if ($filters['date_from']) {
-            $observations = array_filter($observations, function($obs) use ($filters) {
-                return $obs['observation_date'] >= $filters['date_from'];
-            });
-        }
-
-        if ($filters['date_to']) {
-            $observations = array_filter($observations, function($obs) use ($filters) {
-                return $obs['observation_date'] <= $filters['date_to'];
-            });
-        }
+        $observations = $obsModel->allFiltered($filters, $userId, $roleRestrict);
 
         // Buscar todos os alunos para o dropdown de filtro
         $students = $studentModel->all();
 
+        // Ano corrente e lista de anos para filtro
+        $currentYear = (int) date('Y');
+        $years = range($currentYear, $currentYear - 3);
+
         return $this->render('observations/index', [
             'observations' => $observations,
             'students' => $students,
-            'student' => $student,
-            'filters' => $filters
+            'filters' => $filters,
+            'years' => $years,
+            'currentYear' => $currentYear,
+            'userRole' => $userRole,
         ]);
     }
 
     /**
-     * Formulário de criação
+     * Formulario de criacao (apenas professor)
      */
     public function create()
     {
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+
+        // Coordenador nao cria observacoes
+        if ($userRole === 'coordenador') {
+            $_SESSION['error_message'] = 'Coordenadores nao podem criar observacoes.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
         $studentModel = new Student();
         $students = $studentModel->all();
 
-        // Se veio com student_id na URL, pré-selecionar
         $selectedStudentId = $_GET['student_id'] ?? null;
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('m');
+        $defaultSemester = ($currentMonth <= 6) ? 1 : 2;
+        $years = range($currentYear, $currentYear - 3);
 
         return $this->render('observations/create', [
             'students' => $students,
-            'selectedStudentId' => $selectedStudentId
+            'selectedStudentId' => $selectedStudentId,
+            'currentYear' => $currentYear,
+            'defaultSemester' => $defaultSemester,
+            'years' => $years,
         ]);
     }
 
     /**
-     * Salvar nova observação
+     * Salvar nova observacao com eixos
      */
     public function store()
     {
-        // Validações básicas
-        if (empty($_POST['student_id']) || empty($_POST['title'])) {
-            $_SESSION['error_message'] = 'Preencha todos os campos obrigatórios.';
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+
+        if ($userRole === 'coordenador') {
+            $_SESSION['error_message'] = 'Coordenadores nao podem criar observacoes.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
+        // Validacoes
+        if (empty($_POST['student_id']) || empty($_POST['semester']) || empty($_POST['year'])) {
+            $_SESSION['error_message'] = 'Preencha todos os campos obrigatorios (aluno, semestre e ano).';
             header('Location: /admin/observations/create');
+            exit;
+        }
+
+        $obsModel = new Observation();
+
+        // Verificar duplicidade
+        $existing = $obsModel->existsForStudentSemester(
+            $_POST['student_id'],
+            $_POST['semester'],
+            $_POST['year']
+        );
+
+        if ($existing) {
+            $_SESSION['error_message'] = 'Ja existe uma observacao para este aluno neste semestre/ano. Edite a observacao existente.';
+            header('Location: /admin/observations/' . $existing['id'] . '/edit');
             exit;
         }
 
         $data = [
             'student_id' => $_POST['student_id'],
             'user_id' => $_SESSION['user_id'],
-            'category' => $_POST['category'] ?? 'Geral',
-            'title' => trim($_POST['title']),
-            'description' => trim($_POST['description'] ?? ''),
-            'observation_date' => !empty($_POST['observation_date'])
-                ? $_POST['observation_date']
-                : date('Y-m-d')
+            'semester' => $_POST['semester'],
+            'year' => $_POST['year'],
+            'observation_general' => trim($_POST['observation_general'] ?? ''),
+            'axis_movement' => trim($_POST['axis_movement'] ?? ''),
+            'axis_manual' => trim($_POST['axis_manual'] ?? ''),
+            'axis_music' => trim($_POST['axis_music'] ?? ''),
+            'axis_stories' => trim($_POST['axis_stories'] ?? ''),
+            'axis_pca' => trim($_POST['axis_pca'] ?? ''),
         ];
 
-        $obsModel = new Observation();
-        if ($obsModel->create($data)) {
-            $_SESSION['success_message'] = 'Observação criada com sucesso!';
-            header('Location: /admin/observations?student_id=' . $data['student_id']);
+        $newId = $obsModel->createWithAxes($data);
+        if ($newId) {
+            $_SESSION['success_message'] = 'Observacao criada com sucesso!';
+            header('Location: /admin/observations/' . $newId . '/edit');
             exit;
         }
 
-        $_SESSION['error_message'] = 'Erro ao criar observação. Tente novamente.';
+        $_SESSION['error_message'] = 'Erro ao criar observacao. Tente novamente.';
         header('Location: /admin/observations/create');
         exit;
     }
 
     /**
-     * Ver detalhes de uma observação
+     * Ver detalhes de uma observacao
      */
     public function show($id)
     {
@@ -123,18 +149,29 @@ class ObservationController
         $observation = $obsModel->find($id);
 
         if (!$observation) {
-            $_SESSION['error_message'] = 'Observação não encontrada.';
+            $_SESSION['error_message'] = 'Observacao nao encontrada.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Professor so ve suas proprias
+        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+            $_SESSION['error_message'] = 'Voce nao tem permissao para ver esta observacao.';
             header('Location: /admin/observations');
             exit;
         }
 
         return $this->render('observations/show', [
-            'observation' => $observation
+            'observation' => $observation,
+            'userRole' => $userRole,
         ]);
     }
 
     /**
-     * Formulário de edição
+     * Formulario de edicao
      */
     public function edit($id)
     {
@@ -142,22 +179,49 @@ class ObservationController
         $observation = $obsModel->find($id);
 
         if (!$observation) {
-            $_SESSION['error_message'] = 'Observação não encontrada.';
+            $_SESSION['error_message'] = 'Observacao nao encontrada.';
             header('Location: /admin/observations');
+            exit;
+        }
+
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Professor so edita suas proprias e em andamento
+        if ($userRole === 'professor') {
+            if ($observation['user_id'] != $userId) {
+                $_SESSION['error_message'] = 'Voce nao tem permissao para editar esta observacao.';
+                header('Location: /admin/observations');
+                exit;
+            }
+            if (($observation['status'] ?? 'in_progress') === 'finalized') {
+                $_SESSION['error_message'] = 'Esta observacao esta finalizada e nao pode ser editada.';
+                header('Location: /admin/observations/' . $id);
+                exit;
+            }
+        }
+
+        // Coordenador nao edita, apenas visualiza e reabre
+        if ($userRole === 'coordenador') {
+            header('Location: /admin/observations/' . $id);
             exit;
         }
 
         $studentModel = new Student();
         $students = $studentModel->all();
+        $currentYear = (int) date('Y');
+        $years = range($currentYear, $currentYear - 3);
 
         return $this->render('observations/edit', [
             'observation' => $observation,
-            'students' => $students
+            'students' => $students,
+            'years' => $years,
+            'userRole' => $userRole,
         ]);
     }
 
     /**
-     * Atualizar observação
+     * Atualizar observacao
      */
     public function update($id)
     {
@@ -165,42 +229,188 @@ class ObservationController
         $observation = $obsModel->find($id);
 
         if (!$observation) {
-            $_SESSION['error_message'] = 'Observação não encontrada.';
+            $_SESSION['error_message'] = 'Observacao nao encontrada.';
             header('Location: /admin/observations');
             exit;
         }
 
-        // Validações básicas
-        if (empty($_POST['student_id']) || empty($_POST['title'])) {
-            $_SESSION['error_message'] = 'Preencha todos os campos obrigatórios.';
-            header('Location: /admin/observations/' . $id . '/edit');
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Verificar permissoes
+        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+            $_SESSION['error_message'] = 'Voce nao tem permissao para editar esta observacao.';
+            header('Location: /admin/observations');
             exit;
         }
 
-        $data = [
-            'student_id' => $_POST['student_id'],
-            'user_id' => $observation['user_id'], // Mantém o criador original
-            'category' => $_POST['category'] ?? 'Geral',
-            'title' => trim($_POST['title']),
-            'description' => trim($_POST['description'] ?? ''),
-            'observation_date' => !empty($_POST['observation_date'])
-                ? $_POST['observation_date']
-                : $observation['observation_date']
-        ];
-
-        if ($obsModel->update($id, $data)) {
-            $_SESSION['success_message'] = 'Observação atualizada com sucesso!';
+        if (($observation['status'] ?? 'in_progress') === 'finalized') {
+            $_SESSION['error_message'] = 'Esta observacao esta finalizada e nao pode ser editada.';
             header('Location: /admin/observations/' . $id);
             exit;
         }
 
-        $_SESSION['error_message'] = 'Erro ao atualizar observação. Tente novamente.';
+        $data = [
+            'student_id' => $_POST['student_id'] ?? $observation['student_id'],
+            'semester' => $_POST['semester'] ?? $observation['semester'],
+            'year' => $_POST['year'] ?? $observation['year'],
+            'observation_general' => trim($_POST['observation_general'] ?? ''),
+            'axis_movement' => trim($_POST['axis_movement'] ?? ''),
+            'axis_manual' => trim($_POST['axis_manual'] ?? ''),
+            'axis_music' => trim($_POST['axis_music'] ?? ''),
+            'axis_stories' => trim($_POST['axis_stories'] ?? ''),
+            'axis_pca' => trim($_POST['axis_pca'] ?? ''),
+        ];
+
+        if ($obsModel->updateWithAxes($id, $data)) {
+            $_SESSION['success_message'] = 'Observacao atualizada com sucesso!';
+            header('Location: /admin/observations/' . $id);
+            exit;
+        }
+
+        $_SESSION['error_message'] = 'Erro ao atualizar observacao. Tente novamente.';
         header('Location: /admin/observations/' . $id . '/edit');
         exit;
     }
 
     /**
-     * Deletar observação
+     * Auto-save via AJAX (POST)
+     */
+    public function autoSave($id)
+    {
+        header('Content-Type: application/json');
+
+        $obsModel = new Observation();
+        $observation = $obsModel->find($id);
+
+        if (!$observation) {
+            echo json_encode(['success' => false, 'message' => 'Observacao nao encontrada.']);
+            exit;
+        }
+
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Verificar permissoes
+        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissao.']);
+            exit;
+        }
+
+        if (($observation['status'] ?? 'in_progress') === 'finalized') {
+            echo json_encode(['success' => false, 'message' => 'Observacao finalizada.']);
+            exit;
+        }
+
+        // Ler JSON do body
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            $input = $_POST;
+        }
+
+        $field = $input['field'] ?? null;
+        $value = $input['value'] ?? '';
+
+        if (!$field) {
+            echo json_encode(['success' => false, 'message' => 'Campo nao informado.']);
+            exit;
+        }
+
+        $result = $obsModel->updateField($id, $field, $value);
+
+        if ($result) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Salvo',
+                'saved_at' => date('H:i')
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao salvar.']);
+        }
+        exit;
+    }
+
+    /**
+     * Finalizar observacao
+     */
+    public function finalize($id)
+    {
+        $obsModel = new Observation();
+        $observation = $obsModel->find($id);
+
+        if (!$observation) {
+            $_SESSION['error_message'] = 'Observacao nao encontrada.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Somente o professor dono pode finalizar
+        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+            $_SESSION['error_message'] = 'Voce nao tem permissao para finalizar esta observacao.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
+        if (($observation['status'] ?? 'in_progress') === 'finalized') {
+            $_SESSION['error_message'] = 'Esta observacao ja esta finalizada.';
+            header('Location: /admin/observations/' . $id);
+            exit;
+        }
+
+        if ($obsModel->finalize($id, $userId)) {
+            $_SESSION['success_message'] = 'Observacao finalizada com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao finalizar observacao.';
+        }
+
+        header('Location: /admin/observations/' . $id);
+        exit;
+    }
+
+    /**
+     * Reabrir observacao (coordenador e admin)
+     */
+    public function reopen($id)
+    {
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+
+        // Apenas coordenador e admin podem reabrir
+        if (!in_array($userRole, ['coordenador', 'admin'])) {
+            $_SESSION['error_message'] = 'Apenas coordenadores podem reabrir observacoes.';
+            header('Location: /admin/observations/' . $id);
+            exit;
+        }
+
+        $obsModel = new Observation();
+        $observation = $obsModel->find($id);
+
+        if (!$observation) {
+            $_SESSION['error_message'] = 'Observacao nao encontrada.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
+        if (($observation['status'] ?? 'in_progress') !== 'finalized') {
+            $_SESSION['error_message'] = 'Esta observacao nao esta finalizada.';
+            header('Location: /admin/observations/' . $id);
+            exit;
+        }
+
+        if ($obsModel->reopen($id)) {
+            $_SESSION['success_message'] = 'Observacao reaberta com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao reabrir observacao.';
+        }
+
+        header('Location: /admin/observations/' . $id);
+        exit;
+    }
+
+    /**
+     * Deletar observacao
      */
     public function delete($id)
     {
@@ -208,20 +418,37 @@ class ObservationController
         $observation = $obsModel->find($id);
 
         if (!$observation) {
-            $_SESSION['error_message'] = 'Observação não encontrada.';
+            $_SESSION['error_message'] = 'Observacao nao encontrada.';
             header('Location: /admin/observations');
+            exit;
+        }
+
+        $userRole = $_SESSION['user_role'] ?? 'professor';
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Apenas dono ou admin pode deletar
+        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+            $_SESSION['error_message'] = 'Voce nao tem permissao para excluir esta observacao.';
+            header('Location: /admin/observations');
+            exit;
+        }
+
+        // Nao pode deletar finalizada (exceto admin)
+        if (($observation['status'] ?? 'in_progress') === 'finalized' && $userRole !== 'admin') {
+            $_SESSION['error_message'] = 'Nao e possivel excluir uma observacao finalizada.';
+            header('Location: /admin/observations/' . $id);
             exit;
         }
 
         $studentId = $observation['student_id'];
 
         if ($obsModel->delete($id)) {
-            $_SESSION['success_message'] = 'Observação deletada com sucesso!';
+            $_SESSION['success_message'] = 'Observacao excluida com sucesso!';
         } else {
-            $_SESSION['error_message'] = 'Erro ao deletar observação. Tente novamente.';
+            $_SESSION['error_message'] = 'Erro ao excluir observacao.';
         }
 
-        header('Location: /admin/observations?student_id=' . $studentId);
+        header('Location: /admin/observations');
         exit;
     }
 
@@ -234,7 +461,7 @@ class ObservationController
         if (file_exists($viewFile)) {
             include $viewFile;
         } else {
-            echo "<h2>Página {$view} em construção</h2>";
+            echo "<h2>Pagina {$view} em construcao</h2>";
         }
         $content = ob_get_clean();
 

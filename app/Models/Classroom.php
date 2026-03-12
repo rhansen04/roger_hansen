@@ -103,13 +103,20 @@ class Classroom
         }
     }
 
-    public function delete($id)
+    public function toggleStatus($id)
     {
         try {
-            $stmt = $this->db->prepare("DELETE FROM classrooms WHERE id = ?");
-            return $stmt->execute([$id]);
+            $sql = "UPDATE classrooms
+                    SET status = CASE WHEN status = 'active' THEN 'inactive' ELSE 'active' END,
+                        updated_at = :updated_at
+                    WHERE id = :id";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':id' => $id,
+                ':updated_at' => date('Y-m-d H:i:s')
+            ]);
         } catch (PDOException $e) {
-            error_log("Erro ao deletar turma: " . $e->getMessage());
+            error_log("Erro ao alterar status da turma: " . $e->getMessage());
             return false;
         }
     }
@@ -144,6 +151,128 @@ class Classroom
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Erro ao buscar turmas por escola: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Retorna os alunos de uma turma com idade calculada
+     */
+    public function students($classroomId)
+    {
+        try {
+            $sql = "SELECT s.*, sch.name as school_name, cs.enrolled_at,
+                           TIMESTAMPDIFF(YEAR, s.birth_date, CURDATE()) as age_years,
+                           TIMESTAMPDIFF(MONTH, s.birth_date, CURDATE()) % 12 as age_months
+                    FROM classroom_students cs
+                    INNER JOIN students s ON cs.student_id = s.id
+                    LEFT JOIN schools sch ON s.school_id = sch.id
+                    WHERE cs.classroom_id = :classroom_id
+                    ORDER BY s.name ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':classroom_id' => $classroomId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar alunos da turma: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Adiciona um aluno a uma turma
+     */
+    public function addStudent($classroomId, $studentId)
+    {
+        try {
+            $sql = "INSERT INTO classroom_students (classroom_id, student_id, enrolled_at)
+                    VALUES (:classroom_id, :student_id, CURDATE())";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':classroom_id' => $classroomId,
+                ':student_id' => $studentId
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao adicionar aluno na turma: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Remove um aluno de uma turma
+     */
+    public function removeStudent($classroomId, $studentId)
+    {
+        try {
+            $sql = "DELETE FROM classroom_students
+                    WHERE classroom_id = :classroom_id AND student_id = :student_id";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':classroom_id' => $classroomId,
+                ':student_id' => $studentId
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao remover aluno da turma: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Conta alunos em uma turma
+     */
+    public function countStudents($classroomId)
+    {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM classroom_students WHERE classroom_id = :classroom_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':classroom_id' => $classroomId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        } catch (PDOException $e) {
+            error_log("Erro ao contar alunos da turma: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Retorna alunos que NAO estao nesta turma (para dropdown de adicionar)
+     */
+    public function availableStudents($classroomId)
+    {
+        try {
+            $sql = "SELECT s.*, sch.name as school_name
+                    FROM students s
+                    LEFT JOIN schools sch ON s.school_id = sch.id
+                    WHERE s.id NOT IN (
+                        SELECT student_id FROM classroom_students WHERE classroom_id = :classroom_id
+                    )
+                    ORDER BY s.name ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':classroom_id' => $classroomId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar alunos disponiveis: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Conta alunos por turma (para listagem)
+     */
+    public function countStudentsByClassroom()
+    {
+        try {
+            $sql = "SELECT classroom_id, COUNT(*) as total
+                    FROM classroom_students
+                    GROUP BY classroom_id";
+            $stmt = $this->db->query($sql);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $counts = [];
+            foreach ($results as $row) {
+                $counts[$row['classroom_id']] = $row['total'];
+            }
+            return $counts;
+        } catch (PDOException $e) {
+            error_log("Erro ao contar alunos por turma: " . $e->getMessage());
             return [];
         }
     }

@@ -132,6 +132,35 @@ class ReportsController
         exit;
     }
 
+    /**
+     * GET /admin/reports/courses
+     * Course report for coordenadores
+     */
+    public function courseReport()
+    {
+        // Course stats with enrolled professor count and avg completion
+        $stmt = $this->db->query("
+            SELECT c.id, c.title, c.slug,
+                   COUNT(DISTINCT e.id) AS total_enrolled,
+                   COUNT(DISTINCT CASE WHEN u.role = 'professor' THEN e.id END) AS professor_enrolled,
+                   ROUND(AVG(e.overall_progress_percentage), 1) AS avg_progress,
+                   SUM(CASE WHEN e.is_course_completed = 1 THEN 1 ELSE 0 END) AS completed_count,
+                   COUNT(DISTINCT CASE WHEN e.status = 'active' THEN e.id END) AS active_count
+            FROM courses c
+            LEFT JOIN enrollments e ON c.id = e.course_id
+            LEFT JOIN users u ON e.user_id = u.id
+            WHERE c.is_active = 1
+            GROUP BY c.id
+            ORDER BY total_enrolled DESC
+        ");
+        $courseStats = $stmt->fetchAll();
+
+        return $this->render('reports/courses', [
+            'pageTitle' => 'Relatorio de Cursos',
+            'courseStats' => $courseStats,
+        ]);
+    }
+
     protected function render($view, $data = [])
     {
         extract($data);
