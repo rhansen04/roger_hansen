@@ -63,6 +63,12 @@
             </form>
         <?php endif; ?>
 
+        <?php if ($portfolio['status'] === 'finalized'): ?>
+            <a href="/admin/portfolios/<?= $portfolio['id'] ?>/export-pdf" class="btn btn-outline-danger" target="_blank">
+                <i class="fas fa-file-pdf me-2"></i>Exportar PDF
+            </a>
+        <?php endif; ?>
+
         <?php if ($portfolio['status'] === 'finalized' && ($role === 'admin' || $isCoordenador)): ?>
             <form method="POST" action="/admin/portfolios/<?= $portfolio['id'] ?>/reopen" class="d-inline"
                   onsubmit="return confirm('Reabrir este portfolio para edicao?')">

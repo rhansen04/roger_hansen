@@ -30,6 +30,9 @@ $statusLabel = ['draft' => 'Rascunho', 'submitted' => 'Enviado', 'registered' =>
                 <i class="fas fa-edit me-2"></i> Editar
             </a>
         <?php endif; ?>
+        <a href="/admin/planning/<?= $submission['id'] ?>/routine" class="btn btn-outline-info ms-2">
+            <i class="fas fa-clock me-2"></i> Rotina Semanal
+        </a>
         <button onclick="window.print()" class="btn btn-outline-secondary ms-2">
             <i class="fas fa-print me-2"></i> Imprimir
         </button>
@@ -122,6 +125,63 @@ $statusLabel = ['draft' => 'Rascunho', 'submitted' => 'Enviado', 'registered' =>
 </div>
 <?php endforeach;
 endif; ?>
+
+<!-- Routine Summary -->
+<?php
+$routineModel = new \App\Models\PlanningDailyRoutine();
+$routinesByDay = $routineModel->findBySubmission($submission['id']);
+$hasRoutines = !empty($routinesByDay);
+?>
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-clock me-2"></i> Rotina Semanal</span>
+        <a href="/admin/planning/<?= $submission['id'] ?>/routine" class="btn btn-sm btn-outline-primary">
+            <?= $hasRoutines ? '<i class="fas fa-edit me-1"></i> Editar Rotina' : '<i class="fas fa-plus me-1"></i> Criar Rotina' ?>
+        </a>
+    </div>
+    <div class="card-body">
+        <?php if ($hasRoutines):
+            $dayLabels = [1 => 'Segunda', 2 => 'Terca', 3 => 'Quarta', 4 => 'Quinta', 5 => 'Sexta'];
+        ?>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <?php foreach ($dayLabels as $num => $label): ?>
+                            <th class="text-center small"><?= $label ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <?php foreach ($dayLabels as $num => $label):
+                            $activities = $routinesByDay[$num] ?? [];
+                        ?>
+                            <td class="small" style="min-width: 140px; vertical-align: top;">
+                                <?php if (empty($activities)): ?>
+                                    <span class="text-muted fst-italic">--</span>
+                                <?php else: ?>
+                                    <?php foreach ($activities as $act): ?>
+                                        <div class="mb-1">
+                                            <span class="badge bg-primary"><?= htmlspecialchars($act['time_slot']) ?></span><br>
+                                            <small><?= htmlspecialchars($act['activity_description']) ?></small>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </td>
+                        <?php endforeach; ?>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <?php else: ?>
+            <p class="text-muted text-center mb-0 fst-italic">
+                <i class="fas fa-info-circle me-1"></i> Nenhuma rotina cadastrada.
+                <a href="/admin/planning/<?= $submission['id'] ?>/routine">Criar rotina semanal</a>
+            </p>
+        <?php endif; ?>
+    </div>
+</div>
 
 <style>
 @media print {

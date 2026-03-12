@@ -22,9 +22,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary fw-bold mb-0">PLANEJAMENTOS PEDAGÓGICOS</h2>
-    <a href="/admin/planning/create" class="btn btn-hansen text-white">
-        <i class="fas fa-plus me-2"></i> Novo Planejamento
-    </a>
+    <div>
+        <a href="/admin/planning/calendar" class="btn btn-outline-primary me-2">
+            <i class="fas fa-calendar-alt me-2"></i> Calendario
+        </a>
+        <a href="/admin/planning/create" class="btn btn-hansen text-white">
+            <i class="fas fa-plus me-2"></i> Novo Planejamento
+        </a>
+    </div>
 </div>
 
 <!-- Filters -->
@@ -117,6 +122,9 @@ $statusBadge = [
                                 <div class="btn-group">
                                     <a href="/admin/planning/<?= $sub['id'] ?>" class="btn btn-sm btn-outline-primary" title="Ver">
                                         <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/admin/planning/<?= $sub['id'] ?>/routine" class="btn btn-sm btn-outline-info" title="Rotina Semanal">
+                                        <i class="fas fa-clock"></i>
                                     </a>
                                     <?php if ($sub['status'] !== 'registered'): ?>
                                     <a href="/admin/planning/<?= $sub['id'] ?>/edit" class="btn btn-sm btn-outline-secondary" title="Editar">

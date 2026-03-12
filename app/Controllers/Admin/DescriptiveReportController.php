@@ -404,6 +404,35 @@ Equipe Pedagogica';
     }
 
     /**
+     * Exportar parecer como PDF
+     */
+    public function exportPdf($id)
+    {
+        $model = new DescriptiveReport();
+        $report = $model->find($id);
+
+        if (!$report) {
+            $_SESSION['error_message'] = 'Parecer nao encontrado.';
+            header('Location: /admin/descriptive-reports');
+            exit;
+        }
+
+        $studentModel = new Student();
+        $student = $studentModel->find($report['student_id']);
+
+        $classroomModel = new Classroom();
+        $classroom = !empty($report['classroom_id']) ? $classroomModel->find($report['classroom_id']) : null;
+
+        $pdfService = new \App\Services\PdfExportService();
+        $pdfContent = $pdfService->generateDescriptiveReportPdf($report, $student, $classroom);
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="parecer_' . $report['id'] . '.pdf"');
+        echo $pdfContent;
+        exit;
+    }
+
+    /**
      * AJAX: Correcao automatica de texto via IA
      */
     public function correctText($id)

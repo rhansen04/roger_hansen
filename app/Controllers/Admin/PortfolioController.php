@@ -290,6 +290,32 @@ class PortfolioController
     }
 
     /**
+     * Exportar portfolio como PDF
+     */
+    public function exportPdf($id)
+    {
+        $portfolioModel = new Portfolio();
+        $portfolio = $portfolioModel->find($id);
+
+        if (!$portfolio) {
+            $_SESSION['error_message'] = 'Portfolio nao encontrado.';
+            header('Location: /admin/portfolios');
+            exit;
+        }
+
+        $classroomModel = new Classroom();
+        $classroom = $classroomModel->find($portfolio['classroom_id']);
+
+        $pdfService = new \App\Services\PdfExportService();
+        $pdfContent = $pdfService->generatePortfolioPdf($portfolio, $classroom);
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="portfolio_' . $portfolio['id'] . '.pdf"');
+        echo $pdfContent;
+        exit;
+    }
+
+    /**
      * Corrigir texto com IA (AJAX)
      */
     public function correctText($id)

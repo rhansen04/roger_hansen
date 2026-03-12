@@ -301,7 +301,11 @@ $router->post('/admin/planning-templates/fields/{id}/delete', [AdminPlanningTemp
 // Rotas Admin - Planejamentos
 $router->get('/admin/planning', [AdminPlanningController::class, 'index']);
 $router->get('/admin/planning/create', [AdminPlanningController::class, 'create']);
+$router->get('/admin/planning/calendar', [AdminPlanningController::class, 'calendar']);
 $router->post('/admin/planning', [AdminPlanningController::class, 'store']);
+$router->post('/admin/planning/routine/{id}/delete', [AdminPlanningController::class, 'deleteRoutineEntry']);
+$router->get('/admin/planning/{id}/routine', [AdminPlanningController::class, 'weeklyRoutine']);
+$router->post('/admin/planning/{id}/routine', [AdminPlanningController::class, 'saveRoutine']);
 $router->get('/admin/planning/{id}', [AdminPlanningController::class, 'show']);
 $router->get('/admin/planning/{id}/edit', [AdminPlanningController::class, 'edit']);
 $router->post('/admin/planning/{id}/update', [AdminPlanningController::class, 'update']);
@@ -329,6 +333,7 @@ $router->post('/admin/descriptive-reports/{id}/finalize', [AdminDescriptiveRepor
 $router->post('/admin/descriptive-reports/{id}/reopen', [AdminDescriptiveReportController::class, 'reopen']);
 $router->post('/admin/descriptive-reports/{id}/request-revision', [AdminDescriptiveReportController::class, 'requestRevision']);
 $router->post('/admin/descriptive-reports/{id}/correct-text', [AdminDescriptiveReportController::class, 'correctText']);
+$router->get('/admin/descriptive-reports/{id}/export-pdf', [AdminDescriptiveReportController::class, 'exportPdf']);
 
 // Rotas Admin - Banco de Imagens
 $router->get('/admin/image-bank', [AdminImageBankController::class, 'index']);
@@ -350,6 +355,7 @@ $router->post('/admin/portfolios/{id}/finalize', [AdminPortfolioController::clas
 $router->post('/admin/portfolios/{id}/request-revision', [AdminPortfolioController::class, 'requestRevision']);
 $router->post('/admin/portfolios/{id}/reopen', [AdminPortfolioController::class, 'reopen']);
 $router->post('/admin/portfolios/{id}/correct-text', [AdminPortfolioController::class, 'correctText']);
+$router->get('/admin/portfolios/{id}/export-pdf', [AdminPortfolioController::class, 'exportPdf']);
 
 // Rotas Admin - Material de Apoio
 $router->get('/admin/support-materials', [AdminSupportMaterialController::class, 'index']);

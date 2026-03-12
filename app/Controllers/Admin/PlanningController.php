@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Models\PlanningSubmission;
 use App\Models\PlanningTemplate;
+use App\Models\PlanningDailyRoutine;
 use App\Models\Classroom;
 
 class PlanningController
@@ -217,6 +218,218 @@ class PlanningController
             $_SESSION['error_message'] = 'Erro ao excluir planejamento.';
         }
         header('Location: /admin/planning');
+        exit;
+    }
+
+    public function calendar()
+    {
+        $subModel = new PlanningSubmission();
+        $classModel = new Classroom();
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+
+        $year = (int) ($_GET['year'] ?? date('Y'));
+        $month = (int) ($_GET['month'] ?? date('n'));
+
+        // Get classrooms for filter
+        $classrooms = ($role === 'teacher')
+            ? $classModel->getByTeacher($_SESSION['user_id'])
+            : $classModel->all();
+
+        $classroomId = $_GET['classroom_id'] ?? null;
+
+        // Get all submissions that overlap with this month
+        $monthStart = sprintf('%04d-%02d-01', $year, $month);
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+
+        $filters = [];
+        if ($role === 'teacher') {
+            $filters['teacher_id'] = $_SESSION['user_id'];
+        }
+        if (!empty($classroomId)) {
+            $filters['classroom_id'] = $classroomId;
+        }
+
+        $allSubmissions = $subModel->all($filters);
+
+        // Filter submissions that overlap with the selected month
+        $monthSubmissions = [];
+        foreach ($allSubmissions as $sub) {
+            if ($sub['period_end'] >= $monthStart && $sub['period_start'] <= $monthEnd) {
+                $monthSubmissions[] = $sub;
+            }
+        }
+
+        // Build weeks of the month
+        $weeks = [];
+        $firstDay = strtotime($monthStart);
+        $lastDay = strtotime($monthEnd);
+
+        // Find Monday of the first week
+        $dayOfWeek = date('N', $firstDay); // 1=Mon, 7=Sun
+        $weekStart = strtotime('-' . ($dayOfWeek - 1) . ' days', $firstDay);
+
+        while ($weekStart <= $lastDay) {
+            $weekEnd = strtotime('+4 days', $weekStart); // Friday
+            $weekSunday = strtotime('+6 days', $weekStart); // Sunday (end of week)
+
+            $weekSubs = [];
+            foreach ($monthSubmissions as $sub) {
+                $pStart = strtotime($sub['period_start']);
+                $pEnd = strtotime($sub['period_end']);
+                // Check overlap between submission period and this week (Mon-Fri)
+                if ($pEnd >= $weekStart && $pStart <= $weekEnd) {
+                    $weekSubs[] = $sub;
+                }
+            }
+
+            $weeks[] = [
+                'start' => date('Y-m-d', $weekStart),
+                'end' => date('Y-m-d', $weekEnd),
+                'start_fmt' => date('d/m', $weekStart),
+                'end_fmt' => date('d/m', $weekEnd),
+                'submissions' => $weekSubs,
+                'in_month' => (date('n', $weekStart) == $month || date('n', $weekEnd) == $month),
+            ];
+
+            $weekStart = strtotime('+7 days', $weekStart);
+        }
+
+        $monthNames = [
+            1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Marco', 4 => 'Abril',
+            5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+            9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+        ];
+
+        return $this->render('planning/calendar', [
+            'weeks' => $weeks,
+            'year' => $year,
+            'month' => $month,
+            'monthName' => $monthNames[$month],
+            'classrooms' => $classrooms,
+            'classroomId' => $classroomId,
+            'userRole' => $role,
+        ]);
+    }
+
+    public function weeklyRoutine($id)
+    {
+        $subModel = new PlanningSubmission();
+        $routineModel = new PlanningDailyRoutine();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $routines = $routineModel->findBySubmission($id);
+
+        $dayNames = [
+            1 => 'Segunda-feira',
+            2 => 'Terca-feira',
+            3 => 'Quarta-feira',
+            4 => 'Quinta-feira',
+            5 => 'Sexta-feira',
+        ];
+
+        $canEdit = ($submission['status'] !== 'registered')
+            && ($role !== 'teacher' || $submission['teacher_id'] == $_SESSION['user_id']);
+
+        return $this->render('planning/routine', [
+            'submission' => $submission,
+            'routines' => $routines,
+            'dayNames' => $dayNames,
+            'canEdit' => $canEdit,
+        ]);
+    }
+
+    public function saveRoutine($id)
+    {
+        $subModel = new PlanningSubmission();
+        $routineModel = new PlanningDailyRoutine();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        // Parse POST data: routines[day_of_week][index][time_slot|activity_description]
+        $routines = [];
+        if (!empty($_POST['routines']) && is_array($_POST['routines'])) {
+            foreach ($_POST['routines'] as $day => $activities) {
+                $sortOrder = 0;
+                foreach ($activities as $activity) {
+                    $timeSlot = trim($activity['time_slot'] ?? '');
+                    $description = trim($activity['activity_description'] ?? '');
+                    if ($timeSlot === '' && $description === '') continue;
+
+                    $routines[] = [
+                        'day_of_week' => (int) $day,
+                        'time_slot' => $timeSlot,
+                        'activity_description' => $description,
+                        'sort_order' => $sortOrder++,
+                    ];
+                }
+            }
+        }
+
+        if ($routineModel->saveRoutines($id, $routines)) {
+            $_SESSION['success_message'] = 'Rotina semanal salva com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao salvar rotina.';
+        }
+
+        header("Location: /admin/planning/{$id}/routine");
+        exit;
+    }
+
+    public function deleteRoutineEntry($id)
+    {
+        $routineModel = new PlanningDailyRoutine();
+        $entry = $routineModel->find($id);
+
+        if (!$entry) {
+            $_SESSION['error_message'] = 'Atividade nao encontrada.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $subModel = new PlanningSubmission();
+        $submission = $subModel->find($entry['submission_id']);
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $submissionId = $entry['submission_id'];
+        if ($routineModel->delete($id)) {
+            $_SESSION['success_message'] = 'Atividade removida!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao remover atividade.';
+        }
+
+        header("Location: /admin/planning/{$submissionId}/routine");
         exit;
     }
 

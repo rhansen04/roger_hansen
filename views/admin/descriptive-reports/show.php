@@ -70,6 +70,12 @@
             </form>
         <?php endif; ?>
 
+        <?php if ($isFinalized): ?>
+            <a href="/admin/descriptive-reports/<?php echo $report['id']; ?>/export-pdf" class="btn btn-outline-danger" target="_blank">
+                <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+            </a>
+        <?php endif; ?>
+
         <?php if ($isFinalized && $isCoordenadorOrAdmin): ?>
             <form method="POST" action="/admin/descriptive-reports/<?php echo $report['id']; ?>/reopen" class="d-inline" onsubmit="return confirm('Reabrir este parecer para edicao?')">
                 <button type="submit" class="btn btn-outline-warning">

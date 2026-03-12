@@ -43,9 +43,9 @@
 ---
 
 ### T-0.6 — Ajuste do Planejamento (estrutura Mês → Semanas → Dias)
-**Status:** ⬜
+**Status:** ✅
 **Log:**
-- 2026-03-12: Não implementada nesta sessão. O planejamento já existe com templates customizáveis. Reestruturação para Mês → Semanas → Dias requer análise mais detalhada do sistema de templates atual.
+- 2026-03-12: Criada migration `031_create_planning_daily_routines.sql` (tabela para rotinas diárias com day_of_week, time_slot, activity_description). Model `PlanningDailyRoutine.php` com 10 métodos (findBySubmission, saveRoutines batch, hasRoutines, etc). Adicionados 4 métodos ao PlanningController: `calendar()` (visão mensal com filtros), `weeklyRoutine()` (editor/visualizador de rotina semanal), `saveRoutine()` (POST salvar rotinas), `deleteRoutineEntry()`. Criadas 2 views: `calendar.php` (calendário mensal com semanas, submissions linkadas, botão criar) e `routine.php` (editor 5 colunas Seg-Sex com atividades dinâmicas via JS). Views `index.php` e `show.php` atualizadas com links para calendário e rotina. 4 rotas adicionadas.
 
 ---
 
@@ -138,9 +138,9 @@
 ---
 
 ### T-2.8 — Geração de PDF e Word
-**Status:** ⬜
+**Status:** ✅
 **Log:**
-- 2026-03-12: Estrutura preparada (rotas e botões de download criados). Falta instalar mPDF/PHPWord via Composer e implementar a geração efetiva dos arquivos.
+- 2026-03-12: Criado `PdfExportService.php` com mPDF para geração de PDF. Parecer: capa (fundo #007e66, foto, nome, turma, semestre), página institucional, texto da criança, 5 páginas de eixos com fotos (layout 2+1). Método `exportPdf()` adicionado ao DescriptiveReportController. Rota GET `/admin/descriptive-reports/{id}/export-pdf`. Botão "Exportar PDF" na view show.php (visível apenas para finalizados). mPDF adicionado ao composer.json.
 
 ---
 
@@ -191,9 +191,9 @@
 ---
 
 ### T-4.4 — Geração de PDF do Portfólio
-**Status:** ⬜
+**Status:** ✅
 **Log:**
-- 2026-03-12: Estrutura preparada. Falta instalar mPDF via Composer e implementar geração do PDF de 14+ páginas.
+- 2026-03-12: PDF do portfólio implementado no PdfExportService: capa, "Sobre a Magia do Portfólio", "Proposta da Pedagogia Florença" (5 princípios), mensagem da professora, "Os Eixos de Atividades", 10 páginas de eixos (descrição + fotos). Método `exportPdf()` adicionado ao PortfolioController. Rota GET `/admin/portfolios/{id}/export-pdf`. Botão "Exportar PDF" na view show.php (visível apenas para finalizados).
 
 ---
 
