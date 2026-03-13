@@ -15,8 +15,25 @@
         <i class="<?= $category['icon'] ?> me-1"></i><?= $category['title'] ?>
     </span>
     <h2 class="fw-bold mb-2"><?= htmlspecialchars($article['title']) ?></h2>
-    <div class="text-muted small">
-        <i class="far fa-clock me-1"></i><?= $article['time'] ?> min de leitura
+    <div class="text-muted small d-flex align-items-center flex-wrap">
+        <span><i class="far fa-clock me-1"></i><?= $article['time'] ?> min de leitura</span>
+        <?php if (!empty($article['release'])): ?>
+            <?php
+            $releaseDate = new DateTime($article['release']);
+            $now = new DateTime();
+            $daysSinceRelease = $now->diff($releaseDate)->days;
+            $isNew = $daysSinceRelease <= 30;
+            ?>
+            <span class="badge bg-light text-muted border ms-2">
+                <i class="fas fa-calendar-check me-1"></i>
+                <?= $releaseDate->format('d/m/Y') ?>
+            </span>
+            <?php if ($isNew): ?>
+                <span class="badge bg-success ms-1">
+                    <i class="fas fa-sparkles me-1"></i>Novo
+                </span>
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
 </div>
 

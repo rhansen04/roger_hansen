@@ -9,6 +9,11 @@
             <i class="fas fa-search help-search-icon"></i>
             <input type="text" id="helpSearch" class="help-search-input" placeholder="Buscar artigos, tutoriais, dúvidas..." autocomplete="off">
         </div>
+        <div class="mt-3">
+            <button type="button" id="btnNovidades" class="btn btn-novidades" onclick="toggleNovidades()">
+                <i class="fas fa-sparkles me-1"></i>Novidades
+            </button>
+        </div>
     </div>
 </div>
 
@@ -39,14 +44,39 @@
     <h5 class="fw-bold mb-3"><i class="fas fa-folder-open me-2" style="color:var(--primary-color)"></i>Categorias</h5>
     <div class="row g-4 mb-5" id="categoryGrid">
         <?php foreach ($categories as $slug => $cat): ?>
-        <div class="col-md-6 col-lg-4 help-searchable" data-search="<?= strtolower($cat['title'] . ' ' . $cat['description'] . ' ' . implode(' ', array_column($cat['articles'], 'title'))) ?>">
+        <?php
+        $catNewCount = 0;
+        foreach ($cat['articles'] as $a) {
+            if (!empty($a['release'])) {
+                $rd = new DateTime($a['release']);
+                $diff = (new DateTime())->diff($rd)->days;
+                if ($diff <= 30) $catNewCount++;
+            }
+        }
+        ?>
+        <div class="col-md-6 col-lg-4 help-searchable" data-new-count="<?= $catNewCount ?>" data-search="<?= strtolower($cat['title'] . ' ' . $cat['description'] . ' ' . implode(' ', array_column($cat['articles'], 'title'))) ?>">
             <a href="/admin/help/<?= $slug ?>" class="category-card">
                 <div class="category-card-icon" style="background:<?= $cat['color'] ?>15; color:<?= $cat['color'] ?>">
                     <i class="<?= $cat['icon'] ?>"></i>
                 </div>
                 <h6 class="category-card-title"><?= $cat['title'] ?></h6>
                 <p class="category-card-desc"><?= $cat['description'] ?></p>
-                <span class="category-card-count"><?= count($cat['articles']) ?> artigos</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="category-card-count"><?= count($cat['articles']) ?> artigos</span>
+                    <?php
+                    $newCount = 0;
+                    foreach ($cat['articles'] as $a) {
+                        if (!empty($a['release'])) {
+                            $rd = new DateTime($a['release']);
+                            $diff = (new DateTime())->diff($rd)->days;
+                            if ($diff <= 30) $newCount++;
+                        }
+                    }
+                    ?>
+                    <?php if ($newCount > 0): ?>
+                        <span class="badge bg-success"><?= $newCount ?> novo<?= $newCount > 1 ? 's' : '' ?></span>
+                    <?php endif; ?>
+                </div>
             </a>
         </div>
         <?php endforeach; ?>
@@ -80,18 +110,46 @@
 </div>
 
 <script>
+var novidadesActive = false;
+
 // Live search filter
 document.getElementById('helpSearch').addEventListener('input', function() {
-    var query = this.value.toLowerCase().trim();
+    if (novidadesActive) {
+        novidadesActive = false;
+        document.getElementById('btnNovidades').classList.remove('active');
+    }
+    applyFilters();
+});
+
+function applyFilters() {
+    var query = document.getElementById('helpSearch').value.toLowerCase().trim();
     var items = document.querySelectorAll('.help-searchable');
     var visible = 0;
 
     items.forEach(function(item) {
-        var match = !query || item.getAttribute('data-search').indexOf(query) !== -1;
-        item.style.display = match ? '' : 'none';
-        if (match) visible++;
+        var matchSearch = !query || item.getAttribute('data-search').indexOf(query) !== -1;
+        var matchNovidades = true;
+        if (novidadesActive) {
+            var newCount = item.getAttribute('data-new-count');
+            // Items without data-new-count (FAQ, quick start) are hidden in novidades mode
+            if (newCount !== null) {
+                matchNovidades = parseInt(newCount) > 0;
+            } else {
+                matchNovidades = false;
+            }
+        }
+        var show = matchSearch && matchNovidades;
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
     });
 
-    document.getElementById('noResults').classList.toggle('d-none', visible > 0 || !query);
-});
+    document.getElementById('noResults').classList.toggle('d-none', visible > 0 || (!query && !novidadesActive));
+}
+
+function toggleNovidades() {
+    novidadesActive = !novidadesActive;
+    document.getElementById('btnNovidades').classList.toggle('active', novidadesActive);
+    document.getElementById('helpSearch').value = '';
+    applyFilters();
+}
 </script>

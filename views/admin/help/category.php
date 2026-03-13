@@ -30,7 +30,17 @@
                 <h6 class="mb-1 fw-bold"><?= htmlspecialchars($article['title']) ?></h6>
                 <p class="mb-1 text-muted small"><?= htmlspecialchars($article['summary']) ?></p>
             </div>
-            <div class="text-end ms-3 flex-shrink-0">
+            <div class="text-end ms-3 flex-shrink-0 d-flex align-items-center gap-1">
+                <?php if (!empty($article['release'])): ?>
+                    <?php
+                    $rd = new DateTime($article['release']);
+                    $diff = (new DateTime())->diff($rd)->days;
+                    ?>
+                    <?php if ($diff <= 30): ?>
+                        <span class="badge bg-success">Novo</span>
+                    <?php endif; ?>
+                    <span class="badge bg-light text-muted border"><i class="fas fa-calendar-check me-1"></i><?= $rd->format('d/m/Y') ?></span>
+                <?php endif; ?>
                 <span class="badge bg-light text-muted"><i class="far fa-clock me-1"></i><?= $article['time'] ?> min</span>
                 <i class="fas fa-chevron-right text-muted ms-2"></i>
             </div>
