@@ -12,59 +12,258 @@ class HelpController
         $this->categories = [
             'primeiros-passos' => [
                 'title' => 'Primeiros Passos',
-                'description' => 'Aprenda o básico do painel administrativo: Dashboard, menu lateral, modo escuro, tours interativos e configurações iniciais.',
+                'description' => 'Aprenda o básico da plataforma: dashboard por papel, menu lateral, modo escuro, tours interativos e configurações iniciais.',
                 'icon' => 'fas fa-rocket',
                 'color' => '#007e66',
                 'articles' => [
                     'visao-geral' => [
-                        'title' => 'Visão Geral do Painel',
-                        'summary' => 'Conheça o Dashboard, menu lateral com 5 seções, barra superior e todas as funcionalidades do painel administrativo.',
-                        'time' => 5,
+                        'title' => 'Visão Geral da Plataforma',
+                        'summary' => 'Conheça todos os módulos da plataforma: Dashboard, Turmas, Alunos, Observações, Pareceres, Portfólios, Banco de Imagens, Planejamento, Material de Apoio, Cursos, Relatórios e Notificações.',
+                        'time' => 7,
                     ],
                     'primeiro-acesso' => [
                         'title' => 'Primeiro Acesso e Configuração',
-                        'summary' => 'Checklist completo do primeiro login: papéis de usuário, cadastro de escola, alunos e primeira matrícula.',
+                        'summary' => 'Checklist completo do primeiro login: entenda seu papel (Admin, Professor, Coordenador), configure a escola, cadastre turmas e alunos.',
                         'time' => 6,
                     ],
                     'navegacao' => [
                         'title' => 'Navegação, Modo Escuro e Tours',
-                        'summary' => 'Menu lateral responsivo, modo escuro persistente, tours interativos página a página e Central de Ajuda.',
+                        'summary' => 'Menu lateral por papel, modo escuro persistente, tours interativos por página, sino de notificações e Central de Ajuda.',
+                        'time' => 5,
+                    ],
+                    'papeis-permissoes' => [
+                        'title' => 'Papéis e Permissões',
+                        'summary' => 'Entenda o que cada papel (Admin, Professor, Coordenador) pode fazer em cada módulo: criação, edição, visualização, finalização e aprovação.',
+                        'time' => 6,
+                    ],
+                ],
+            ],
+            'dashboard' => [
+                'title' => 'Dashboard',
+                'description' => 'O Dashboard se adapta ao seu papel: Professor vê suas turmas e alunos, Coordenador vê métricas gerais, Admin tem visão completa.',
+                'icon' => 'fas fa-tachometer-alt',
+                'color' => '#0d6efd',
+                'articles' => [
+                    'dashboard-professor' => [
+                        'title' => 'Dashboard do Professor',
+                        'summary' => 'Cards de turmas ativas, alunos sob responsabilidade, cursos em andamento com progresso, observações recentes e ações rápidas.',
                         'time' => 4,
+                    ],
+                    'dashboard-coordenador' => [
+                        'title' => 'Dashboard do Coordenador',
+                        'summary' => 'Métricas globais: total de turmas, crianças, professores, observações. Relatório de cursos com progresso médio. Visão de todas as observações.',
+                        'time' => 4,
+                    ],
+                    'dashboard-admin' => [
+                        'title' => 'Dashboard do Administrador',
+                        'summary' => 'Visão completa: alunos, matrículas, cursos, contatos, escolas, horas assistidas, quizzes. Matrículas recentes, cursos populares, alunos com baixo progresso.',
+                        'time' => 5,
+                    ],
+                ],
+            ],
+            'turmas-alunos' => [
+                'title' => 'Turmas e Alunos',
+                'description' => 'Gerencie turmas (criar, ativar/desativar, vincular alunos) e cadastre alunos com foto, escola e resumo pedagógico via IA.',
+                'icon' => 'fas fa-users',
+                'color' => '#fd7e14',
+                'articles' => [
+                    'gerenciar-turmas' => [
+                        'title' => 'Gerenciar Turmas',
+                        'summary' => 'Crie turmas com nome, escola, professor, faixa etária e período. Ative/desative turmas sem perder histórico. Visualize alunos vinculados.',
+                        'time' => 5,
+                    ],
+                    'vincular-alunos' => [
+                        'title' => 'Vincular Alunos à Turma',
+                        'summary' => 'Adicione e remova alunos da turma. Veja lista com foto, nome, data de nascimento e idade calculada. Acesse perfil direto da turma.',
+                        'time' => 4,
+                    ],
+                    'cadastrar-aluno' => [
+                        'title' => 'Cadastrar Aluno',
+                        'summary' => 'Registre com nome, data de nascimento (idade calculada automaticamente), escola e foto. Upload de imagem com preview.',
+                        'time' => 4,
+                    ],
+                    'perfil-aluno' => [
+                        'title' => 'Perfil do Aluno e Resumo IA',
+                        'summary' => 'Veja dados completos, turma atual, professor responsável, observações vinculadas. Use o botão "Resumo IA" para gerar narrativa pedagógica automática.',
+                        'time' => 5,
+                    ],
+                ],
+            ],
+            'observacoes' => [
+                'title' => 'Observações Pedagógicas',
+                'description' => 'Registre observações semestrais organizadas por 6 eixos pedagógicos, com salvamento automático, finalização e controle de permissões.',
+                'icon' => 'fas fa-clipboard-list',
+                'color' => '#6f42c1',
+                'articles' => [
+                    'criar-observacao' => [
+                        'title' => 'Criar uma Observação',
+                        'summary' => 'Selecione aluno, semestre e ano. Preencha os 6 eixos pedagógicos em abas separadas. O sistema previne duplicatas por aluno/semestre.',
+                        'time' => 6,
+                    ],
+                    'eixos-pedagogicos' => [
+                        'title' => 'Os 6 Eixos Pedagógicos',
+                        'summary' => 'Entenda cada eixo: Observação Geral, Movimento, Atividade Manual, Atividade Musical, Contos e Programa Comunicação Ativa (PCA).',
+                        'time' => 5,
+                    ],
+                    'auto-save-finalizar' => [
+                        'title' => 'Salvamento Automático e Finalização',
+                        'summary' => 'O texto é salvo automaticamente ao sair do campo (blur) ou após 2 segundos sem digitar. Finalize para bloquear edição e liberar geração de Parecer.',
+                        'time' => 5,
+                    ],
+                    'permissoes-observacoes' => [
+                        'title' => 'Permissões e Fluxo de Revisão',
+                        'summary' => 'Professor cria e edita suas observações. Coordenador visualiza todas e pode reabrir finalizadas. Admin tem acesso total.',
+                        'time' => 4,
+                    ],
+                ],
+            ],
+            'parecer-descritivo' => [
+                'title' => 'Parecer Descritivo',
+                'description' => 'Gere pareceres descritivos a partir das observações: capa, texto institucional, narrativa da criança com correção IA, fotos por eixo e exportação em PDF.',
+                'icon' => 'fas fa-file-alt',
+                'color' => '#20c997',
+                'articles' => [
+                    'criar-parecer' => [
+                        'title' => 'Criar um Parecer Descritivo',
+                        'summary' => 'Selecione aluno e observação finalizada. O sistema compila automaticamente os textos dos 6 eixos em uma narrativa unificada.',
+                        'time' => 6,
+                    ],
+                    'editar-corrigir' => [
+                        'title' => 'Editar Texto e Correção com IA',
+                        'summary' => 'Edite o texto compilado sem alterar a observação original. Use o botão "Correção Automática IA" para revisar ortografia e gramática.',
+                        'time' => 5,
+                    ],
+                    'fotos-eixos' => [
+                        'title' => 'Fotos dos Eixos de Atividades',
+                        'summary' => 'Adicione até 3 fotos por eixo (Musical, Manual, Contos, Movimento, PCA) com legendas descritivas. As fotos aparecem no PDF final.',
+                        'time' => 4,
+                    ],
+                    'finalizar-exportar' => [
+                        'title' => 'Finalizar e Exportar PDF',
+                        'summary' => 'Finalize o parecer para bloquear edição. Coordenador pode solicitar revisão. Exporte PDF com 7 páginas: capa, texto institucional, narrativa e eixos.',
+                        'time' => 5,
+                    ],
+                ],
+            ],
+            'portfolio' => [
+                'title' => 'Portfólio da Turma',
+                'description' => 'Monte portfólios semestrais por turma com mensagem da professora, fotos por eixo, correção IA e exportação em PDF de 14+ páginas.',
+                'icon' => 'fas fa-images',
+                'color' => '#e83e8c',
+                'articles' => [
+                    'criar-portfolio' => [
+                        'title' => 'Criar um Portfólio',
+                        'summary' => 'Selecione turma, semestre e ano. Adicione foto de capa e mensagem da professora. Cada combinação turma/semestre/ano é única.',
+                        'time' => 5,
+                    ],
+                    'eixos-fotos' => [
+                        'title' => 'Eixos, Descrições e Fotos',
+                        'summary' => 'Preencha a descrição de cada eixo (Movimento, Manual, Musical, Contos, PCA) e adicione até 3 fotos com legendas por eixo.',
+                        'time' => 6,
+                    ],
+                    'finalizar-exportar-portfolio' => [
+                        'title' => 'Finalizar e Exportar PDF',
+                        'summary' => 'Finalize o portfólio, solicite revisão via coordenador e exporte PDF completo: capa, textos institucionais, mensagem, eixos com fotos.',
+                        'time' => 5,
+                    ],
+                ],
+            ],
+            'banco-imagens' => [
+                'title' => 'Banco de Imagens',
+                'description' => 'Organize fotos por turma e aluno. Upload múltiplo com redimensionamento automático, legendas editáveis e organização por pastas.',
+                'icon' => 'fas fa-camera',
+                'color' => '#17a2b8',
+                'articles' => [
+                    'organizar-fotos' => [
+                        'title' => 'Estrutura e Navegação',
+                        'summary' => 'Cada turma tem pastas automáticas: uma coletiva e uma por aluno. Navegue por turma → pasta → fotos com thumbnails.',
+                        'time' => 4,
+                    ],
+                    'upload-gerenciar' => [
+                        'title' => 'Upload, Legendas e Organização',
+                        'summary' => 'Faça upload de múltiplas fotos (JPG/PNG, redimensionadas para max 1920px). Edite legendas inline, mova entre pastas e exclua fotos.',
+                        'time' => 5,
                     ],
                 ],
             ],
             'planejamento' => [
                 'title' => 'Planejamento Pedagógico',
-                'description' => 'Crie planejamentos pedagógicos com templates personalizáveis, seções dinâmicas e fluxo de aprovação (Rascunho → Enviado → Registrado).',
+                'description' => 'Crie planejamentos com templates personalizáveis, campos condicionais, calendário mensal, rotina diária e fluxo de aprovação.',
                 'icon' => 'fas fa-calendar-alt',
                 'color' => '#6f42c1',
                 'articles' => [
                     'criar-planejamento' => [
                         'title' => 'Criar um Planejamento',
-                        'summary' => 'Passo a passo: escolher template, vincular turma, definir período e preencher as seções geradas automaticamente.',
+                        'summary' => 'Escolha template, vincule turma, defina período semanal e preencha as seções geradas automaticamente pelo template.',
                         'time' => 6,
                     ],
                     'usar-templates' => [
                         'title' => 'Templates de Planejamento',
-                        'summary' => 'Como criar e gerenciar templates com seções e campos personalizados (texto, seleção, checkbox, radio).',
+                        'summary' => 'Crie templates com seções e campos (texto, textarea, select, radio, checkbox, checklist). Defina faixa etária e organize por ordem.',
                         'time' => 7,
                     ],
                     'fluxo-status' => [
                         'title' => 'Fluxo de Status',
-                        'summary' => 'Entenda os 3 estados: Rascunho (professor edita), Enviado (coordenação avalia) e Registrado (pós-vivência).',
+                        'summary' => 'Entenda os 3 estados: Rascunho (professor edita), Enviado (coordenação avalia) e Registrado (pós-vivência, somente leitura).',
                         'time' => 3,
+                    ],
+                    'dependencia-campos' => [
+                        'title' => 'Dependência entre Campos',
+                        'summary' => 'Configure campos que aparecem/ocultam conforme valor de outro campo. Ex: Eixo "Musical" → só objetivos musicais visíveis.',
+                        'time' => 5,
+                    ],
+                    'calendario-rotina' => [
+                        'title' => 'Calendário e Rotina Diária',
+                        'summary' => 'Visualize planejamentos no calendário mensal. Crie rotinas diárias com horários e atividades para cada dia da semana (Seg-Sex).',
+                        'time' => 5,
+                    ],
+                ],
+            ],
+            'material-apoio' => [
+                'title' => 'Material de Apoio',
+                'description' => 'Repositório centralizado de materiais pedagógicos organizados em pastas hierárquicas: Eixos de Atividades, Centros de Aprendizagem e Famílias de Brinquedos.',
+                'icon' => 'fas fa-folder-open',
+                'color' => '#795548',
+                'articles' => [
+                    'navegacao-pastas' => [
+                        'title' => 'Navegação e Estrutura de Pastas',
+                        'summary' => 'Árvore de pastas com subpastas ilimitadas. Estrutura padrão: Eixos de Atividades (Manuais, Musicais, Contos, Movimento), Centros de Aprendizagem, Famílias de Brinquedos.',
+                        'time' => 3,
+                    ],
+                    'upload-download' => [
+                        'title' => 'Upload e Download de Materiais',
+                        'summary' => 'Envie PDFs, documentos e arquivos. Faça download preservando o nome original. Admin faz upload/exclusão; professores e coordenadores baixam.',
+                        'time' => 4,
+                    ],
+                ],
+            ],
+            'notificacoes-fluxo' => [
+                'title' => 'Notificações e Fluxo de Aprovação',
+                'description' => 'Sistema de notificações internas com sino no header. Fluxo Professor → Coordenador para pareceres, portfólios e planejamentos.',
+                'icon' => 'fas fa-bell',
+                'color' => '#ffc107',
+                'articles' => [
+                    'sistema-notificacoes' => [
+                        'title' => 'Sistema de Notificações',
+                        'summary' => 'Sino com badge de contagem no header. Dropdown com 10 notificações recentes. Página completa com 100 últimas. Marcar como lida individual ou em massa.',
+                        'time' => 4,
+                    ],
+                    'fluxo-aprovacao' => [
+                        'title' => 'Fluxo de Aprovação Professor → Coordenador',
+                        'summary' => 'Professor finaliza → coordenadores notificados. Coordenador solicita revisão com notas → professor notificado. Professor corrige e refinaliza.',
+                        'time' => 5,
                     ],
                 ],
             ],
             'cursos' => [
-                'title' => 'Cursos',
-                'description' => 'Crie cursos completos com hierarquia Módulos → Seções → Lições, vídeos com preview, quizzes avaliativos e materiais de apoio.',
+                'title' => 'Cursos e Formação',
+                'description' => 'Crie cursos completos com hierarquia Módulos → Seções → Lições, vídeos com tracking, quizzes avaliativos e materiais de apoio.',
                 'icon' => 'fas fa-book',
                 'color' => '#0d6efd',
                 'articles' => [
                     'criar-curso' => [
                         'title' => 'Criar um Curso',
-                        'summary' => 'Cadastre com título, slug automático, imagem de capa, instrutor, preço, nível e categoria.',
+                        'summary' => 'Cadastre com título, slug automático, imagem de capa, instrutor, preço, nível e categoria. Ative quando estiver pronto.',
                         'time' => 5,
                     ],
                     'modulos-licoes' => [
@@ -74,61 +273,25 @@ class HelpController
                     ],
                     'publicar-curso' => [
                         'title' => 'Quizzes, Materiais e Publicação',
-                        'summary' => 'Configure quizzes com nota mínima e tentativas, envie materiais (PDF, Excel, vídeo) e ative o curso.',
+                        'summary' => 'Configure quizzes com nota mínima e tentativas, envie materiais de apoio (PDF, Excel, vídeo, máx 50MB) e publique o curso.',
                         'time' => 6,
                     ],
-                ],
-            ],
-            'turmas' => [
-                'title' => 'Turmas',
-                'description' => 'Organize alunos em turmas vinculadas a escolas e professores, com faixa etária, período e ano letivo.',
-                'icon' => 'fas fa-chalkboard',
-                'color' => '#fd7e14',
-                'articles' => [
-                    'criar-turma' => [
-                        'title' => 'Criar uma Turma',
-                        'summary' => 'Configure nome, escola, professor, faixa etária, período (manhã/tarde/integral) e ano letivo.',
-                        'time' => 4,
-                    ],
-                    'gerenciar-alunos' => [
-                        'title' => 'Gerenciar Alunos na Turma',
-                        'summary' => 'Edite composição da turma, veja vinculações com planejamentos e mantenha o histórico organizado.',
-                        'time' => 4,
-                    ],
-                ],
-            ],
-            'alunos' => [
-                'title' => 'Alunos e Matrículas',
-                'description' => 'Cadastre alunos com foto, realize matrículas com controle de status/pagamento, acompanhe progresso e gere resumos com IA.',
-                'icon' => 'fas fa-user-graduate',
-                'color' => '#20c997',
-                'articles' => [
-                    'cadastrar-aluno' => [
-                        'title' => 'Cadastrar Aluno',
-                        'summary' => 'Registro com nome, data de nascimento (idade automática), escola, foto com preview e resumo IA via Gemini.',
+                    'visao-aluno' => [
+                        'title' => 'Visão do Aluno no Curso',
+                        'summary' => 'Dashboard do aluno com cursos matriculados, botão "Continuar curso", módulos com status (não iniciado/em andamento/concluído), indicadores de progresso.',
                         'time' => 5,
-                    ],
-                    'matricular' => [
-                        'title' => 'Realizar Matrícula',
-                        'summary' => 'Matricule alunos em cursos com status ativo/pendente, controle de pagamento e prevenção de duplicatas.',
-                        'time' => 5,
-                    ],
-                    'acompanhar-progresso' => [
-                        'title' => 'Acompanhar Progresso',
-                        'summary' => 'Dashboard de Vídeos, progresso por lição, sessões individuais, alunos inativos e certificados digitais.',
-                        'time' => 7,
                     ],
                 ],
             ],
             'relatorios' => [
                 'title' => 'Relatórios e Análises',
-                'description' => 'Métricas consolidadas, performance por curso e quiz, alunos com notas baixas, tracking detalhado de vídeo e ranking de engajamento.',
+                'description' => 'Métricas consolidadas, performance por curso, alunos com notas baixas, tracking de vídeo, ranking de engajamento e relatório de cursos para coordenadores.',
                 'icon' => 'fas fa-chart-bar',
                 'color' => '#dc3545',
                 'articles' => [
                     'relatorio-geral' => [
                         'title' => 'Relatório Geral',
-                        'summary' => 'Cards de resumo, performance por curso (taxa de conclusão), desempenho de quizzes e tendências de matrícula.',
+                        'summary' => 'Cards de resumo, performance por curso (taxa de conclusão), desempenho de quizzes e tendências de matrícula nos últimos 30 dias.',
                         'time' => 5,
                     ],
                     'notas-baixas' => [
@@ -138,8 +301,13 @@ class HelpController
                     ],
                     'tracking-video' => [
                         'title' => 'Dashboard de Vídeos',
-                        'summary' => 'Horas assistidas, sessões por dia, ranking de alunos, inativos há +7 dias e histórico completo por aluno.',
+                        'summary' => 'Horas assistidas, sessões por dia, ranking de alunos, inativos há +7 dias e histórico completo de sessões.',
                         'time' => 7,
+                    ],
+                    'relatorio-cursos' => [
+                        'title' => 'Relatório de Cursos (Coordenador)',
+                        'summary' => 'Tabela com nome do curso, professores inscritos, progresso médio, concluídos e ativos. Exportação CSV.',
+                        'time' => 4,
                     ],
                 ],
             ],
@@ -149,113 +317,171 @@ class HelpController
             // --- Interface e Navegação ---
             [
                 'question' => 'Como alterno entre modo claro e escuro?',
-                'answer' => 'Clique no ícone de lua (<i class="fas fa-moon"></i>) na barra superior do painel. A preferência é salva automaticamente no seu navegador e persiste entre sessões.',
+                'answer' => 'Clique no ícone de lua (<i class="fas fa-moon"></i>) na barra superior do painel. A preferência é salva automaticamente no navegador e persiste entre sessões.',
             ],
             [
                 'question' => 'Posso usar o sistema no celular?',
-                'answer' => 'Sim! O painel é totalmente responsivo. No celular, toque no botão ☰ no canto superior esquerdo para abrir o menu lateral. Toque fora do menu ou no overlay escuro para fechar.',
+                'answer' => 'Sim! O painel é totalmente responsivo. No celular, toque no botão ☰ no canto superior esquerdo para abrir o menu lateral.',
             ],
             [
                 'question' => 'Como funciona o tour interativo?',
-                'answer' => 'Clique no botão <strong>? Ajuda</strong> na barra superior ou em <strong>"Tour desta Página"</strong> no menu lateral. Um guia visual destaca cada elemento da página com explicações detalhadas. Use "Próximo" e "Anterior" para navegar pelo tour.',
+                'answer' => 'Clique no botão <strong>? Ajuda</strong> na barra superior ou em <strong>"Tour desta Página"</strong> no menu lateral. Um guia visual destaca cada elemento da página com explicações.',
             ],
-            // --- Usuários e Acesso ---
+            // --- Papéis e Acesso ---
             [
-                'question' => 'Quem pode acessar o painel administrativo?',
-                'answer' => 'Usuários com papel de <strong>admin</strong> ou <strong>professor</strong>. O sistema tem 5 papéis: admin (acesso total), professor (gestão de alunos), coordenador (relatórios), student (painel do aluno em /minha-conta) e parent (painel de responsável em /minha-area).',
+                'question' => 'Quais são os papéis de usuário?',
+                'answer' => 'O sistema tem 5 papéis: <strong>Admin</strong> (acesso total), <strong>Professor</strong> (turmas, observações, pareceres, portfólios, planejamentos), <strong>Coordenador</strong> (visualização e aprovação), <strong>Student</strong> (painel do aluno) e <strong>Parent</strong> (painel do responsável).',
+            ],
+            [
+                'question' => 'O que o Professor pode fazer que o Coordenador não pode?',
+                'answer' => 'O Professor <strong>cria e edita</strong> observações, pareceres, portfólios e planejamentos. O Coordenador <strong>visualiza tudo</strong> mas não cria — ele pode <strong>reabrir</strong> documentos finalizados e <strong>solicitar revisão</strong> com notas explicativas.',
             ],
             [
                 'question' => 'Posso excluir minha própria conta de admin?',
-                'answer' => 'Não. O sistema impede que você exclua sua própria conta e também bloqueia a exclusão se você for o último administrador. Isso garante que sempre haverá acesso administrativo ao sistema.',
+                'answer' => 'Não. O sistema impede exclusão da própria conta e bloqueia se você for o último administrador, garantindo sempre acesso administrativo.',
             ],
             [
                 'question' => 'Como redefinir a senha de um usuário?',
-                'answer' => 'Acesse <strong>Cadastros → Usuários</strong>, clique em editar o usuário e digite uma nova senha (mínimo 6 caracteres). Se deixar o campo de senha em branco, a senha atual é mantida.',
+                'answer' => 'Acesse <strong>Cadastros → Usuários</strong>, edite o usuário e digite nova senha (mínimo 6 caracteres). Deixe em branco para manter a atual.',
             ],
-            // --- Alunos e Matrículas ---
+            // --- Turmas e Alunos ---
             [
-                'question' => 'Como faço para matricular vários alunos de uma vez?',
-                'answer' => 'Atualmente as matrículas são feitas individualmente em <strong>Ensino → Matrículas</strong>. Clique em "Nova Matrícula", informe o ID do aluno (usuário com papel student), selecione o curso e defina o status.',
-            ],
-            [
-                'question' => 'O que acontece quando um aluno completa um curso?',
-                'answer' => 'O sistema marca automaticamente a matrícula como concluída (100% de progresso). O aluno pode então gerar um <strong>certificado digital</strong> com código de verificação único, que pode ser validado publicamente pela URL <code>/certificado/{código}</code>.',
+                'question' => 'Uma turma pode ser excluída?',
+                'answer' => 'Não. Turmas são <strong>desativadas</strong>, nunca excluídas. Isso preserva todo o histórico pedagógico (observações, pareceres, portfólios). Use o botão "Desativar" na listagem de turmas.',
             ],
             [
-                'question' => 'Posso reativar uma matrícula desativada?',
-                'answer' => 'Sim! Em <strong>Ensino → Matrículas</strong>, clique no botão <strong>✅ Ativar</strong> ao lado da matrícula inativa. O aluno recupera o acesso ao curso com todo o progresso preservado.',
+                'question' => 'Como vincular um aluno a uma turma?',
+                'answer' => 'Acesse a turma desejada e clique em <strong>"Adicionar Aluno"</strong>. Selecione o aluno no dropdown (mostra apenas alunos da mesma escola) e confirme. O aluno aparecerá na lista da turma.',
             ],
             [
                 'question' => 'Por que não consigo excluir um aluno?',
-                'answer' => 'Alunos com <strong>observações pedagógicas</strong> vinculadas não podem ser excluídos para proteger o histórico. Remova as observações primeiro ou mantenha o aluno no sistema como registro.',
+                'answer' => 'Alunos com <strong>observações pedagógicas</strong> vinculadas não podem ser excluídos para proteger o histórico. Remova as observações primeiro ou mantenha o registro.',
             ],
             [
                 'question' => 'O que é o "Resumo IA" no perfil do aluno?',
-                'answer' => 'É um resumo pedagógico gerado automaticamente pela <strong>API Gemini (IA)</strong> analisando todas as observações do aluno. Clique no botão roxo <strong>🪄 Resumo IA</strong> na página de detalhes do aluno. Requer que observações estejam cadastradas.',
-            ],
-            // --- Cursos e Conteúdo ---
-            [
-                'question' => 'Por que não consigo excluir um curso?',
-                'answer' => 'Cursos com <strong>matrículas vinculadas</strong> não podem ser excluídos. Para retirá-lo do catálogo, edite o curso e desmarque "Ativo". As matrículas existentes continuam funcionando normalmente.',
-            ],
-            [
-                'question' => 'O que acontece ao excluir um módulo?',
-                'answer' => 'As seções dentro do módulo <strong>não são removidas</strong> — apenas desvinculadas e movidas para "Seções Gerais". Já ao excluir uma seção, todas as lições dentro dela são removidas permanentemente.',
-            ],
-            [
-                'question' => 'Posso mover seções entre módulos?',
-                'answer' => 'Sim! Na página do curso, clique no botão <strong>"Mover"</strong> no cabeçalho de um módulo. Um modal permite selecionar seções e transferi-las para outro módulo ou para "Seções Gerais".',
-            ],
-            [
-                'question' => 'Posso adicionar materiais de apoio aos cursos?',
-                'answer' => 'Sim! Na página de detalhes do curso, clique em <strong>"Materiais"</strong>. Envie PDFs, Excel, Word, PowerPoint, imagens, vídeos ou ZIP (máx. 50MB). Os alunos podem baixar pelo painel do curso.',
-            ],
-            // --- Vídeo e Tracking ---
-            [
-                'question' => 'Como os vídeos são rastreados?',
-                'answer' => 'O sistema registra automaticamente cada sessão de vídeo: horário de início/fim, tempo assistido, progresso antes e depois, dispositivo e IP. Veja tudo em <strong>Análises → Vídeos / Tracking</strong>.',
-            ],
-            [
-                'question' => 'O que significa "aluno inativo"?',
-                'answer' => 'No Dashboard de Vídeos, alunos que não acessaram nenhuma lição há mais de <strong>7 dias</strong> aparecem na seção "Alunos Inativos" com um badge vermelho mostrando os dias de inatividade.',
-            ],
-            // --- Quizzes ---
-            [
-                'question' => 'Um aluno esgotou as tentativas do quiz. O que fazer?',
-                'answer' => 'Acesse <strong>Análises → Notas Baixas</strong> e clique no botão <strong>🔄 Liberar Retry</strong> ao lado do aluno. Isso remove todas as tentativas anteriores, permitindo refazer o quiz.',
-            ],
-            // --- Planejamento ---
-            [
-                'question' => 'Posso restaurar um planejamento excluído?',
-                'answer' => 'Não, a exclusão é permanente. Use os status (Rascunho → Enviado → Registrado) para controlar o fluxo. Evite excluir planejamentos que podem servir como referência futura.',
-            ],
-            [
-                'question' => 'Professores podem ver planejamentos de outros professores?',
-                'answer' => 'Não. Professores veem apenas seus próprios planejamentos. <strong>Administradores</strong> e <strong>coordenadores</strong> têm acesso a todos os planejamentos e podem filtrar por professor, turma ou status.',
-            ],
-            // --- Responsáveis ---
-            [
-                'question' => 'Como vincular responsáveis a alunos?',
-                'answer' => 'Acesse <strong>Cadastros → Responsáveis</strong>, clique em <strong>"Vincular Filhos"</strong> ao lado do responsável. Selecione o aluno (usuário student) e o tipo de parentesco (Pai, Mãe ou Responsável). O responsável terá acesso ao painel em <code>/minha-area</code>.',
-            ],
-            // --- Contatos e Comunicação ---
-            [
-                'question' => 'Como sei que recebi um novo contato?',
-                'answer' => 'Na seção <strong>Comunicação → Contatos</strong>, mensagens não lidas aparecem com badge <strong>"Novo"</strong> em vermelho e texto em negrito. Um contador de não lidos aparece no topo da página. O contato é marcado como lido automaticamente ao visualizar.',
-            ],
-            [
-                'question' => 'Como responder perguntas dos alunos?',
-                'answer' => 'Em <strong>Comunicação → Perguntas</strong>, clique no botão <strong>"Responder"</strong> ao lado da pergunta. Você será redirecionado para a thread do curso onde pode digitar sua resposta.',
-            ],
-            // --- Escolas ---
-            [
-                'question' => 'Como funciona o contrato de uma escola?',
-                'answer' => 'Ao cadastrar uma escola em <strong>Cadastros → Escolas</strong>, defina as datas de início e fim do contrato e o status (ativa/inativa). Isso é informativo — o sistema não bloqueia acesso com base nas datas, mas ajuda no controle administrativo.',
+                'answer' => 'É um resumo pedagógico gerado pela <strong>IA (Gemini)</strong> analisando todas as observações do aluno. Clique no botão roxo <strong>🪄 Resumo IA</strong> na página de detalhes. Requer observações cadastradas.',
             ],
             // --- Observações ---
             [
-                'question' => 'Quais tipos de observação pedagógica existem?',
-                'answer' => 'O sistema oferece 5 categorias: <span class="badge bg-primary">Comportamento</span> (atitudes e interações), <span class="badge bg-success">Aprendizado</span> (progressos e dificuldades), <span class="badge bg-danger">Saúde</span> (sintomas e acidentes), <span class="badge bg-warning text-dark">Comunicação com Pais</span> (conversas e alinhamentos) e <span class="badge bg-secondary">Geral</span>.',
+                'question' => 'Quais são os 6 eixos pedagógicos das observações?',
+                'answer' => '1) <strong>Observação Geral</strong>, 2) <strong>Eixo de Movimento</strong>, 3) <strong>Eixo Manual</strong>, 4) <strong>Eixo Musical</strong>, 5) <strong>Eixo de Contos</strong>, 6) <strong>Programa Comunicação Ativa (PCA)</strong>. Cada eixo tem um campo de texto dedicado com 5 linhas.',
+            ],
+            [
+                'question' => 'Como funciona o salvamento automático?',
+                'answer' => 'O texto é salvo automaticamente ao <strong>sair do campo</strong> (blur) ou após <strong>2 segundos sem digitar</strong> (debounce). Um indicador mostra "Salvo automaticamente às HH:MM". Se houver mudanças não salvas, um alerta aparece ao tentar sair da página.',
+            ],
+            [
+                'question' => 'Posso editar uma observação finalizada?',
+                'answer' => 'O professor <strong>não pode</strong> editar após finalizar. O <strong>Coordenador</strong> ou <strong>Admin</strong> pode reabrir a observação usando o botão "Reabrir", devolvendo-a ao estado "Em andamento" para edição.',
+            ],
+            [
+                'question' => 'Pode haver duas observações para o mesmo aluno no mesmo semestre?',
+                'answer' => 'Não. O sistema verifica duplicatas e impede a criação de mais de uma observação por aluno/semestre/ano.',
+            ],
+            // --- Parecer Descritivo ---
+            [
+                'question' => 'Como o texto do parecer é gerado?',
+                'answer' => 'Ao criar um parecer, o sistema <strong>compila automaticamente</strong> os textos dos 6 eixos da observação vinculada em uma narrativa unificada. Você pode editar livremente o texto compilado sem alterar a observação original.',
+            ],
+            [
+                'question' => 'O que faz o botão "Correção Automática IA"?',
+                'answer' => 'Envia o texto do parecer para a <strong>IA (Gemini)</strong> que revisa ortografia, gramática e fluidez textual <strong>sem alterar o conteúdo pedagógico</strong>. A versão corrigida é salva automaticamente e pode ser editada novamente.',
+            ],
+            [
+                'question' => 'Quantas fotos posso adicionar por eixo no parecer?',
+                'answer' => 'Até <strong>3 fotos por eixo</strong>, cada uma com legenda descritiva. Os 5 eixos são: Musical, Manual, Contos, Movimento e PCA. No PDF, as fotos ficam dispostas em layout 2+1 (duas em cima, uma embaixo).',
+            ],
+            [
+                'question' => 'Quando o botão "Exportar PDF" aparece?',
+                'answer' => 'O botão aparece apenas quando o parecer está com status <strong>"Finalizado"</strong>. O PDF tem 7 páginas: capa, texto institucional, narrativa da criança e 5 páginas de eixos com fotos.',
+            ],
+            // --- Portfólio ---
+            [
+                'question' => 'Qual a diferença entre Parecer e Portfólio?',
+                'answer' => 'O <strong>Parecer Descritivo</strong> é individual (um por aluno), focado em texto narrativo sobre a criança. O <strong>Portfólio</strong> é coletivo (um por turma), focado em fotos das atividades da turma nos 5 eixos com textos institucionais fixos.',
+            ],
+            [
+                'question' => 'Quantas páginas tem o PDF do portfólio?',
+                'answer' => '<strong>14+ páginas:</strong> Capa → Sobre a Magia do Portfólio → Proposta da Pedagogia Florença → Mensagem da Professora → Os Eixos de Atividades → 5 pares de páginas (descrição do eixo + fotos).',
+            ],
+            // --- Banco de Imagens ---
+            [
+                'question' => 'As pastas do banco de imagens são criadas automaticamente?',
+                'answer' => 'Sim! Ao acessar o banco de imagens de uma turma, o sistema cria automaticamente uma <strong>pasta coletiva</strong> e <strong>pastas individuais</strong> para cada aluno vinculado à turma.',
+            ],
+            [
+                'question' => 'Qual o tamanho máximo das fotos?',
+                'answer' => 'Formatos aceitos: <strong>JPG e PNG</strong>. As fotos são <strong>redimensionadas automaticamente</strong> para no máximo 1920px de largura, mantendo a proporção. Isso otimiza o armazenamento sem perder qualidade visual.',
+            ],
+            [
+                'question' => 'O Coordenador pode fazer upload de fotos?',
+                'answer' => 'Não. O Coordenador tem <strong>acesso somente leitura</strong> ao banco de imagens. Apenas <strong>Professores</strong> e <strong>Admins</strong> podem fazer upload, mover e excluir fotos.',
+            ],
+            // --- Planejamento ---
+            [
+                'question' => 'O que são campos condicionais no planejamento?',
+                'answer' => 'Campos que só aparecem quando outro campo tem um valor específico. Exemplo: ao selecionar <strong>Eixo "Musical"</strong> na Seção 2, apenas os objetivos musicais ficam visíveis na Seção 4 — os demais ficam ocultos automaticamente.',
+            ],
+            [
+                'question' => 'Como funciona o Calendário de Planejamentos?',
+                'answer' => 'O calendário mostra uma visão mensal com todas as semanas. Cada semana mostra os planejamentos vinculados (se existirem) com badges de status. Você pode criar novos planejamentos diretamente do calendário clicando no botão "+" da semana.',
+            ],
+            [
+                'question' => 'O que é a Rotina Diária?',
+                'answer' => 'É um recurso dentro de cada planejamento semanal que permite definir <strong>atividades por dia</strong> (Segunda a Sexta). Cada atividade tem um <strong>horário</strong> (ex: 08:00-08:30) e uma <strong>descrição</strong>. A visualização mostra os 5 dias lado a lado para comparação.',
+            ],
+            [
+                'question' => 'Professores podem ver planejamentos de outros professores?',
+                'answer' => 'Não. Professores veem apenas seus próprios planejamentos. <strong>Administradores</strong> e <strong>Coordenadores</strong> têm acesso a todos e podem filtrar por professor, turma ou status.',
+            ],
+            // --- Material de Apoio ---
+            [
+                'question' => 'Qual a estrutura padrão das pastas de material de apoio?',
+                'answer' => 'A estrutura inicial tem 3 pastas principais: <strong>Eixos de Atividades</strong> (com subpastas Manuais, Musicais, Contos e Movimento), <strong>Centros de Aprendizagem</strong> e <strong>Famílias de Brinquedos</strong>. O eixo PCA não tem subpasta (material é físico).',
+            ],
+            // --- Notificações ---
+            [
+                'question' => 'Como funcionam as notificações?',
+                'answer' => 'O <strong>sino</strong> no header mostra um badge com a contagem de não lidas. Clique para ver as 10 mais recentes em dropdown. Acesse <strong>Notificações</strong> no menu para ver todas (últimas 100). Marque como lida individualmente ou use "Marcar todas como lidas".',
+            ],
+            [
+                'question' => 'Quando recebo notificações?',
+                'answer' => 'Notificações são geradas automaticamente quando: um <strong>documento é finalizado</strong> (pareceres, portfólios), um <strong>coordenador solicita revisão</strong>, ou um documento é <strong>reaberto</strong>. O tipo de notificação é identificado por ícones coloridos.',
+            ],
+            // --- Cursos ---
+            [
+                'question' => 'Por que não consigo excluir um curso?',
+                'answer' => 'Cursos com <strong>matrículas vinculadas</strong> não podem ser excluídos. Para retirá-lo do catálogo, edite e desmarque "Ativo". As matrículas existentes continuam funcionando.',
+            ],
+            [
+                'question' => 'Posso mover seções entre módulos?',
+                'answer' => 'Sim! Na página do curso, clique em <strong>"Mover"</strong> no cabeçalho de um módulo. Selecione seções e transfira para outro módulo ou "Seções Gerais".',
+            ],
+            [
+                'question' => 'O que acontece quando um aluno completa um curso?',
+                'answer' => 'O sistema marca a matrícula como concluída (100%). O aluno pode gerar um <strong>certificado digital</strong> com código de verificação único, validável publicamente em <code>/certificado/{código}</code>.',
+            ],
+            [
+                'question' => 'Um aluno esgotou as tentativas do quiz. O que fazer?',
+                'answer' => 'Acesse <strong>Análises → Notas Baixas</strong> e clique em <strong>🔄 Liberar Retry</strong>. Isso remove tentativas anteriores, permitindo refazer o quiz do zero.',
+            ],
+            // --- Relatórios ---
+            [
+                'question' => 'Onde vejo o relatório de cursos do Coordenador?',
+                'answer' => 'Em <strong>Análises → Relatório de Cursos</strong>. Mostra tabela com curso, inscritos, professores, ativos, concluídos e progresso médio. Disponível para Admin e Coordenador. Tem botão de exportação CSV.',
+            ],
+            [
+                'question' => 'Como os vídeos são rastreados?',
+                'answer' => 'O sistema registra cada sessão de vídeo automaticamente: horário de início/fim, tempo assistido, progresso antes/depois, dispositivo e IP. Veja tudo em <strong>Análises → Vídeos / Tracking</strong>.',
+            ],
+            // --- Escolas e Responsáveis ---
+            [
+                'question' => 'Como funciona o contrato de uma escola?',
+                'answer' => 'Ao cadastrar em <strong>Cadastros → Escolas</strong>, defina datas de início/fim do contrato e status. O sistema não bloqueia acesso com base nas datas — é apenas controle informativo.',
+            ],
+            [
+                'question' => 'Como vincular responsáveis a alunos?',
+                'answer' => 'Em <strong>Cadastros → Responsáveis</strong>, clique em <strong>"Vincular Filhos"</strong>. Selecione o aluno e o tipo de parentesco (Pai, Mãe ou Responsável). O responsável terá acesso em <code>/minha-area</code>.',
             ],
         ];
     }

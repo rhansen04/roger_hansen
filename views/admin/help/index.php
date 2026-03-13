@@ -18,7 +18,7 @@
     <div class="row g-3 mb-4">
         <?php
         $quickStart = $categories['primeiros-passos']['articles'];
-        $qsIcons = ['visao-geral' => 'fa-th-large', 'primeiro-acesso' => 'fa-key', 'navegacao' => 'fa-compass'];
+        $qsIcons = ['visao-geral' => 'fa-th-large', 'primeiro-acesso' => 'fa-key', 'navegacao' => 'fa-compass', 'papeis-permissoes' => 'fa-user-shield'];
         foreach ($quickStart as $slug => $art): ?>
         <div class="col-md-4 help-searchable" data-search="<?= strtolower($art['title'] . ' ' . $art['summary']) ?>">
             <a href="/admin/help/primeiros-passos/<?= $slug ?>" class="quick-start-card">
