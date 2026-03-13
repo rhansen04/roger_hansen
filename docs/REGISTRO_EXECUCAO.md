@@ -265,3 +265,33 @@
 - 2026-03-12: Método `courseReport()` adicionado ao ReportsController. View `views/admin/reports/courses.php` com cards resumo + tabela (curso, inscritos, professores, ativos, concluídos, progresso médio). Botão exportar CSV. Rota `/admin/reports/courses` adicionada. Link no sidebar para admin/coordenador.
 
 ---
+
+## EXTRAS — PÓS-PLANO
+
+### Central de Ajuda (reconstrução completa)
+**Status:** ✅
+**Log:**
+- 2026-03-12: HelpController reescrito com 12 categorias, 42 artigos detalhados, 40 FAQs. 31 novos artigos PHP criados em `views/admin/help/articles/`. Categorias: Primeiros Passos, Dashboard, Turmas e Alunos, Observações, Parecer Descritivo, Portfólio, Banco de Imagens, Planejamento, Material de Apoio, Notificações e Fluxo, Cursos e Formação, Relatórios.
+
+### Badges de Data de Release no Help
+**Status:** ✅
+**Log:**
+- 2026-03-12: Campo `release` adicionado em todos os 42 artigos. Badge "Novo" (30 dias) nas views article.php e category.php. Botão "Novidades" no index.php com filtro JS. Estilos `.btn-novidades` com suporte dark mode.
+
+### Documento Formal de Release v2.0
+**Status:** ✅
+**Log:**
+- 2026-03-12: Criado `docs/RELEASE_v2_PLATAFORMA_PEDAGOGICA.md` — documento formal em linguagem profissional descrevendo todos os 15 módulos implementados, destinado ao envio para usuários finais (professores e coordenadores).
+
+### Limpeza e Organização da Documentação
+**Status:** ✅
+**Log:**
+- 2026-03-12: Docs obsoletos movidos para `docs/archive/` (CRUD_ESCOLAS, CRUD_OBSERVACOES, MELHORIAS_FUTURAS_OBSERVACOES, QUICK_START_SCHOOLS, SCHOOLS_STRUCTURE, SCHOOLS_ROADMAP, TROUBLESHOOTING_OBSERVACOES). PLANO_EXECUCAO.md atualizado com todas as 27 tarefas marcadas como ✅. Memória do projeto atualizada.
+
+---
+
+## CONCLUSÃO
+
+> **Todas as 27 tarefas do PLANO_EXECUCAO.md (T-0.1 a T-7.5) foram concluídas em 2026-03-12.**
+> Plataforma v2.0 em produção em http://154.38.189.82:8080/
+> Documentação formal de release disponível em `docs/RELEASE_v2_PLATAFORMA_PEDAGOGICA.md`.

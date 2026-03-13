@@ -23,7 +23,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 > Adaptar módulos já implementados para atender aos requisitos do documento.
 
 ### T-0.1 — Ajuste do Menu Lateral por Papel (Professor vs Coordenador)
-**Módulo:** 1 e 11 | **Status:** ⬜
+**Módulo:** 1 e 11 | **Status:** ✅
 **Descrição:** O sistema já possui sidebar admin. Precisa diferenciar o menu lateral conforme o papel do usuário logado:
 - **Professor:** Cursos, Turmas, Planejamento, Parecer Descritivo, Portfólio, Material de Apoio, Banco de Imagens
 - **Coordenador:** Turmas, Pareceres Descritivos, Portfólios, Planejamentos, Materiais de Apoio, Banco de Imagens (somente visualização), Relatório
@@ -35,7 +35,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 ---
 
 ### T-0.2 — Dashboard diferenciado por Papel
-**Módulo:** 1 e 11 | **Status:** ⬜
+**Módulo:** 1 e 11 | **Status:** ✅
 **Descrição:** Ajustar o dashboard para exibir cards diferentes conforme o papel:
 
 **Professor:**
@@ -60,7 +60,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 ---
 
 ### T-0.3 — Ajuste do modelo de Turmas (status e histórico)
-**Módulo:** 2 | **Status:** ⬜
+**Módulo:** 2 | **Status:** ✅
 **Descrição:** O modelo Classroom já existe. Ajustes necessários:
 - Status deve ser apenas: **Ativo** e **Inativo** (confirmar que não há "Arquivada")
 - Turma **nunca deve ser excluída**, apenas desativada
@@ -76,7 +76,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 ---
 
 ### T-0.4 — Vínculo Aluno ↔ Turma
-**Módulo:** 2 e 3 | **Status:** ⬜
+**Módulo:** 2 e 3 | **Status:** ✅
 **Descrição:** Garantir que alunos estejam vinculados a turmas (não apenas a escolas). Necessário:
 - Tabela pivot `classroom_students` (se não existir): classroom_id, student_id, enrolled_at
 - Ao clicar na turma → exibir lista de alunos daquela turma
@@ -93,7 +93,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 ---
 
 ### T-0.5 — Perfil do Aluno (adequar ao documento)
-**Módulo:** 3 | **Status:** ⬜
+**Módulo:** 3 | **Status:** ✅
 **Descrição:** O perfil do aluno já existe mas precisa incluir:
 - Foto da criança (em destaque)
 - Nome completo, Data de nascimento, Idade (calculada), Turma, Professor responsável
@@ -107,7 +107,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 ---
 
 ### T-0.6 — Ajuste do Planejamento (estrutura Mês → Semanas → Dias)
-**Módulo:** 8 | **Status:** ⬜
+**Módulo:** 8 | **Status:** ✅
 **Descrição:** O sistema de planejamento já existe com templates. Verificar e ajustar:
 - Hierarquia: **Mês → Semanas → Dias**
 - Botão "+ Adicionar Planejamento" → selecionar mês
@@ -130,7 +130,7 @@ Este plano organiza as tarefas do documento em **fases de execução** ordenadas
 > O módulo de observações já existe. Adequar à estrutura do documento.
 
 ### T-1.1 — Observações por Eixo Pedagógico
-**Módulo:** 4 | **Status:** ⬜
+**Módulo:** 4 | **Status:** ✅
 **Descrição:** Reestruturar as observações para ter abas/seções por eixo:
 1. Observação Geral
 2. Eixo de Atividade de Movimento
@@ -150,7 +150,7 @@ Cada campo: tipo texto, limite visual de 5 linhas.
 ---
 
 ### T-1.2 — Periodicidade Semestral das Observações
-**Módulo:** 4 | **Status:** ⬜
+**Módulo:** 4 | **Status:** ✅
 **Descrição:** As observações devem ser organizadas por **semestre**:
 - 1º Semestre (ex: jan-jun)
 - 2º Semestre (ex: jul-dez)
@@ -165,7 +165,7 @@ Cada campo: tipo texto, limite visual de 5 linhas.
 ---
 
 ### T-1.3 — Salvamento Automático de Observações
-**Módulo:** 4 | **Status:** ⬜
+**Módulo:** 4 | **Status:** ✅
 **Descrição:**
 - Salvar automaticamente ao sair do campo (evento blur/change)
 - Exibir indicador: "Salvo automaticamente às HH:MM"
@@ -180,7 +180,7 @@ Cada campo: tipo texto, limite visual de 5 linhas.
 ---
 
 ### T-1.4 — Finalizar Observação
-**Módulo:** 4 | **Status:** ⬜
+**Módulo:** 4 | **Status:** ✅
 **Descrição:**
 - Botão "Finalizar Registro" no final da página
 - Modal de confirmação: "Deseja finalizar? Após finalizar, não será possível editar."
@@ -196,7 +196,7 @@ Cada campo: tipo texto, limite visual de 5 linhas.
 ---
 
 ### T-1.5 — Permissões de Observações
-**Módulo:** 4 | **Status:** ⬜
+**Módulo:** 4 | **Status:** ✅
 **Descrição:**
 - **Professor:** criar/editar observações "Em andamento"
 - **Coordenação:** editar qualquer turma, reabrir observações finalizadas, visualizar histórico completo
@@ -212,7 +212,7 @@ Cada campo: tipo texto, limite visual de 5 linhas.
 > Módulo novo. Depende de Observações (Fase 1) e Banco de Imagens (Fase 3).
 
 ### T-2.1 — Modelo e Migração do Parecer Descritivo
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** Criar tabela `descriptive_reports`:
 ```
 id, student_id, classroom_id, semester (1 ou 2), year,
@@ -232,7 +232,7 @@ created_at, updated_at
 ---
 
 ### T-2.2 — Controller e Rotas do Parecer Descritivo
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** Implementar CRUD + fluxo de geração:
 - GET /admin/descriptive-reports → lista (por turma)
 - GET /admin/descriptive-reports/create?student_id=X&observation_id=Y → gerar
@@ -250,7 +250,7 @@ created_at, updated_at
 ---
 
 ### T-2.3 — Views do Parecer Descritivo
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** Criar views:
 - `index.php` — lista de pareceres por turma (cards com nome da criança, status, ações)
 - `show.php` — visualização completa do parecer (preview das páginas)
@@ -260,7 +260,7 @@ created_at, updated_at
 ---
 
 ### T-2.4 — Página da Capa (Parecer)
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** Capa do PDF:
 - Título: "PARECER DESCRITIVO"
 - Subtítulo: "Acompanhamento do desenvolvimento da criança no ambiente escolar"
@@ -271,7 +271,7 @@ created_at, updated_at
 ---
 
 ### T-2.5 — Página 1: "Sobre o Parecer Descritivo" (texto fixo)
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** Texto institucional fixo (não editável) — texto completo fornecido no documento:
 - Começa com "Queridas famílias..."
 - Termina com "Com carinho, Equipe Pedagógica"
@@ -280,7 +280,7 @@ created_at, updated_at
 ---
 
 ### T-2.6 — Página 2: Texto sobre a Criança
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:**
 - Título: Nome da Criança
 - Conteúdo: compilação automática de Observação Geral + 5 Eixos
@@ -295,7 +295,7 @@ created_at, updated_at
 ---
 
 ### T-2.7 — Páginas 3-7: Eixos de Atividades com Fotos
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** 5 páginas, uma por eixo:
 | Página | Eixo |
 |--------|------|
@@ -311,7 +311,7 @@ Fotos vêm do Banco de Imagens (Fase 3).
 ---
 
 ### T-2.8 — Geração de PDF e Word
-**Módulo:** 5 | **Status:** ⬜
+**Módulo:** 5 | **Status:** ✅
 **Descrição:** Gerar documento exportável:
 - PDF: usando biblioteca PHP (TCPDF ou mPDF via Composer)
 - Word (.docx): usando PHPWord via Composer
@@ -329,7 +329,7 @@ Fotos vêm do Banco de Imagens (Fase 3).
 > Módulo novo. Necessário para Parecer Descritivo e Portfólio.
 
 ### T-3.1 — Modelo e Migração do Banco de Imagens
-**Módulo:** 10 | **Status:** ⬜
+**Módulo:** 10 | **Status:** ✅
 **Descrição:** Criar tabelas:
 ```sql
 -- Pastas do banco de imagens
@@ -372,7 +372,7 @@ CREATE TABLE image_bank (
 ---
 
 ### T-3.2 — Controller e Rotas do Banco de Imagens
-**Módulo:** 10 | **Status:** ⬜
+**Módulo:** 10 | **Status:** ✅
 **Descrição:**
 - GET /admin/image-bank → lista de turmas com pastas
 - GET /admin/image-bank/{classroom_id} → pastas da turma (coletiva + individuais)
@@ -392,7 +392,7 @@ CREATE TABLE image_bank (
 ---
 
 ### T-3.3 — Views do Banco de Imagens
-**Módulo:** 10 | **Status:** ⬜
+**Módulo:** 10 | **Status:** ✅
 **Descrição:**
 - `index.php` — lista de turmas com link para pastas
 - `classroom.php` — pastas da turma (Registros Coletivos + pastas por aluno)
@@ -406,7 +406,7 @@ CREATE TABLE image_bank (
 > Módulo novo. Depende do Banco de Imagens (Fase 3).
 
 ### T-4.1 — Modelo e Migração do Portfólio
-**Módulo:** 6 | **Status:** ⬜
+**Módulo:** 6 | **Status:** ✅
 **Descrição:** O portfólio é **por turma** (coletivo). Criar tabela:
 ```sql
 CREATE TABLE portfolios (
@@ -445,7 +445,7 @@ CREATE TABLE portfolios (
 ---
 
 ### T-4.2 — Controller e Rotas do Portfólio
-**Módulo:** 6 | **Status:** ⬜
+**Módulo:** 6 | **Status:** ✅
 **Descrição:**
 - GET /admin/portfolios → lista por turma (cards com status)
 - GET /admin/portfolios/create?classroom_id=X → novo portfólio
@@ -465,7 +465,7 @@ CREATE TABLE portfolios (
 ---
 
 ### T-4.3 — Views do Portfólio
-**Módulo:** 6 | **Status:** ⬜
+**Módulo:** 6 | **Status:** ✅
 **Descrição:** Criar views para o editor do portfólio:
 - `index.php` — listagem por turma com status
 - `create.php` / `edit.php` — editor com abas/steps:
@@ -486,7 +486,7 @@ CREATE TABLE portfolios (
 ---
 
 ### T-4.4 — Geração de PDF do Portfólio
-**Módulo:** 6 | **Status:** ⬜
+**Módulo:** 6 | **Status:** ✅
 **Descrição:** Gerar PDF com 14+ páginas:
 - Capa: foto da turma + título
 - Pág. 1: "Sobre a Magia do Portfólio"
@@ -502,7 +502,7 @@ Layout de fotos: 2 acima + 1 abaixo. Evitar quebra de imagem entre páginas.
 ## FASE 5 — MATERIAL DE APOIO
 
 ### T-5.1 — Modelo e Migração de Material de Apoio
-**Módulo:** 9 | **Status:** ⬜
+**Módulo:** 9 | **Status:** ✅
 **Descrição:** Criar sistema de pastas e arquivos de material de apoio:
 ```sql
 CREATE TABLE support_material_folders (
@@ -552,7 +552,7 @@ Nota: Eixo "Comunicação Ativa" **não tem subpasta** (material é físico).
 ---
 
 ### T-5.2 — Controller, Rotas e Views de Material de Apoio
-**Módulo:** 9 | **Status:** ⬜
+**Módulo:** 9 | **Status:** ✅
 **Descrição:**
 - GET /admin/support-materials → árvore de pastas
 - GET /admin/support-materials/folder/{id} → conteúdo da pasta
@@ -569,7 +569,7 @@ Views: navegação em árvore de pastas, upload, listagem de arquivos.
 > Sistema transversal para Parecer, Portfólio e Planejamento.
 
 ### T-6.1 — Sistema de Notificações Internas
-**Módulo:** 7 | **Status:** ⬜
+**Módulo:** 7 | **Status:** ✅
 **Descrição:** Criar sistema de notificações in-app:
 ```sql
 CREATE TABLE notifications (
@@ -602,7 +602,7 @@ CREATE TABLE notifications (
 ---
 
 ### T-6.2 — Fluxo Professor → Coordenador
-**Módulo:** 7 e 12-13 | **Status:** ⬜
+**Módulo:** 7 e 12-13 | **Status:** ✅
 **Descrição:** Implementar fluxo de aprovação:
 
 1. **Professor** finaliza documento (Parecer / Portfólio / Planejamento)
@@ -631,7 +631,7 @@ CREATE TABLE notifications (
 > Ajustar módulo de cursos existente para atender ao documento.
 
 ### T-7.1 — Dashboard do Aluno/Professor (Cursos)
-**Módulo:** 14 | **Status:** ⬜
+**Módulo:** 14 | **Status:** ✅
 **Descrição:** Tela inicial do curso mostrando:
 - Nome do curso
 - Progresso geral (%)
@@ -640,7 +640,7 @@ CREATE TABLE notifications (
 ---
 
 ### T-7.2 — Tela de Módulos do Curso
-**Módulo:** 14 | **Status:** ⬜
+**Módulo:** 14 | **Status:** ✅
 **Descrição:** Ao entrar no curso, exibir módulos em cards:
 - Nome do módulo
 - Quantidade de aulas
@@ -650,7 +650,7 @@ CREATE TABLE notifications (
 ---
 
 ### T-7.3 — Tela do Módulo (lista de aulas)
-**Módulo:** 14 | **Status:** ⬜
+**Módulo:** 14 | **Status:** ✅
 **Descrição:** Menu lateral ou lista com aulas:
 - ✓ Concluído | ▶ Em andamento | ⬜ Não iniciado
 - Permitir: pausar, voltar, rever conteúdo, acompanhar progresso, baixar materiais
@@ -660,7 +660,7 @@ CREATE TABLE notifications (
 ---
 
 ### T-7.4 — Organização dos Cursos
-**Módulo:** 14 | **Status:** ⬜
+**Módulo:** 14 | **Status:** ✅
 **Descrição:** Categorias dentro do curso:
 1. Módulos
 2. Aulas Complementares
@@ -671,7 +671,7 @@ CREATE TABLE notifications (
 ---
 
 ### T-7.5 — Relatório de Cursos (Coordenador)
-**Módulo:** 11 | **Status:** ⬜
+**Módulo:** 11 | **Status:** ✅
 **Descrição:** Na dashboard do coordenador, tabela com:
 - Nome do curso
 - Nº de professores inscritos
