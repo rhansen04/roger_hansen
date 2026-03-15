@@ -87,6 +87,58 @@ class ClassroomController
             exit;
         }
 
+        // Novo fluxo: cadastrar aluno e vincular à turma
+        if (!empty($_POST['create_new'])) {
+            if (empty($_POST['name']) || empty($_POST['birth_date'])) {
+                $_SESSION['error_message'] = 'Nome e Data de Nascimento são obrigatórios.';
+                header("Location: /admin/classrooms/{$id}");
+                exit;
+            }
+
+            $studentData = [
+                'name' => $_POST['name'],
+                'birth_date' => $_POST['birth_date'],
+                'school_id' => $classroom['school_id'] ?? null,
+                'photo_url' => null
+            ];
+
+            // Upload de foto
+            if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
+                $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                    $filename = time() . '_' . uniqid() . '.' . $ext;
+                    $uploadPath = __DIR__ . '/../../../public/uploads/students/' . $filename;
+
+                    if (!is_dir(dirname($uploadPath))) {
+                        mkdir(dirname($uploadPath), 0775, true);
+                    }
+
+                    if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadPath)) {
+                        $studentData['photo_url'] = '/uploads/students/' . $filename;
+                    }
+                }
+            }
+
+            $studentModel = new Student();
+            $studentId = $studentModel->create($studentData);
+
+            if (!$studentId) {
+                $_SESSION['error_message'] = 'Erro ao cadastrar aluno.';
+                header("Location: /admin/classrooms/{$id}");
+                exit;
+            }
+
+            if ($model->addStudent($id, $studentId)) {
+                $_SESSION['success_message'] = 'Aluno cadastrado e adicionado à turma com sucesso!';
+            } else {
+                $_SESSION['error_message'] = 'Aluno cadastrado, mas erro ao vincular à turma.';
+            }
+
+            header("Location: /admin/classrooms/{$id}");
+            exit;
+        }
+
+        // Fluxo legado: vincular aluno existente
         $studentId = $_POST['student_id'] ?? null;
         if (empty($studentId)) {
             $_SESSION['error_message'] = 'Selecione um aluno.';

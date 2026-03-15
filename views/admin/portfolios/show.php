@@ -36,9 +36,9 @@
     $axes = [
         'movement' => ['name' => 'Movimento', 'icon' => 'running', 'color' => '#e74c3c'],
         'manual' => ['name' => 'Atividades Manuais', 'icon' => 'paint-brush', 'color' => '#3498db'],
-        'stories' => ['name' => 'Contos e Historias', 'icon' => 'book', 'color' => '#2ecc71'],
+        'stories' => ['name' => 'Contos', 'icon' => 'book', 'color' => '#2ecc71'],
         'music' => ['name' => 'Musical', 'icon' => 'music', 'color' => '#9b59b6'],
-        'pca' => ['name' => 'PCA - Projeto Coletivo', 'icon' => 'project-diagram', 'color' => '#f39c12']
+        'pca' => ['name' => 'Programa Comunicacao Ativa (PCA)', 'icon' => 'comments', 'color' => '#f39c12']
     ];
 ?>
 

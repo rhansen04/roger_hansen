@@ -66,11 +66,9 @@ $statusLabels = ['active' => 'Ativa', 'inactive' => 'Inativa'];
         <i class="fas fa-users me-2 text-primary"></i>Alunos
         <span class="badge bg-primary rounded-pill ms-2"><?= count($students) ?></span>
     </h4>
-    <?php if (!empty($availableStudents)): ?>
-        <button type="button" class="btn btn-hansen text-white btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-            <i class="fas fa-plus me-1"></i> Adicionar Aluno
-        </button>
-    <?php endif; ?>
+    <button type="button" class="btn btn-hansen text-white btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+        <i class="fas fa-plus me-1"></i> Adicionar Aluno
+    </button>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -153,37 +151,41 @@ $statusLabels = ['active' => 'Ativa', 'inactive' => 'Inativa'];
     </div>
 </div>
 
-<!-- Modal Adicionar Aluno -->
+<!-- Modal Adicionar Aluno (Cadastro) -->
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="/admin/classrooms/<?= $classroom['id'] ?>/add-student">
+            <form method="POST" action="/admin/classrooms/<?= $classroom['id'] ?>/add-student" enctype="multipart/form-data">
+                <input type="hidden" name="create_new" value="1">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addStudentModalLabel">
-                        <i class="fas fa-user-plus me-2"></i>Adicionar Aluno
+                        <i class="fas fa-user-plus me-2"></i>Cadastrar Aluno
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="student_id" class="form-label">Selecione o aluno</label>
-                        <select name="student_id" id="student_id" class="form-select" required>
-                            <option value="">-- Selecione --</option>
-                            <?php foreach ($availableStudents as $as): ?>
-                                <option value="<?= $as['id'] ?>">
-                                    <?= htmlspecialchars($as['name']) ?>
-                                    <?php if (!empty($as['school_name'])): ?>
-                                        (<?= htmlspecialchars($as['school_name']) ?>)
-                                    <?php endif; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label for="student_name" class="form-label fw-bold">Nome da Crianca <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="student_name" class="form-control" required placeholder="Nome completo da crianca">
+                    </div>
+                    <div class="mb-3">
+                        <label for="student_birth_date" class="form-label fw-bold">Data de Nascimento <span class="text-danger">*</span></label>
+                        <input type="date" name="birth_date" id="student_birth_date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Turma</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($classroom['name']) ?>" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="student_photo" class="form-label fw-bold">Foto</label>
+                        <input type="file" name="photo" id="student_photo" class="form-control" accept="image/jpeg,image/png">
+                        <small class="text-muted">JPG ou PNG (opcional)</small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-hansen text-white">
-                        <i class="fas fa-plus me-1"></i> Adicionar
+                        <i class="fas fa-save me-1"></i> Salvar
                     </button>
                 </div>
             </form>

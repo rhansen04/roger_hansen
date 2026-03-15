@@ -160,36 +160,150 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
             <div class="tab-content pt-4" id="axesTabContent">
                 <div class="tab-pane fade show active" id="panel-general" role="tabpanel">
                     <label class="form-label fw-bold">Observacao Geral</label>
+                    <?php if (!$isFinalized): ?>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-general" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-general">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Quais atividades, objetos ou brinquedos a crianca demonstra maior interesse em explorar?</li>
+                                    <li>Quais sao suas facilidades e dificuldades?</li>
+                                    <li>Como a crianca interage com os colegas e professores?</li>
+                                    <li>Em que atividades a crianca demonstra autonomia? O que faz por conta propria?</li>
+                                    <li>Como a crianca lida com situacoes desafiadoras?</li>
+                                    <li>Como a crianca expressa suas emocoes?</li>
+                                    <li>Quais sao as caracteristicas mais marcantes no comportamento da crianca?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <textarea name="observation_general" class="form-control auto-save-field" rows="5"
                         data-field="observation_general" <?php echo $readonlyAttr; ?>
                         placeholder="Registre aqui observacoes gerais sobre o desenvolvimento do aluno neste periodo..."><?php echo htmlspecialchars($observation['observation_general'] ?? ''); ?></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-movement" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade de Movimento</label>
+                    <?php if (!$isFinalized): ?>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-movement" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-movement">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Prudencia: Como a crianca se movimenta? E cuidadosa?</li>
+                                    <li>Persistencia: Insiste quando enfrenta dificuldades?</li>
+                                    <li>Medo e Coragem: Apresenta medos excessivos ou enfrenta desafios?</li>
+                                    <li>Qualidade do Movimento: Movimentos equilibrados, precisos, tensos ou relaxados?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <textarea name="axis_movement" class="form-control auto-save-field" rows="5"
                         data-field="axis_movement" <?php echo $readonlyAttr; ?>
                         placeholder="Descreva o desenvolvimento do aluno nas atividades de movimento..."><?php echo htmlspecialchars($observation['axis_movement'] ?? ''); ?></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-manual" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade Manual</label>
+                    <?php if (!$isFinalized): ?>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-manual" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-manual">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Capacidade de Brincar: A crianca brinca e se diverte? Brinca sozinha?</li>
+                                    <li>Concentracao: Concentra-se nos brinquedos e atividades manuais?</li>
+                                    <li>Variedade: Explora diferentes tipos de brinquedos e atividades?</li>
+                                    <li>Profundidade: Brinca mais tempo com um mesmo brinquedo?</li>
+                                    <li>Interatividade: Como a crianca interage com os brinquedos e com outras criancas durante as atividades manuais?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <textarea name="axis_manual" class="form-control auto-save-field" rows="5"
                         data-field="axis_manual" <?php echo $readonlyAttr; ?>
                         placeholder="Descreva o desenvolvimento do aluno nas atividades manuais..."><?php echo htmlspecialchars($observation['axis_manual'] ?? ''); ?></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-music" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade Musical</label>
+                    <?php if (!$isFinalized): ?>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-music" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-music">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Preferencias Musicais: Quais sao as preferencias da crianca em relacao a tipos sonoros, musicas e instrumentos?</li>
+                                    <li>Sincronia: A crianca acompanha os movimentos e sons de forma sincronizada?</li>
+                                    <li>Canto: A crianca canta ou cantarola sozinha?</li>
+                                    <li>Concentracao: Como e a concentracao da crianca durante atividades musicais?</li>
+                                    <li>Reacoes: Quais sao as reacoes da crianca a diferentes sons e musicas?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <textarea name="axis_music" class="form-control auto-save-field" rows="5"
                         data-field="axis_music" <?php echo $readonlyAttr; ?>
                         placeholder="Descreva o desenvolvimento do aluno nas atividades musicais..."><?php echo htmlspecialchars($observation['axis_music'] ?? ''); ?></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-stories" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade de Contos</label>
+                    <?php if (!$isFinalized): ?>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-stories" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-stories">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Reacoes Corporais e Faciais: Como a crianca reage aos contos?</li>
+                                    <li>Expressoes de Emocoes: Como a crianca expressa emocoes durante os contos?</li>
+                                    <li>Preferencias: Quais sao as preferencias da crianca em relacao a sons, rimas, momentos dos contos e historias?</li>
+                                    <li>Imitacao: A crianca imita gestos e palavras dos contos?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <textarea name="axis_stories" class="form-control auto-save-field" rows="5"
                         data-field="axis_stories" <?php echo $readonlyAttr; ?>
                         placeholder="Descreva o desenvolvimento do aluno nas atividades de contos..."><?php echo htmlspecialchars($observation['axis_stories'] ?? ''); ?></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-pca" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Programa Comunicacao Ativa</label>
+                    <?php if (!$isFinalized): ?>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-pca" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-pca">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Capacidade de compreender palavras: Entende os significados das palavras?</li>
+                                    <li>Capacidade de expressar palavras: Expressa palavras com sentido correto?</li>
+                                    <li>Usa palavras trabalhadas no seu dia a dia?</li>
+                                    <li>Consegue expressar em palavras o que esta sentindo ou pensando?</li>
+                                    <li>Entende o sentido das historias de conversar?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <textarea name="axis_pca" class="form-control auto-save-field" rows="5"
                         data-field="axis_pca" <?php echo $readonlyAttr; ?>
                         placeholder="Descreva o desenvolvimento do aluno no Programa Comunicacao Ativa..."><?php echo htmlspecialchars($observation['axis_pca'] ?? ''); ?></textarea>

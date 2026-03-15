@@ -38,12 +38,12 @@
             'desc' => 'Atividades que envolvem o corpo em movimento: correr, pular, dancar, equilibrar-se e explorar espacos.'],
         'manual' => ['name' => 'Atividades Manuais', 'icon' => 'paint-brush', 'color' => '#3498db',
             'desc' => 'Atividades de criacao e expressao: pintura, desenho, modelagem, recorte e colagem.'],
-        'stories' => ['name' => 'Contos e Historias', 'icon' => 'book', 'color' => '#2ecc71',
+        'stories' => ['name' => 'Contos', 'icon' => 'book', 'color' => '#2ecc71',
             'desc' => 'Contacao de historias, teatro de fantoches, dramatizacao e literatura infantil.'],
         'music' => ['name' => 'Musical', 'icon' => 'music', 'color' => '#9b59b6',
             'desc' => 'Atividades musicais: cantar, tocar instrumentos, ritmos corporais e apreciacao musical.'],
-        'pca' => ['name' => 'PCA - Projeto Coletivo', 'icon' => 'project-diagram', 'color' => '#f39c12',
-            'desc' => 'Projetos coletivos de aprendizagem que integram diferentes areas do conhecimento.']
+        'pca' => ['name' => 'Programa Comunicacao Ativa (PCA)', 'icon' => 'comments', 'color' => '#f39c12',
+            'desc' => 'Desenvolvimento da comunicacao e expressao verbal da crianca por meio de atividades dirigidas.']
     ];
 ?>
 

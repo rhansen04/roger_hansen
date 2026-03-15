@@ -26,18 +26,28 @@
             <div class="row">
                 <div class="col-md-5 mb-3">
                     <label class="form-label fw-bold">Aluno <span class="text-danger">*</span></label>
-                    <select name="student_id" id="student_id" class="form-select" required>
-                        <option value="">Selecione um aluno</option>
-                        <?php foreach ($students as $student): ?>
-                            <option value="<?php echo $student['id']; ?>"
-                                <?php echo ($selectedStudentId == $student['id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($student['name']); ?>
-                                <?php if (!empty($student['school_name'])): ?>
-                                    - <?php echo htmlspecialchars($student['school_name']); ?>
-                                <?php endif; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if (!empty($selectedStudentId)):
+                        // Encontrar nome do aluno selecionado
+                        $selectedName = '';
+                        foreach ($students as $s) {
+                            if ($s['id'] == $selectedStudentId) { $selectedName = $s['name']; break; }
+                        }
+                    ?>
+                        <input type="hidden" name="student_id" id="student_id" value="<?php echo $selectedStudentId; ?>">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($selectedName); ?>" readonly>
+                    <?php else: ?>
+                        <select name="student_id" id="student_id" class="form-select" required>
+                            <option value="">Selecione um aluno</option>
+                            <?php foreach ($students as $student): ?>
+                                <option value="<?php echo $student['id']; ?>">
+                                    <?php echo htmlspecialchars($student['name']); ?>
+                                    <?php if (!empty($student['school_name'])): ?>
+                                        - <?php echo htmlspecialchars($student['school_name']); ?>
+                                    <?php endif; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label fw-bold">Semestre <span class="text-danger">*</span></label>
@@ -104,31 +114,133 @@
             <div class="tab-content pt-4" id="axesTabContent">
                 <div class="tab-pane fade show active" id="panel-general" role="tabpanel">
                     <label class="form-label fw-bold">Observacao Geral</label>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-general" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-general">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Quais atividades, objetos ou brinquedos a crianca demonstra maior interesse em explorar?</li>
+                                    <li>Quais sao suas facilidades e dificuldades?</li>
+                                    <li>Como a crianca interage com os colegas e professores?</li>
+                                    <li>Em que atividades a crianca demonstra autonomia? O que faz por conta propria?</li>
+                                    <li>Como a crianca lida com situacoes desafiadoras?</li>
+                                    <li>Como a crianca expressa suas emocoes?</li>
+                                    <li>Quais sao as caracteristicas mais marcantes no comportamento da crianca?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <textarea name="observation_general" class="form-control" rows="5"
                         placeholder="Registre aqui observacoes gerais sobre o desenvolvimento do aluno neste periodo..."></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-movement" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade de Movimento</label>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-movement" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-movement">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Prudencia: Como a crianca se movimenta? E cuidadosa?</li>
+                                    <li>Persistencia: Insiste quando enfrenta dificuldades?</li>
+                                    <li>Medo e Coragem: Apresenta medos excessivos ou enfrenta desafios?</li>
+                                    <li>Qualidade do Movimento: Movimentos equilibrados, precisos, tensos ou relaxados?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <textarea name="axis_movement" class="form-control" rows="5"
                         placeholder="Descreva o desenvolvimento do aluno nas atividades de movimento..."></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-manual" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade Manual</label>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-manual" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-manual">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Capacidade de Brincar: A crianca brinca e se diverte? Brinca sozinha?</li>
+                                    <li>Concentracao: Concentra-se nos brinquedos e atividades manuais?</li>
+                                    <li>Variedade: Explora diferentes tipos de brinquedos e atividades?</li>
+                                    <li>Profundidade: Brinca mais tempo com um mesmo brinquedo?</li>
+                                    <li>Interatividade: Como a crianca interage com os brinquedos e com outras criancas durante as atividades manuais?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <textarea name="axis_manual" class="form-control" rows="5"
                         placeholder="Descreva o desenvolvimento do aluno nas atividades manuais..."></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-music" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade Musical</label>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-music" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-music">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Preferencias Musicais: Quais sao as preferencias da crianca em relacao a tipos sonoros, musicas e instrumentos?</li>
+                                    <li>Sincronia: A crianca acompanha os movimentos e sons de forma sincronizada?</li>
+                                    <li>Canto: A crianca canta ou cantarola sozinha?</li>
+                                    <li>Concentracao: Como e a concentracao da crianca durante atividades musicais?</li>
+                                    <li>Reacoes: Quais sao as reacoes da crianca a diferentes sons e musicas?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <textarea name="axis_music" class="form-control" rows="5"
                         placeholder="Descreva o desenvolvimento do aluno nas atividades musicais..."></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-stories" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade de Contos</label>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-stories" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-stories">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Reacoes Corporais e Faciais: Como a crianca reage aos contos?</li>
+                                    <li>Expressoes de Emocoes: Como a crianca expressa emocoes durante os contos?</li>
+                                    <li>Preferencias: Quais sao as preferencias da crianca em relacao a sons, rimas, momentos dos contos e historias?</li>
+                                    <li>Imitacao: A crianca imita gestos e palavras dos contos?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <textarea name="axis_stories" class="form-control" rows="5"
                         placeholder="Descreva o desenvolvimento do aluno nas atividades de contos..."></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-pca" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Programa Comunicacao Ativa</label>
+                    <div class="mb-2">
+                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-pca" role="button">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
+                        </a>
+                        <div class="collapse" id="guide-pca">
+                            <div class="card card-body bg-light border-0 mt-1 small">
+                                <ul class="mb-0 ps-3">
+                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Capacidade de compreender palavras: Entende os significados das palavras?</li>
+                                    <li>Capacidade de expressar palavras: Expressa palavras com sentido correto?</li>
+                                    <li>Usa palavras trabalhadas no seu dia a dia?</li>
+                                    <li>Consegue expressar em palavras o que esta sentindo ou pensando?</li>
+                                    <li>Entende o sentido das historias de conversar?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <textarea name="axis_pca" class="form-control" rows="5"
                         placeholder="Descreva o desenvolvimento do aluno no Programa Comunicacao Ativa..."></textarea>
                 </div>
@@ -158,14 +270,16 @@ document.getElementById('observationForm').addEventListener('submit', function(e
     if (!studentId) {
         e.preventDefault();
         alert('Por favor, selecione um aluno.');
-        document.getElementById('student_id').focus();
+        var el = document.getElementById('student_id');
+        if (el.tagName === 'SELECT') el.focus();
         return false;
     }
 });
 
-// Select2 para busca de alunos (se disponivel)
-if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
-    jQuery('#student_id').select2({
+// Select2 para busca de alunos (se disponivel e nao for hidden)
+var studentSelect = document.querySelector('select#student_id');
+if (studentSelect && typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    jQuery(studentSelect).select2({
         placeholder: 'Digite para buscar um aluno...',
         allowClear: true
     });

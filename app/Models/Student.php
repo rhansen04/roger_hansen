@@ -64,7 +64,7 @@ class Student
             $stmt = $this->db->prepare($sql);
             $now = date('Y-m-d H:i:s');
 
-            return $stmt->execute([
+            $result = $stmt->execute([
                 ':name' => $data['name'],
                 ':birth_date' => $data['birth_date'],
                 ':school_id' => $data['school_id'],
@@ -72,6 +72,11 @@ class Student
                 ':created_at' => $now,
                 ':updated_at' => $now
             ]);
+
+            if ($result) {
+                return $this->db->lastInsertId();
+            }
+            return false;
         } catch (PDOException $e) {
             error_log("Erro ao criar aluno: " . $e->getMessage());
             return false;

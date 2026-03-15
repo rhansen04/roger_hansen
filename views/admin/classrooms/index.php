@@ -37,7 +37,6 @@
                         <th class="ps-4 py-3">ID</th>
                         <th class="py-3">Nome</th>
                         <th class="py-3">Alunos</th>
-                        <th class="py-3">Escola</th>
                         <th class="py-3">Professor</th>
                         <th class="py-3">Faixa Etária</th>
                         <th class="py-3">Período</th>
@@ -49,7 +48,7 @@
                 <tbody>
                     <?php if (empty($classrooms)): ?>
                         <tr>
-                            <td colspan="10" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="fas fa-chalkboard fa-3x mb-3"></i><br>
                                 Nenhuma turma cadastrada.
                             </td>
@@ -70,7 +69,6 @@
                                     <i class="fas fa-users me-1"></i><?= $studentCounts[$c['id']] ?? 0 ?>
                                 </span>
                             </td>
-                            <td><?= htmlspecialchars($c['school_name'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($c['teacher_name'] ?? '-') ?></td>
                             <td><span class="badge bg-info"><?= $c['age_group'] ?> anos</span></td>
                             <td><?= $periodLabels[$c['period']] ?? $c['period'] ?></td>
