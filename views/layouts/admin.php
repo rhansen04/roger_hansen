@@ -294,36 +294,36 @@
                 <?php if ($realRole === 'admin'): ?>
                 <!-- Simulador de Perfil -->
                 <div class="dropdown me-2">
-                    <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Simular Perfil">
+                    <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Simular Perfil"
+                        style="background:var(--primary-color);color:#fff;border:none;font-weight:600;">
                         <i class="fas fa-theater-masks me-1"></i><span class="d-none d-md-inline">Simular Perfil</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><h6 class="dropdown-header">Simular visao de:</h6></li>
-                        <li>
-                            <form method="POST" action="/admin/simulate-role" class="d-inline">
-                                <button type="submit" name="simulated_role" value="professor" class="dropdown-item <?php echo ($isSimulating && $role === 'professor') ? 'active' : ''; ?>">
+                    <div class="dropdown-menu dropdown-menu-end shadow-lg p-0" style="min-width:220px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.15);">
+                        <div style="background:var(--primary-color);color:#fff;padding:10px 16px;font-size:.8rem;font-weight:700;letter-spacing:.5px;">
+                            <i class="fas fa-theater-masks me-1"></i> SIMULAR VISAO DE:
+                        </div>
+                        <div style="padding:8px;">
+                            <form method="POST" action="/admin/simulate-role">
+                                <button type="submit" name="simulated_role" value="professor" class="btn btn-sm w-100 text-start mb-1 <?php echo ($isSimulating && $role === 'professor') ? 'btn-primary' : 'btn-outline-secondary'; ?>" style="font-weight:600;">
                                     <i class="fas fa-chalkboard-teacher me-2"></i>Professor
                                 </button>
                             </form>
-                        </li>
-                        <li>
-                            <form method="POST" action="/admin/simulate-role" class="d-inline">
-                                <button type="submit" name="simulated_role" value="coordenador" class="dropdown-item <?php echo ($isSimulating && $role === 'coordenador') ? 'active' : ''; ?>">
+                            <form method="POST" action="/admin/simulate-role">
+                                <button type="submit" name="simulated_role" value="coordenador" class="btn btn-sm w-100 text-start <?php echo ($isSimulating && $role === 'coordenador') ? 'btn-primary' : 'btn-outline-secondary'; ?>" style="font-weight:600;">
                                     <i class="fas fa-user-tie me-2"></i>Coordenador
                                 </button>
                             </form>
-                        </li>
+                        </div>
                         <?php if ($isSimulating): ?>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="/admin/simulate-role/reset" class="d-inline">
-                                <button type="submit" class="dropdown-item text-primary fw-bold">
-                                    <i class="fas fa-undo me-2"></i>Voltar para Admin
+                        <div style="border-top:1px solid rgba(0,0,0,.1);padding:8px;">
+                            <form method="POST" action="/admin/simulate-role/reset">
+                                <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">
+                                    <i class="fas fa-undo me-1"></i> Voltar para Admin
                                 </button>
                             </form>
-                        </li>
+                        </div>
                         <?php endif; ?>
-                    </ul>
+                    </div>
                 </div>
                 <?php endif; ?>
                 <button class="btn btn-help-premium me-2" onclick="HelpTours.start()" title="Tour desta página"><i class="fas fa-question-circle"></i><span class="d-none d-md-inline">Ajuda</span></button>
@@ -357,14 +357,15 @@
     </nav>
 
     <?php if (!empty($_SESSION['simulated_role']) && ($_SESSION['user_role'] ?? '') === 'admin'): ?>
-    <div class="alert alert-warning d-flex align-items-center justify-content-between mb-3 py-2 px-3 shadow-sm" style="position:sticky;top:0;z-index:1030;">
+    <div class="d-flex align-items-center justify-content-between mb-3 py-2 px-3 rounded shadow-sm"
+        style="background:linear-gradient(135deg, var(--primary-color), var(--dark-teal));color:#fff;position:sticky;top:0;z-index:1030;">
         <div>
             <i class="fas fa-theater-masks me-2"></i>
             <strong>Simulando visao de <?php echo strtoupper($_SESSION['simulated_role']); ?></strong>
-            <span class="ms-2 text-muted small">Operacoes de escrita usam seu perfil real (admin).</span>
+            <span class="ms-2 opacity-75" style="font-size:.85rem;">Operacoes de escrita usam seu perfil real (admin).</span>
         </div>
         <form method="POST" action="/admin/simulate-role/reset" class="d-inline">
-            <button type="submit" class="btn btn-sm btn-outline-dark">
+            <button type="submit" class="btn btn-sm btn-light fw-bold">
                 <i class="fas fa-undo me-1"></i>Voltar para Admin
             </button>
         </form>

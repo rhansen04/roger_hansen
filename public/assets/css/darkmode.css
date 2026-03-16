@@ -353,6 +353,32 @@
     color: #fff !important;
 }
 
+/* ===== ROLE SIMULATOR DROPDOWN ===== */
+[data-theme="dark"] .dropdown-menu .btn-outline-secondary {
+    color: #e0e0e0 !important;
+    border-color: #4a5a7c !important;
+}
+[data-theme="dark"] .dropdown-menu .btn-outline-secondary:hover {
+    background-color: #2a3a5c !important;
+    color: #fff !important;
+    border-color: #6a7a9c !important;
+}
+[data-theme="dark"] .dropdown-menu .btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .dropdown-item {
+    color: #e0e0e0 !important;
+}
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: #253555 !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .dropdown-header {
+    color: #9a9a9a !important;
+}
+
 /* ===== DRIVER.JS TOUR POPOVER (DARK MODE) ===== */
 [data-theme="dark"] .driver-popover,
 [data-theme="dark"] div.driver-popover,
