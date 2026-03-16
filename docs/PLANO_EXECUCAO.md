@@ -739,3 +739,12 @@ Fase 0 (base) → Fase 1 (observações) → Fase 3 (banco de imagens)
 
 > Registro centralizado em arquivo único: [`docs/REGISTRO_EXECUCAO.md`](REGISTRO_EXECUCAO.md)
 > Cada tarefa tem seu log de execução atualizado conforme é implementada.
+
+## PÓS-PLANO — REVISÕES DE FEEDBACK
+
+| Revisão | Data | Tarefas | Origem | Docs |
+|---------|------|---------|--------|------|
+| Revisão 01 | 2026-03-15 | 7/7 ✅ | Roger Hansen (coordenador) | [`Revisao_01/`](Revisao_01/) |
+| Revisão 02 | 2026-03-16 | 9/9 ✅ | Larissa (coord. pedagógica) | [`Revisao_02/`](Revisao_02/) |
+
+**Total geral:** 43 tarefas implementadas (27 plano + 7 R1 + 9 R2)

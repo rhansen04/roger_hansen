@@ -290,8 +290,63 @@
 
 ---
 
+## REVISÃO 01 — Feedback do Roger Hansen (Coordenador)
+
+**Data:** 2026-03-15 | **Commit:** `954c0f9` | **7 tarefas**
+
+| # | Tarefa | Resumo da Implementação |
+|---|--------|------------------------|
+| R1-1 | Coluna Escola removida da listagem de turmas | View `classrooms/index.php` |
+| R1-2 | Formulário de cadastro de aluno inline na turma | View `classrooms/show.php`, `StudentController` |
+| R1-3 | Aluno pré-selecionado ao criar observação do perfil | `ObservationController::create()`, view `create.php` |
+| R1-4 | Perguntas orientadoras nos 6 eixos | Views `create.php` e `edit.php` com collapsible guides |
+| R1-5 | Nome do eixo "Contos e Histórias" → "Contos" | Views de portfólio |
+| R1-6 | Nome "PCA - Projeto Coletivo" → "Programa Comunicação Ativa (PCA)" | Views de portfólio |
+| R1-7 | Login do Roger corrigido (professor → coordenador) | UPDATE direto no banco |
+
+**Detalhes:** `docs/Revisao_01/TAREFAS_REVISAO_01.md` e `docs/Revisao_01/RETORNO_REVISAO_01.md`
+
+---
+
+## REVISÃO 02 — Feedback da Larissa (Coordenadora Pedagógica)
+
+**Data:** 2026-03-16 | **Commits:** `bf8091b`, `8192a99` | **9 tarefas**
+
+| # | Tarefa | Resumo da Implementação |
+|---|--------|------------------------|
+| R2-01 | Link "Gerenciar Alunos" na edição de turmas | Card com botão em `classrooms/form.php` |
+| R2-02 | Coordenadores podem criar observações | Removido bloqueio em `ObservationController`, views |
+| R2-03 | 6 cards coloridos de eixos na listagem | `observations/index.php` + JS de ativação de tab via `?focus=` |
+| R2-04 | Mensagem de erro melhorada no parecer | `DescriptiveReportController`, `descriptive-reports/create.php` |
+| R2-05 | Visualização quinzenal por dias | Nova view `planning/days.php`, novos métodos `days()`, `dayEdit()`, `dayUpdate()` |
+| R2-06 | Card diário ajustado | Nova view `planning/day_card.php` — sem Identificação, eixos como btn-group toggle |
+| R2-07 | Botão "Finalizar Planejamento" | Método `finalize()`, notificação automática aos coordenadores |
+| R2-08 | Registro Pós-Vivência | Nova view `planning/registration.php`, métodos `registration()`, `saveRegistration()` |
+| R2-09 | Simulador de Perfil (Admin) | `RoleSimulatorController.php`, dropdown na topbar, banner de simulação, dark mode |
+
+**Infraestrutura:**
+- Migration `032_create_planning_daily_entries.sql` executada no banco cloud
+- Novos métodos no `PlanningSubmission` model: `getDailyEntries()`, `findOrCreateDailyEntry()`, `getAnswersForDay()`, `saveAnswerForDay()`
+- 8 novas rotas de planejamento em `index.php`
+- `edit()` do PlanningController redireciona para `/days` (nova entrada principal)
+
+**Help Center atualizado:**
+- 4 novos artigos: Simulador de Perfil, Visualização Quinzenal, Card Diário, Registro Pós-Vivência
+- 5 artigos existentes atualizados (observações, turmas, parecer, planejamento)
+- 4 novas FAQs, 2 FAQs atualizadas
+- Categoria Planejamento reorganizada (8 artigos)
+
+**Detalhes:** `docs/Revisao_02/TAREFAS_REVISAO_02.md` e `docs/Revisao_02/RETORNO_REVISAO_02.md`
+
+---
+
 ## CONCLUSÃO
 
-> **Todas as 27 tarefas do PLANO_EXECUCAO.md (T-0.1 a T-7.5) foram concluídas em 2026-03-12.**
-> Plataforma v2.0 em produção em http://154.38.189.82:8080/
-> Documentação formal de release disponível em `docs/RELEASE_v2_PLATAFORMA_PEDAGOGICA.md`.
+> **Plano original:** 27/27 tarefas (T-0.1 a T-7.5) concluídas em 2026-03-12.
+> **Revisão 01:** 7/7 tarefas concluídas em 2026-03-15.
+> **Revisão 02:** 9/9 tarefas concluídas em 2026-03-16.
+> **Total:** 43 tarefas implementadas.
+>
+> Plataforma v2.0 em produção: https://rogerhansen.com.br
+> Documentação formal de release: `docs/RELEASE_v2_PLATAFORMA_PEDAGOGICA.md`
+> Retorno para usuários: `docs/Revisao_02/RETORNO_REVISAO_02.md`
