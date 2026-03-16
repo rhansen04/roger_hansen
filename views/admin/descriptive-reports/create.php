@@ -49,10 +49,11 @@
                             <label for="semester" class="form-label fw-bold">
                                 <i class="fas fa-calendar-alt me-1 text-primary"></i> Semestre <span class="text-danger">*</span>
                             </label>
+                            <?php $selSemester = $_GET['semester'] ?? ''; ?>
                             <select name="semester" id="semester" class="form-select" required onchange="loadObservations()">
                                 <option value="">Selecione...</option>
-                                <option value="1">1o Semestre</option>
-                                <option value="2">2o Semestre</option>
+                                <option value="1" <?php echo ($selSemester == '1') ? 'selected' : ''; ?>>1o Semestre</option>
+                                <option value="2" <?php echo ($selSemester == '2') ? 'selected' : ''; ?>>2o Semestre</option>
                             </select>
                         </div>
                         <div class="col-md-6">
