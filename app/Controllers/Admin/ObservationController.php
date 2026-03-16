@@ -53,15 +53,6 @@ class ObservationController
      */
     public function create()
     {
-        $userRole = $_SESSION['user_role'] ?? 'professor';
-
-        // Coordenador nao cria observacoes
-        if ($userRole === 'coordenador') {
-            $_SESSION['error_message'] = 'Coordenadores nao podem criar observacoes.';
-            header('Location: /admin/observations');
-            exit;
-        }
-
         $studentModel = new Student();
         $students = $studentModel->all();
 
@@ -85,14 +76,6 @@ class ObservationController
      */
     public function store()
     {
-        $userRole = $_SESSION['user_role'] ?? 'professor';
-
-        if ($userRole === 'coordenador') {
-            $_SESSION['error_message'] = 'Coordenadores nao podem criar observacoes.';
-            header('Location: /admin/observations');
-            exit;
-        }
-
         // Validacoes
         if (empty($_POST['student_id']) || empty($_POST['semester']) || empty($_POST['year'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatorios (aluno, semestre e ano).';

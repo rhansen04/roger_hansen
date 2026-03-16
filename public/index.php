@@ -62,6 +62,7 @@ use App\Controllers\Admin\DescriptiveReportController as AdminDescriptiveReportC
 use App\Controllers\Admin\ImageBankController as AdminImageBankController;
 use App\Controllers\Admin\PortfolioController as AdminPortfolioController;
 use App\Controllers\Admin\SupportMaterialController as AdminSupportMaterialController;
+use App\Controllers\Admin\RoleSimulatorController as AdminRoleSimulatorController;
 
 $router = new Router();
 
@@ -115,6 +116,10 @@ if (strpos($uri, '/minha-area') === 0) {
 }
 
 $router->get('/admin/dashboard', [DashboardController::class, 'index']);
+
+// Rotas Admin - Simulador de Perfil
+$router->post('/admin/simulate-role', [AdminRoleSimulatorController::class, 'simulate']);
+$router->post('/admin/simulate-role/reset', [AdminRoleSimulatorController::class, 'reset']);
 
 // Rotas de Alunos
 $router->get('/admin/students', [AdminStudentController::class, 'index']);
@@ -304,6 +309,13 @@ $router->get('/admin/planning/create', [AdminPlanningController::class, 'create'
 $router->get('/admin/planning/calendar', [AdminPlanningController::class, 'calendar']);
 $router->post('/admin/planning', [AdminPlanningController::class, 'store']);
 $router->post('/admin/planning/routine/{id}/delete', [AdminPlanningController::class, 'deleteRoutineEntry']);
+$router->get('/admin/planning/{id}/days', [AdminPlanningController::class, 'days']);
+$router->post('/admin/planning/{id}/days', [AdminPlanningController::class, 'days']);
+$router->get('/admin/planning/{id}/day/{date}', [AdminPlanningController::class, 'dayEdit']);
+$router->post('/admin/planning/{id}/day/{date}', [AdminPlanningController::class, 'dayUpdate']);
+$router->get('/admin/planning/{id}/registration', [AdminPlanningController::class, 'registration']);
+$router->post('/admin/planning/{id}/registration', [AdminPlanningController::class, 'saveRegistration']);
+$router->post('/admin/planning/{id}/finalize', [AdminPlanningController::class, 'finalize']);
 $router->get('/admin/planning/{id}/routine', [AdminPlanningController::class, 'weeklyRoutine']);
 $router->post('/admin/planning/{id}/routine', [AdminPlanningController::class, 'saveRoutine']);
 $router->get('/admin/planning/{id}', [AdminPlanningController::class, 'show']);

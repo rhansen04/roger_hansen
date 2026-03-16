@@ -184,6 +184,16 @@ Equipe Pedagogica';
             }
         }
 
+        // Se nao encontrou observacao, avisar com link para criar
+        if (empty($studentText)) {
+            $studentModel2 = new Student();
+            $studentInfo = $studentModel2->find($studentId);
+            $studentName = $studentInfo ? htmlspecialchars($studentInfo['name']) : 'este aluno';
+            $_SESSION['error_message'] = 'Nenhuma observacao encontrada para ' . $studentName . ' no ' . $semester . 'o semestre de ' . $year . '. <a href="/admin/observations/create?student_id=' . $studentId . '" class="alert-link">Criar observacao primeiro</a>.';
+            header('Location: /admin/descriptive-reports/create');
+            exit;
+        }
+
         $reportModel = new DescriptiveReport();
         $newId = $reportModel->create([
             'student_id' => $studentId,

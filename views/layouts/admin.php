@@ -204,7 +204,9 @@
         <?php
             $uri = strtok($_SERVER['REQUEST_URI'] ?? '', '?');
             $isActive = function($path) use ($uri) { return str_starts_with($uri, $path) ? 'active' : ''; };
-            $role = $_SESSION['user_role'] ?? 'admin';
+            $realRole = $_SESSION['user_role'] ?? 'admin';
+            $role = (!empty($_SESSION['simulated_role']) && $realRole === 'admin') ? $_SESSION['simulated_role'] : $realRole;
+            $isSimulating = ($realRole === 'admin' && !empty($_SESSION['simulated_role']));
             $isAdmin = ($role === 'admin');
             $isProfessor = ($role === 'professor');
             $isCoordenador = ($role === 'coordenador');
@@ -282,10 +284,48 @@
                 <span class="navbar-text mb-0">
                     <i class="fas fa-user-circle me-2 text-primary"></i>
                     Logado como: <strong><?php echo $_SESSION['user_name'] ?? 'Usuário'; ?></strong>
-                    <span class="badge bg-secondary ms-2 text-uppercase"><?php echo $_SESSION['user_role'] ?? 'admin'; ?></span>
+                    <span class="badge bg-secondary ms-2 text-uppercase"><?php echo $role; ?></span>
+                    <?php if ($isSimulating): ?>
+                        <span class="badge bg-warning text-dark ms-1"><i class="fas fa-theater-masks me-1"></i>Simulando</span>
+                    <?php endif; ?>
                 </span>
             </div>
             <div class="d-flex align-items-center">
+                <?php if ($realRole === 'admin'): ?>
+                <!-- Simulador de Perfil -->
+                <div class="dropdown me-2">
+                    <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Simular Perfil">
+                        <i class="fas fa-theater-masks me-1"></i><span class="d-none d-md-inline">Simular Perfil</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><h6 class="dropdown-header">Simular visao de:</h6></li>
+                        <li>
+                            <form method="POST" action="/admin/simulate-role" class="d-inline">
+                                <button type="submit" name="simulated_role" value="professor" class="dropdown-item <?php echo ($isSimulating && $role === 'professor') ? 'active' : ''; ?>">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>Professor
+                                </button>
+                            </form>
+                        </li>
+                        <li>
+                            <form method="POST" action="/admin/simulate-role" class="d-inline">
+                                <button type="submit" name="simulated_role" value="coordenador" class="dropdown-item <?php echo ($isSimulating && $role === 'coordenador') ? 'active' : ''; ?>">
+                                    <i class="fas fa-user-tie me-2"></i>Coordenador
+                                </button>
+                            </form>
+                        </li>
+                        <?php if ($isSimulating): ?>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="/admin/simulate-role/reset" class="d-inline">
+                                <button type="submit" class="dropdown-item text-primary fw-bold">
+                                    <i class="fas fa-undo me-2"></i>Voltar para Admin
+                                </button>
+                            </form>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+                <?php endif; ?>
                 <button class="btn btn-help-premium me-2" onclick="HelpTours.start()" title="Tour desta página"><i class="fas fa-question-circle"></i><span class="d-none d-md-inline">Ajuda</span></button>
 
                 <!-- Notification Bell -->
@@ -315,6 +355,21 @@
             </div>
         </div>
     </nav>
+
+    <?php if (!empty($_SESSION['simulated_role']) && ($_SESSION['user_role'] ?? '') === 'admin'): ?>
+    <div class="alert alert-warning d-flex align-items-center justify-content-between mb-3 py-2 px-3 shadow-sm" style="position:sticky;top:0;z-index:1030;">
+        <div>
+            <i class="fas fa-theater-masks me-2"></i>
+            <strong>Simulando visao de <?php echo strtoupper($_SESSION['simulated_role']); ?></strong>
+            <span class="ms-2 text-muted small">Operacoes de escrita usam seu perfil real (admin).</span>
+        </div>
+        <form method="POST" action="/admin/simulate-role/reset" class="d-inline">
+            <button type="submit" class="btn btn-sm btn-outline-dark">
+                <i class="fas fa-undo me-1"></i>Voltar para Admin
+            </button>
+        </form>
+    </div>
+    <?php endif; ?>
 
     <?php echo $content; ?>
 </div>

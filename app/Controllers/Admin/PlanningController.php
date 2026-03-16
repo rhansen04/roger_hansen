@@ -6,6 +6,7 @@ use App\Models\PlanningSubmission;
 use App\Models\PlanningTemplate;
 use App\Models\PlanningDailyRoutine;
 use App\Models\Classroom;
+use App\Models\Notification;
 
 class PlanningController
 {
@@ -134,6 +135,13 @@ class PlanningController
     }
 
     public function edit($id)
+    {
+        // Redirecionar para a visualizacao de dias (quinzenal)
+        header("Location: /admin/planning/{$id}/days");
+        exit;
+    }
+
+    public function editLegacy($id)
     {
         $subModel = new PlanningSubmission();
         $tplModel = new PlanningTemplate();
@@ -398,6 +406,297 @@ class PlanningController
         }
 
         header("Location: /admin/planning/{$id}/routine");
+        exit;
+    }
+
+    /**
+     * Grid de dias uteis do periodo (visualizacao quinzenal)
+     */
+    public function days($id)
+    {
+        $subModel = new PlanningSubmission();
+        $tplModel = new PlanningTemplate();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        // Calcular dias uteis (seg-sex) entre period_start e period_end
+        $start = new \DateTime($submission['period_start']);
+        $end = new \DateTime($submission['period_end']);
+        $end->modify('+1 day'); // inclusive
+
+        $weekdays = [];
+        $interval = new \DateInterval('P1D');
+        $period = new \DatePeriod($start, $interval, $end);
+        foreach ($period as $day) {
+            $dow = (int)$day->format('N'); // 1=Mon ... 7=Sun
+            if ($dow <= 5) {
+                $weekdays[] = $day->format('Y-m-d');
+            }
+        }
+
+        // Carregar daily entries existentes
+        $entries = $subModel->getDailyEntries($id);
+        $entriesByDate = [];
+        foreach ($entries as $e) {
+            $entriesByDate[$e['entry_date']] = $e;
+        }
+
+        $template = $tplModel->getWithSectionsAndFields($submission['template_id']);
+
+        $dayNames = [1 => 'Seg', 2 => 'Ter', 3 => 'Qua', 4 => 'Qui', 5 => 'Sex'];
+
+        return $this->render('planning/days', [
+            'submission' => $submission,
+            'template' => $template,
+            'weekdays' => $weekdays,
+            'entriesByDate' => $entriesByDate,
+            'dayNames' => $dayNames,
+            'userRole' => $role,
+        ]);
+    }
+
+    /**
+     * Editar um dia especifico do planejamento
+     */
+    public function dayEdit($id, $date)
+    {
+        $subModel = new PlanningSubmission();
+        $tplModel = new PlanningTemplate();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $template = $tplModel->getWithSectionsAndFields($submission['template_id']);
+
+        // Encontrar ou criar daily entry
+        $dailyEntry = $subModel->findOrCreateDailyEntry($id, $date);
+        $answers = $subModel->getAnswersForDay($id, $dailyEntry['id']);
+
+        // Filtrar secoes: excluir Identificacao e secoes de registro
+        $daySections = [];
+        if ($template && !empty($template['sections'])) {
+            foreach ($template['sections'] as $section) {
+                if (!empty($section['is_registration'])) continue;
+                if (stripos($section['title'], 'Identifica') === 0) continue;
+                $daySections[] = $section;
+            }
+        }
+
+        $dayNames = [1 => 'Segunda-feira', 2 => 'Terca-feira', 3 => 'Quarta-feira', 4 => 'Quinta-feira', 5 => 'Sexta-feira'];
+        $dt = new \DateTime($date);
+        $dow = (int)$dt->format('N');
+
+        return $this->render('planning/day_card', [
+            'submission' => $submission,
+            'template' => $template,
+            'sections' => $daySections,
+            'answers' => $answers,
+            'dailyEntry' => $dailyEntry,
+            'date' => $date,
+            'dateFmt' => $dt->format('d/m/Y'),
+            'dayName' => $dayNames[$dow] ?? '',
+        ]);
+    }
+
+    /**
+     * Salvar respostas de um dia especifico
+     */
+    public function dayUpdate($id, $date)
+    {
+        $subModel = new PlanningSubmission();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $dailyEntry = $subModel->findOrCreateDailyEntry($id, $date);
+
+        if (!empty($_POST['answers']) && is_array($_POST['answers'])) {
+            foreach ($_POST['answers'] as $fieldId => $value) {
+                $sectionId = $_POST['answer_sections'][$fieldId] ?? 0;
+
+                if (is_array($value)) {
+                    $answerJson = json_encode(['selected' => array_map('intval', $value)], JSON_UNESCAPED_UNICODE);
+                    $subModel->saveAnswerForDay($id, $fieldId, $sectionId, $dailyEntry['id'], null, $answerJson);
+                } else {
+                    $subModel->saveAnswerForDay($id, $fieldId, $sectionId, $dailyEntry['id'], trim($value), null);
+                }
+            }
+        }
+
+        // Atualizar status do daily entry para draft (tem conteudo)
+        $subModel->updateDailyEntryStatus($dailyEntry['id'], 'filled');
+
+        $_SESSION['success_message'] = 'Dia ' . (new \DateTime($date))->format('d/m') . ' salvo com sucesso!';
+        header("Location: /admin/planning/{$id}/days");
+        exit;
+    }
+
+    /**
+     * Finalizar planejamento (mudar para submitted)
+     */
+    public function finalize($id)
+    {
+        $subModel = new PlanningSubmission();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        if ($submission['status'] !== 'draft') {
+            $_SESSION['error_message'] = 'Apenas planejamentos em rascunho podem ser finalizados.';
+            header("Location: /admin/planning/{$id}/days");
+            exit;
+        }
+
+        $subModel->updateStatus($id, 'submitted');
+
+        // Notificar coordenadores
+        Notification::notifyAllCoordenadores(
+            'planning',
+            'Planejamento enviado para revisao',
+            'O professor ' . ($_SESSION['user_name'] ?? '') . ' enviou o planejamento da turma ' . ($submission['classroom_name'] ?? '') . '.',
+            'planning',
+            $id
+        );
+
+        $_SESSION['success_message'] = 'Planejamento finalizado e enviado para revisao!';
+        header("Location: /admin/planning/{$id}/days");
+        exit;
+    }
+
+    /**
+     * Tela de registro pos-execucao (secoes com is_registration = 1)
+     */
+    public function registration($id)
+    {
+        $subModel = new PlanningSubmission();
+        $tplModel = new PlanningTemplate();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $template = $tplModel->getWithSectionsAndFields($submission['template_id']);
+
+        // Filtrar apenas secoes de registro
+        $regSections = [];
+        if ($template && !empty($template['sections'])) {
+            foreach ($template['sections'] as $section) {
+                if (!empty($section['is_registration'])) {
+                    $regSections[] = $section;
+                }
+            }
+        }
+
+        // Respostas de registro (daily_entry_id IS NULL)
+        $answers = $subModel->getRegistrationAnswers($id);
+
+        return $this->render('planning/registration', [
+            'submission' => $submission,
+            'template' => $template,
+            'sections' => $regSections,
+            'answers' => $answers,
+        ]);
+    }
+
+    /**
+     * Salvar registro pos-execucao
+     */
+    public function saveRegistration($id)
+    {
+        $subModel = new PlanningSubmission();
+
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            $_SESSION['error_message'] = 'Planejamento nao encontrado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $role = $_SESSION['user_role'] ?? 'admin';
+        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Acesso negado.';
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        // Salvar respostas sem daily_entry_id (registro geral)
+        if (!empty($_POST['answers']) && is_array($_POST['answers'])) {
+            foreach ($_POST['answers'] as $fieldId => $value) {
+                $sectionId = $_POST['answer_sections'][$fieldId] ?? 0;
+
+                if (is_array($value)) {
+                    $answerJson = json_encode(['selected' => array_map('intval', $value)], JSON_UNESCAPED_UNICODE);
+                    $subModel->saveAnswer($id, $fieldId, $sectionId, null, $answerJson);
+                } else {
+                    $subModel->saveAnswer($id, $fieldId, $sectionId, trim($value), null);
+                }
+            }
+        }
+
+        $action = $_POST['_action'] ?? 'save';
+        if ($action === 'register' && $submission['status'] === 'submitted') {
+            $subModel->updateStatus($id, 'registered');
+            $_SESSION['success_message'] = 'Registro pos-vivencia finalizado com sucesso!';
+        } else {
+            $_SESSION['success_message'] = 'Registro salvo com sucesso!';
+        }
+
+        header("Location: /admin/planning/{$id}/days");
         exit;
     }
 

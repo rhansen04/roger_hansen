@@ -284,4 +284,28 @@ if (studentSelect && typeof jQuery !== 'undefined' && jQuery.fn.select2) {
         allowClear: true
     });
 }
+
+// Ativar tab via parametro ?focus= da URL
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    var focus = params.get('focus');
+    if (focus) {
+        var tabMap = {
+            'general': 'tab-general',
+            'movement': 'tab-movement',
+            'manual': 'tab-manual',
+            'music': 'tab-music',
+            'stories': 'tab-stories',
+            'pca': 'tab-pca'
+        };
+        var tabId = tabMap[focus];
+        if (tabId) {
+            var tabEl = document.getElementById(tabId);
+            if (tabEl) {
+                var tab = new bootstrap.Tab(tabEl);
+                tab.show();
+            }
+        }
+    }
+})();
 </script>

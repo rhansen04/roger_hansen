@@ -31,6 +31,21 @@
                 <li><strong>Faixa etária e Escola</strong> — podem ser ajustados se houve erro no cadastro inicial</li>
             </ul>
             <p>As alterações são salvas imediatamente ao clicar em <strong>"Salvar"</strong>. O histórico de observações e pareceres dos alunos vinculados não é afetado.</p>
+
+            <h6 class="fw-bold mt-4 mb-3">Acesso rápido aos alunos na edição</h6>
+
+            <p>Ao editar uma turma, o formulário agora exibe um card informativo com o botão <strong>"Gerenciar Alunos"</strong>. Este botão direciona para a página de detalhes da turma, onde você pode:</p>
+            <ul>
+                <li>Ver a lista completa de alunos vinculados (com foto, nome, idade)</li>
+                <li>Adicionar novos alunos à turma</li>
+                <li>Remover alunos da turma</li>
+                <li>Acessar o perfil individual de cada aluno</li>
+            </ul>
+
+            <div class="help-tip">
+                <i class="fas fa-lightbulb me-2"></i>
+                <strong>Dica:</strong> Na listagem de turmas, clicar no <strong>nome da turma</strong> também leva à página de detalhes com a lista de alunos.
+            </div>
         </div>
     </div>
 

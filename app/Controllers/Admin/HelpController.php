@@ -40,6 +40,12 @@ class HelpController
                         'time' => 6,
                         'release' => '2026-03-01',
                     ],
+                    'simulador-perfil' => [
+                        'title' => 'Simulador de Perfil (Admin)',
+                        'summary' => 'Admins podem simular a visão de Professor ou Coordenador sem trocar de conta. Dropdown na barra superior, banner amarelo durante simulação, sem afetar operações de escrita.',
+                        'time' => 4,
+                        'release' => '2026-03-16',
+                    ],
                 ],
             ],
             'dashboard' => [
@@ -76,7 +82,7 @@ class HelpController
                 'articles' => [
                     'gerenciar-turmas' => [
                         'title' => 'Gerenciar Turmas',
-                        'summary' => 'Crie turmas com nome, escola, professor, faixa etária e período. Ative/desative turmas sem perder histórico. Visualize alunos vinculados.',
+                        'summary' => 'Crie turmas com nome, escola, professor, faixa etária e período. Ative/desative turmas sem perder histórico. Na edição, acesse "Gerenciar Alunos" para vincular e visualizar alunos.',
                         'time' => 5,
                         'release' => '2026-03-12',
                     ],
@@ -102,13 +108,13 @@ class HelpController
             ],
             'observacoes' => [
                 'title' => 'Observações Pedagógicas',
-                'description' => 'Registre observações semestrais organizadas por 6 eixos pedagógicos, com salvamento automático, finalização e controle de permissões.',
+                'description' => 'Registre observações semestrais organizadas por 6 eixos pedagógicos com atalhos visuais, salvamento automático, finalização e controle de permissões. Todos os perfis podem criar.',
                 'icon' => 'fas fa-clipboard-list',
                 'color' => '#6f42c1',
                 'articles' => [
                     'criar-observacao' => [
                         'title' => 'Criar uma Observação',
-                        'summary' => 'Selecione aluno, semestre e ano. Preencha os 6 eixos pedagógicos em abas separadas. O sistema previne duplicatas por aluno/semestre.',
+                        'summary' => 'Use os 6 cards coloridos de eixos como atalho ou o botão "Nova Observação". Selecione aluno, semestre e ano. Preencha os eixos em abas separadas. Disponível para todos os perfis.',
                         'time' => 6,
                         'release' => '2026-03-12',
                     ],
@@ -126,7 +132,7 @@ class HelpController
                     ],
                     'permissoes-observacoes' => [
                         'title' => 'Permissões e Fluxo de Revisão',
-                        'summary' => 'Professor cria e edita suas observações. Coordenador visualiza todas e pode reabrir finalizadas. Admin tem acesso total.',
+                        'summary' => 'Todos os perfis (Professor, Coordenador, Admin) podem criar observações. Professor edita as suas. Coordenador visualiza todas, pode reabrir finalizadas. Admin tem acesso total.',
                         'time' => 4,
                         'release' => '2026-03-12',
                     ],
@@ -140,7 +146,7 @@ class HelpController
                 'articles' => [
                     'criar-parecer' => [
                         'title' => 'Criar um Parecer Descritivo',
-                        'summary' => 'Selecione aluno e observação finalizada. O sistema compila automaticamente os textos dos 6 eixos em uma narrativa unificada.',
+                        'summary' => 'Selecione aluno e observação. O sistema compila automaticamente os textos dos 6 eixos. Se não houver observações, uma mensagem clara orienta a criar uma primeiro.',
                         'time' => 6,
                         'release' => '2026-03-12',
                     ],
@@ -212,15 +218,27 @@ class HelpController
             ],
             'planejamento' => [
                 'title' => 'Planejamento Pedagógico',
-                'description' => 'Crie planejamentos com templates personalizáveis, campos condicionais, calendário mensal, rotina diária e fluxo de aprovação.',
+                'description' => 'Crie planejamentos quinzenais com templates, visualize e preencha por dia, finalize para revisão e registre a pós-vivência.',
                 'icon' => 'fas fa-calendar-alt',
                 'color' => '#6f42c1',
                 'articles' => [
                     'criar-planejamento' => [
                         'title' => 'Criar um Planejamento',
-                        'summary' => 'Escolha template, vincule turma, defina período semanal e preencha as seções geradas automaticamente pelo template.',
-                        'time' => 6,
-                        'release' => '2026-03-01',
+                        'summary' => 'Escolha template, vincule turma, defina período quinzenal. Após criar, você será direcionado para a grade de dias úteis do período.',
+                        'time' => 5,
+                        'release' => '2026-03-16',
+                    ],
+                    'visualizacao-quinzenal' => [
+                        'title' => 'Visualização Quinzenal por Dias',
+                        'summary' => 'Grade de cards com os dias úteis (seg-sex) do período. Cada dia mostra status (vazio, rascunho, preenchido) e é clicável para abrir o formulário diário.',
+                        'time' => 5,
+                        'release' => '2026-03-16',
+                    ],
+                    'card-diario' => [
+                        'title' => 'Preenchimento do Dia (Card Diário)',
+                        'summary' => 'Formulário diário sem seção "Identificação". Eixos renomeados para "Eixo de Atividades" com seleção por botões toggle horizontais. Palavra do dia mantida.',
+                        'time' => 5,
+                        'release' => '2026-03-16',
                     ],
                     'usar-templates' => [
                         'title' => 'Templates de Planejamento',
@@ -229,22 +247,28 @@ class HelpController
                         'release' => '2026-03-01',
                     ],
                     'fluxo-status' => [
-                        'title' => 'Fluxo de Status',
-                        'summary' => 'Entenda os 3 estados: Rascunho (professor edita), Enviado (coordenação avalia) e Registrado (pós-vivência, somente leitura).',
-                        'time' => 3,
-                        'release' => '2026-03-01',
+                        'title' => 'Fluxo de Status e Finalização',
+                        'summary' => 'Rascunho → Enviado (botão "Finalizar Planejamento" notifica coordenadores) → Registrado (pós-vivência concluída). Cada etapa tem ações específicas.',
+                        'time' => 4,
+                        'release' => '2026-03-16',
+                    ],
+                    'registro-pos-vivencia' => [
+                        'title' => 'Registro Pós-Vivência',
+                        'summary' => 'Após finalizar o planejamento, preencha o registro do período: síntese do desenvolvimento, execução e justificativa. Cobre a quinzena inteira.',
+                        'time' => 4,
+                        'release' => '2026-03-16',
+                    ],
+                    'calendario-rotina' => [
+                        'title' => 'Calendário e Rotina Semanal',
+                        'summary' => 'Visualize planejamentos no calendário mensal. Crie rotinas diárias com horários e atividades para cada dia da semana (Seg-Sex).',
+                        'time' => 5,
+                        'release' => '2026-03-12',
                     ],
                     'dependencia-campos' => [
                         'title' => 'Dependência entre Campos',
                         'summary' => 'Configure campos que aparecem/ocultam conforme valor de outro campo. Ex: Eixo "Musical" → só objetivos musicais visíveis.',
                         'time' => 5,
                         'release' => '2026-03-01',
-                    ],
-                    'calendario-rotina' => [
-                        'title' => 'Calendário e Rotina Diária',
-                        'summary' => 'Visualize planejamentos no calendário mensal. Crie rotinas diárias com horários e atividades para cada dia da semana (Seg-Sex).',
-                        'time' => 5,
-                        'release' => '2026-03-12',
                     ],
                 ],
             ],
@@ -375,7 +399,7 @@ class HelpController
             ],
             [
                 'question' => 'O que o Professor pode fazer que o Coordenador não pode?',
-                'answer' => 'O Professor <strong>cria e edita</strong> observações, pareceres, portfólios e planejamentos. O Coordenador <strong>visualiza tudo</strong> mas não cria — ele pode <strong>reabrir</strong> documentos finalizados e <strong>solicitar revisão</strong> com notas explicativas.',
+                'answer' => 'O Professor <strong>cria e edita</strong> observações, pareceres, portfólios e planejamentos. O Coordenador <strong>também pode criar observações</strong>, além de <strong>visualizar tudo</strong>, <strong>reabrir</strong> documentos finalizados e <strong>solicitar revisão</strong> com notas explicativas.',
             ],
             [
                 'question' => 'Posso excluir minha própria conta de admin?',
@@ -465,7 +489,7 @@ class HelpController
             ],
             [
                 'question' => 'Como funciona o Calendário de Planejamentos?',
-                'answer' => 'O calendário mostra uma visão mensal com todas as semanas. Cada semana mostra os planejamentos vinculados (se existirem) com badges de status. Você pode criar novos planejamentos diretamente do calendário clicando no botão "+" da semana.',
+                'answer' => 'O calendário mostra uma visão mensal com todas as semanas. Cada semana mostra os planejamentos vinculados (se existirem) com badges de status. Para editar um planejamento, clique nele para acessar a <strong>grade de dias úteis</strong> do período.',
             ],
             [
                 'question' => 'O que é a Rotina Diária?',
@@ -523,6 +547,24 @@ class HelpController
             [
                 'question' => 'Como vincular responsáveis a alunos?',
                 'answer' => 'Em <strong>Cadastros → Responsáveis</strong>, clique em <strong>"Vincular Filhos"</strong>. Selecione o aluno e o tipo de parentesco (Pai, Mãe ou Responsável). O responsável terá acesso em <code>/minha-area</code>.',
+            ],
+            // --- Simulador de Perfil ---
+            [
+                'question' => 'O que é o Simulador de Perfil?',
+                'answer' => 'É um recurso exclusivo para <strong>Administradores</strong> que permite visualizar a plataforma como se fosse um Professor ou Coordenador. Acesse pelo dropdown <strong>"Simular Perfil"</strong> na barra superior. Um banner amarelo indica que a simulação está ativa. Importante: a simulação afeta apenas a <strong>visualização</strong> (menus e dashboard) — operações de escrita continuam usando o perfil real.',
+            ],
+            // --- Planejamento Quinzenal ---
+            [
+                'question' => 'Como funciona a visualização quinzenal do planejamento?',
+                'answer' => 'Ao editar um planejamento, você vê uma <strong>grade com os dias úteis</strong> (segunda a sexta) do período definido. Cada dia é um card clicável que mostra seu status: <strong>vazio</strong> (cinza), <strong>rascunho</strong> (amarelo) ou <strong>preenchido</strong> (verde). O dia atual é destacado com badge "HOJE".',
+            ],
+            [
+                'question' => 'Como finalizo um planejamento?',
+                'answer' => 'Na tela de dias, clique no botão <strong>"Finalizar Planejamento"</strong> (visível apenas quando o status é Rascunho). O status muda para "Enviado" e todos os <strong>coordenadores recebem uma notificação</strong> automática. Após o envio, os dias não podem mais ser editados.',
+            ],
+            [
+                'question' => 'O que é o Registro Pós-Vivência?',
+                'answer' => 'Após finalizar o planejamento (status "Enviado"), aparece o botão <strong>"Registro Pós-Vivência"</strong>. É um formulário separado com campos de registro do período (síntese, execução, justificativa). Ao finalizar o registro, o status muda para <strong>"Registrado"</strong> — estado final do planejamento.',
             ],
         ];
     }

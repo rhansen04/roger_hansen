@@ -18,7 +18,7 @@
             <tr>
                 <td class="text-start"><strong>Criar observação</strong></td>
                 <td><span class="text-success"><i class="fas fa-check-circle"></i></span> Seus alunos</td>
-                <td><span class="text-danger"><i class="fas fa-times-circle"></i></span></td>
+                <td><span class="text-success"><i class="fas fa-check-circle"></i></span> Qualquer aluno</td>
                 <td><span class="text-success"><i class="fas fa-check-circle"></i></span> Qualquer aluno</td>
             </tr>
             <tr>
@@ -92,12 +92,12 @@
         <div class="step-number"><i class="fas fa-user-tie"></i></div>
         <div class="step-content">
             <h6>Coordenador</h6>
-            <p>O coordenador tem papel de supervisão pedagógica. Pode visualizar tudo, mas não interfere diretamente nos registros dos professores:</p>
+            <p>O coordenador tem papel de supervisão pedagógica e também pode criar observações para qualquer aluno:</p>
             <ul>
+                <li><strong>Criar observações</strong> — pode registrar observações para qualquer aluno de qualquer turma</li>
                 <li><strong>Visualizar todas as observações</strong> — acesso completo de leitura a todas as observações de todos os professores</li>
                 <li><strong>Filtrar por professor</strong> — pode selecionar um professor específico no filtro para ver apenas as observações daquele professor</li>
                 <li><strong>Reabrir observações finalizadas</strong> — sua ação exclusiva mais importante (veja detalhes abaixo)</li>
-                <li><strong>Não pode criar</strong> — o coordenador não cria observações, pois esse é o papel do professor</li>
                 <li><strong>Não pode editar</strong> — o coordenador não modifica textos dos eixos, garantindo que o registro reflita a percepção original do professor</li>
             </ul>
         </div>

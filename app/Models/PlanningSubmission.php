@@ -181,4 +181,104 @@ class PlanningSubmission
     {
         return $this->all(['classroom_id' => $classroomId]);
     }
+
+    // --- Daily Entries ---
+
+    public function getDailyEntries($submissionId)
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM planning_daily_entries WHERE submission_id = ? ORDER BY entry_date");
+            $stmt->execute([$submissionId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar daily entries: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function findOrCreateDailyEntry($submissionId, $date)
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM planning_daily_entries WHERE submission_id = ? AND entry_date = ?");
+            $stmt->execute([$submissionId, $date]);
+            $entry = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($entry) return $entry;
+
+            $stmt = $this->db->prepare("INSERT INTO planning_daily_entries (submission_id, entry_date, status) VALUES (?, ?, 'empty')");
+            $stmt->execute([$submissionId, $date]);
+            $id = $this->db->lastInsertId();
+
+            return ['id' => $id, 'submission_id' => $submissionId, 'entry_date' => $date, 'status' => 'empty'];
+        } catch (PDOException $e) {
+            error_log("Erro ao criar daily entry: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function getAnswersForDay($submissionId, $dailyEntryId)
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM planning_submission_answers WHERE submission_id = ? AND daily_entry_id = ?");
+            $stmt->execute([$submissionId, $dailyEntryId]);
+            $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $indexed = [];
+            foreach ($answers as $a) {
+                $indexed[$a['field_id']] = $a;
+            }
+            return $indexed;
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar respostas do dia: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function saveAnswerForDay($submissionId, $fieldId, $sectionId, $dailyEntryId, $answerText, $answerJson = null)
+    {
+        try {
+            $sql = "INSERT INTO planning_submission_answers (submission_id, field_id, section_id, daily_entry_id, answer_text, answer_json)
+                    VALUES (:submission_id, :field_id, :section_id, :daily_entry_id, :answer_text, :answer_json)
+                    ON DUPLICATE KEY UPDATE answer_text = VALUES(answer_text), answer_json = VALUES(answer_json)";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':submission_id' => $submissionId,
+                ':field_id' => $fieldId,
+                ':section_id' => $sectionId,
+                ':daily_entry_id' => $dailyEntryId,
+                ':answer_text' => $answerText,
+                ':answer_json' => $answerJson
+            ]);
+        } catch (PDOException $e) {
+            error_log("Erro ao salvar resposta do dia: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateDailyEntryStatus($entryId, $status)
+    {
+        try {
+            $stmt = $this->db->prepare("UPDATE planning_daily_entries SET status = ?, updated_at = NOW() WHERE id = ?");
+            return $stmt->execute([$status, $entryId]);
+        } catch (PDOException $e) {
+            error_log("Erro ao atualizar status daily entry: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getRegistrationAnswers($submissionId)
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM planning_submission_answers WHERE submission_id = ? AND daily_entry_id IS NULL");
+            $stmt->execute([$submissionId]);
+            $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $indexed = [];
+            foreach ($answers as $a) {
+                $indexed[$a['field_id']] = $a;
+            }
+            return $indexed;
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar respostas de registro: " . $e->getMessage());
+            return [];
+        }
+    }
 }

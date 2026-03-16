@@ -89,7 +89,7 @@
                         <input type="hidden" name="observation_id" id="observation_id" value="<?php echo $selectedObservationId ?? ''; ?>">
                     </div>
 
-                    <?php if (!empty($observations)): ?>
+                    <?php if (!empty($selectedStudentId) && !empty($observations)): ?>
                     <!-- Mostrar observacoes pre-carregadas (se veio com student_id na URL) -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">
@@ -100,14 +100,16 @@
                                 <input class="form-check-input" type="radio" name="observation_id" value="<?php echo $obs['id']; ?>" id="obs_<?php echo $obs['id']; ?>"
                                     <?php echo ($selectedObservationId == $obs['id']) ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="obs_<?php echo $obs['id']; ?>">
-                                    <strong><?php echo htmlspecialchars($obs['title']); ?></strong>
+                                    <strong><?php echo htmlspecialchars($obs['title'] ?? 'Observacao #' . $obs['id']); ?></strong>
                                     <br><small class="text-muted">
-                                        <?php echo date('d/m/Y', strtotime($obs['observation_date'])); ?>
-                                        &middot; <?php echo htmlspecialchars($obs['category'] ?? 'Geral'); ?>
+                                        <?php if (!empty($obs['observation_date'])): ?>
+                                            <?php echo date('d/m/Y', strtotime($obs['observation_date'])); ?> &middot;
+                                        <?php endif; ?>
+                                        <?php echo htmlspecialchars($obs['category'] ?? 'Geral'); ?>
                                         <?php if (!empty($obs['semester'])): ?>
                                             &middot; <?php echo $obs['semester']; ?>o Sem/<?php echo $obs['year']; ?>
                                         <?php endif; ?>
-                                        <?php if ($obs['status'] ?? '' === 'finalized'): ?>
+                                        <?php if (($obs['status'] ?? '') === 'finalized'): ?>
                                             <span class="badge bg-success ms-1">Finalizada</span>
                                         <?php endif; ?>
                                     </small>
@@ -115,6 +117,17 @@
                             </div>
                         <?php endforeach; ?>
                         <div class="form-text">Selecione a observacao cujos textos serao compilados no parecer.</div>
+                    </div>
+                    <?php elseif (!empty($selectedStudentId) && empty($observations)): ?>
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Nenhuma observacao encontrada</strong> para este aluno.
+                        <br><small>Voce precisa criar uma observacao antes de gerar o parecer descritivo.</small>
+                        <div class="mt-2">
+                            <a href="/admin/observations/create?student_id=<?php echo $selectedStudentId; ?>" class="btn btn-sm btn-warning">
+                                <i class="fas fa-plus me-1"></i> Criar Observacao
+                            </a>
+                        </div>
                     </div>
                     <?php endif; ?>
 

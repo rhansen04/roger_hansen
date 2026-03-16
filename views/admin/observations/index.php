@@ -36,11 +36,61 @@
             <?php endif; ?>
         </small>
     </div>
-    <?php if ($userRole !== 'coordenador'): ?>
-        <a href="/admin/observations/create" class="btn btn-hansen text-white text-decoration-none">
-            <i class="fas fa-plus me-2"></i> Nova Observacao
+    <a href="/admin/observations/create" class="btn btn-hansen text-white text-decoration-none">
+        <i class="fas fa-plus me-2"></i> Nova Observacao
+    </a>
+</div>
+
+<!-- Eixos Pedagogicos - Acesso Rapido -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="/admin/observations/create?focus=general" class="card border-0 shadow-sm text-decoration-none h-100" style="background:linear-gradient(135deg,#6c757d,#495057);">
+            <div class="card-body text-center text-white py-3 px-2">
+                <i class="fas fa-file-alt fa-2x mb-2"></i>
+                <div class="small fw-bold">Obs. Geral</div>
+            </div>
         </a>
-    <?php endif; ?>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="/admin/observations/create?focus=movement" class="card border-0 shadow-sm text-decoration-none h-100" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">
+            <div class="card-body text-center text-white py-3 px-2">
+                <i class="fas fa-running fa-2x mb-2"></i>
+                <div class="small fw-bold">Movimento</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="/admin/observations/create?focus=manual" class="card border-0 shadow-sm text-decoration-none h-100" style="background:linear-gradient(135deg,#f39c12,#e67e22);">
+            <div class="card-body text-center text-white py-3 px-2">
+                <i class="fas fa-hands fa-2x mb-2"></i>
+                <div class="small fw-bold">Manual</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="/admin/observations/create?focus=music" class="card border-0 shadow-sm text-decoration-none h-100" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);">
+            <div class="card-body text-center text-white py-3 px-2">
+                <i class="fas fa-music fa-2x mb-2"></i>
+                <div class="small fw-bold">Musical</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="/admin/observations/create?focus=stories" class="card border-0 shadow-sm text-decoration-none h-100" style="background:linear-gradient(135deg,#3498db,#2980b9);">
+            <div class="card-body text-center text-white py-3 px-2">
+                <i class="fas fa-book-open fa-2x mb-2"></i>
+                <div class="small fw-bold">Contos</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="/admin/observations/create?focus=pca" class="card border-0 shadow-sm text-decoration-none h-100" style="background:linear-gradient(135deg,#1abc9c,#16a085);">
+            <div class="card-body text-center text-white py-3 px-2">
+                <i class="fas fa-comments fa-2x mb-2"></i>
+                <div class="small fw-bold">PCA</div>
+            </div>
+        </a>
+    </div>
 </div>
 
 <!-- Filtros -->
@@ -118,11 +168,9 @@
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fas fa-clipboard-list fa-3x mb-3 d-block"></i>
                                 Nenhuma observacao encontrada.
-                                <?php if ($userRole !== 'coordenador'): ?>
-                                    <br><a href="/admin/observations/create" class="btn btn-sm btn-outline-primary mt-3">
-                                        <i class="fas fa-plus me-1"></i> Criar primeira observacao
-                                    </a>
-                                <?php endif; ?>
+                                <br><a href="/admin/observations/create" class="btn btn-sm btn-outline-primary mt-3">
+                                    <i class="fas fa-plus me-1"></i> Criar primeira observacao
+                                </a>
                             </td>
                         </tr>
                     <?php else: ?>

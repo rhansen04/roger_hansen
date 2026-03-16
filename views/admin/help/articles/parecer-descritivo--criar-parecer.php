@@ -59,6 +59,19 @@
     </div>
 </div>
 
+<h6 class="fw-bold mt-4 mb-3">Quando não há observações disponíveis</h6>
+
+<p>Se o aluno selecionado não possui observações cadastradas para o semestre/ano escolhido, o sistema exibe uma <strong>mensagem de alerta</strong> clara com duas opções:</p>
+<ul>
+    <li><strong>Na tela de criação:</strong> Um alerta amarelo aparece com o botão <strong>"Criar Observação"</strong> que leva direto ao formulário de observação com o aluno pré-selecionado</li>
+    <li><strong>Ao tentar gerar:</strong> Uma mensagem de erro vermelha indica o aluno e o período, com link direto para criar a observação necessária</li>
+</ul>
+
+<div class="help-tip help-tip-success">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>Fluxo recomendado:</strong> Sempre crie e finalize a observação do aluno <strong>antes</strong> de gerar o parecer descritivo. O parecer compila os textos da observação — sem observação, não há texto para compilar.
+</div>
+
 <h5 class="mt-4 mb-3"><i class="fas fa-file-alt me-2 text-primary"></i>Estrutura do Parecer Descritivo</h5>
 <p>O documento final do Parecer Descritivo é composto por até 7 páginas com a seguinte estrutura:</p>
 

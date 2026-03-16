@@ -1,5 +1,30 @@
 <p class="lead">As observações pedagógicas são registros detalhados do desenvolvimento de cada aluno, organizados em 6 eixos temáticos e separados por semestre. Aqui você aprende a criar, preencher e gerenciar suas observações.</p>
 
+<h6 class="fw-bold mt-4 mb-3">Atalhos rápidos: Cards dos 6 Eixos</h6>
+
+<p>Na listagem de observações (<strong>Ensino → Observações</strong>), você encontra <strong>6 cards coloridos</strong> representando os eixos pedagógicos. Ao clicar em um card, o formulário de nova observação abre com a aba daquele eixo já ativa:</p>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered">
+        <thead class="table-light">
+            <tr><th>Card</th><th>Cor</th><th>Eixo Ativado</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><i class="fas fa-file-alt me-1"></i> Obs. Geral</td><td>Cinza</td><td>Aba "Observação Geral"</td></tr>
+            <tr><td><i class="fas fa-running me-1"></i> Movimento</td><td>Vermelho</td><td>Aba "Movimento"</td></tr>
+            <tr><td><i class="fas fa-hands me-1"></i> Manual</td><td>Laranja</td><td>Aba "Manual"</td></tr>
+            <tr><td><i class="fas fa-music me-1"></i> Musical</td><td>Roxo</td><td>Aba "Musical"</td></tr>
+            <tr><td><i class="fas fa-book-open me-1"></i> Contos</td><td>Azul</td><td>Aba "Contos"</td></tr>
+            <tr><td><i class="fas fa-comments me-1"></i> PCA</td><td>Verde</td><td>Aba "Comunicação Ativa"</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="help-tip">
+    <i class="fas fa-lightbulb me-2"></i>
+    <strong>Dica:</strong> Os cards servem como atalho visual. Você também pode usar o botão <strong>"Nova Observação"</strong> normalmente — a diferença é que os cards já abrem na aba correta.
+</div>
+
 <div class="article-steps">
     <div class="article-step">
         <div class="step-number">1</div>

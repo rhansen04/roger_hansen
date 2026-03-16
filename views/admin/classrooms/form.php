@@ -80,6 +80,19 @@
                 </div>
             </div>
 
+            <?php if ($isEdit): ?>
+            <div class="alert alert-info d-flex align-items-center mt-3">
+                <i class="fas fa-users me-3 fa-lg"></i>
+                <div class="flex-grow-1">
+                    <strong>Alunos desta turma</strong>
+                    <br><small>Gerencie os alunos matriculados nesta turma.</small>
+                </div>
+                <a href="/admin/classrooms/<?= $classroom['id'] ?>" class="btn btn-primary btn-sm">
+                    <i class="fas fa-user-graduate me-1"></i> Gerenciar Alunos
+                </a>
+            </div>
+            <?php endif; ?>
+
             <hr class="my-4">
             <div class="d-flex justify-content-between">
                 <div><span class="text-danger">*</span> <small class="text-muted">Campos obrigatórios</small></div>

@@ -15,7 +15,8 @@ class DashboardController
 
     public function index()
     {
-        $role = $_SESSION['user_role'] ?? 'admin';
+        $realRole = $_SESSION['user_role'] ?? 'admin';
+        $role = (!empty($_SESSION['simulated_role']) && $realRole === 'admin') ? $_SESSION['simulated_role'] : $realRole;
 
         if ($role === 'professor') {
             return $this->indexProfessor();
