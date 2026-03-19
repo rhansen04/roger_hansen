@@ -159,3 +159,33 @@
     <i class="fas fa-check-circle me-2"></i>
     <strong>Armazenamento independente:</strong> Cada dia gera um registro separado no banco de dados. Isso significa que mesmo que você preencha apenas 3 dos 10 dias, os dados desses 3 dias estão salvos e seguros. Você pode completar os demais em outro momento.
 </div>
+
+<h5 class="mt-4 mb-3"><i class="fas fa-filter me-2 text-primary"></i>Filtro por Eixo nos Objetivos</h5>
+
+<div class="help-tip help-tip-success">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>Novidade v2.1:</strong> Ao selecionar um eixo de atividades, os objetivos de aprendizagem são filtrados automaticamente para exibir apenas os do eixo selecionado.
+</div>
+
+<div class="article-steps">
+    <div class="article-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+            <h6>Selecione o eixo de atividades</h6>
+            <p>Na seção <strong>"Eixo de Atividades"</strong>, clique em um dos botões toggle (Manual, Musical, Movimento, Contos ou PCA). O botão selecionado fica destacado em azul.</p>
+        </div>
+    </div>
+    <div class="article-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+            <h6>Objetivos filtrados automaticamente</h6>
+            <p>Ao selecionar um eixo, a seção de <strong>Objetivos de Aprendizagem</strong> se atualiza automaticamente:</p>
+            <ul>
+                <li>Apenas os objetivos do eixo selecionado ficam visíveis</li>
+                <li>Os objetivos dos demais eixos são ocultados automaticamente</li>
+                <li>Ao trocar de eixo, o filtro se atualiza instantaneamente</li>
+                <li>Os campos de preenchimento abaixo dos objetivos permanecem sempre visíveis</li>
+            </ul>
+        </div>
+    </div>
+</div>

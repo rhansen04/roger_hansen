@@ -98,8 +98,9 @@
             <h6>Adicione atividades à rotina</h6>
             <p>Em cada coluna (dia da semana), clique no botão <strong>"+ Adicionar atividade"</strong> para inserir uma nova atividade. Para cada atividade, preencha:</p>
             <ul>
-                <li><strong>Horário:</strong> campo de texto livre para indicar a faixa horária (ex: <code>08:00-08:30</code>, <code>09:00-09:45</code>)</li>
-                <li><strong>Descrição:</strong> texto descrevendo a atividade planejada para aquele horário (ex: "Roda de conversa", "Atividade musical com instrumentos", "Parque")</li>
+                <li><strong><i class="fas fa-clock me-1"></i> Horário:</strong> campo separado com label claro para indicar a faixa horária (ex: <code>08:00-08:30</code>)</li>
+                <li><strong><i class="fas fa-pencil-alt me-1"></i> Atividade:</strong> campo de descrição separado com label "Atividade" para descrever o que será realizado naquele horário</li>
+                <li>Os dois campos possuem <strong>labels visuais com ícones</strong>, facilitando o preenchimento e evitando confusão</li>
                 <li>Você pode adicionar quantas atividades forem necessárias para cada dia</li>
             </ul>
         </div>

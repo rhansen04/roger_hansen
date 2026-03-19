@@ -2,8 +2,18 @@
 
 <div class="help-tip">
     <i class="fas fa-lightbulb me-2"></i>
-    <strong>Importante:</strong> O botão de exportação PDF só aparece quando o portfólio está com status <strong>"Finalizado"</strong>. Certifique-se de que todas as seções estejam completas antes de finalizar.
+    <strong>Novidade v2.1:</strong> Agora você pode <strong>visualizar o PDF antes de finalizar</strong> o portfólio! O botão "Visualizar PDF" está disponível na página do portfólio para prévia do documento. O botão "Exportar PDF" continua disponível após a finalização.
 </div>
+
+<h5 class="mt-4 mb-3"><i class="fas fa-eye me-2 text-info"></i>Pré-visualizar o PDF</h5>
+<p>Antes de finalizar o portfólio, utilize o botão <strong>"Visualizar PDF"</strong> para gerar uma prévia do documento:</p>
+<ul>
+    <li>O botão está disponível na página do portfólio <strong>mesmo antes da finalização</strong></li>
+    <li>Clique para abrir o PDF em uma nova aba do navegador</li>
+    <li>Revise todas as páginas: capa, mensagem da professora, eixos e fotos</li>
+    <li>Se encontrar ajustes necessários, volte e clique em <strong>"Editar"</strong></li>
+    <li>Gere a pré-visualização quantas vezes quiser</li>
+</ul>
 
 <div class="article-steps">
     <div class="article-step">

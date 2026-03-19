@@ -566,6 +566,35 @@ class HelpController
                 'question' => 'O que é o Registro Pós-Vivência?',
                 'answer' => 'Após finalizar o planejamento (status "Enviado"), aparece o botão <strong>"Registro Pós-Vivência"</strong>. É um formulário separado com campos de registro do período (síntese, execução, justificativa). Ao finalizar o registro, o status muda para <strong>"Registrado"</strong> — estado final do planejamento.',
             ],
+            // --- Novidades da Revisão 03 ---
+            [
+                'question' => 'Posso arrastar e soltar imagens no Banco de Imagens?',
+                'answer' => 'Sim! Você pode <strong>arrastar imagens diretamente para a página</strong> da pasta do aluno. Uma zona de drop aparece automaticamente. As imagens também podem ser arrastadas para dentro do modal de upload. Uma pré-visualização das fotos é exibida antes do envio.',
+            ],
+            [
+                'question' => 'Como funciona o arrastar e soltar no Material de Apoio?',
+                'answer' => 'Arraste um arquivo diretamente para a página da pasta. Uma zona de drop azul aparece indicando onde soltar. O modal de upload abre automaticamente com o arquivo já selecionado. Você pode também arrastar o arquivo diretamente para dentro do modal.',
+            ],
+            [
+                'question' => 'Posso visualizar o PDF do portfólio antes de finalizar?',
+                'answer' => 'Sim! Um botão <strong>"Visualizar PDF"</strong> está disponível na página do portfólio mesmo antes da finalização. Isso permite que a professora revise o conteúdo em formato PDF e faça ajustes antes de solicitar a revisão da coordenação.',
+            ],
+            [
+                'question' => 'O que são as perguntas orientadoras nas observações?',
+                'answer' => 'Cada eixo pedagógico possui um conjunto de <strong>perguntas orientadoras</strong> que ajudam o professor a direcionar o olhar pedagógico. Clique em <strong>"Perguntas orientadoras"</strong> abaixo do nome do eixo para expandir. Exemplos: "Que mudanças você observou nesse campo desde a última observação?", "Como a criança expressa suas emoções?".',
+            ],
+            [
+                'question' => 'Como funciona o filtro por eixo nos objetivos do planejamento?',
+                'answer' => 'No formulário do dia (card diário), ao selecionar um <strong>eixo de atividades</strong> (ex: Manual, Musical), os <strong>objetivos de aprendizagem</strong> são filtrados automaticamente para exibir apenas os do eixo selecionado. Isso torna o preenchimento mais focado e evita confusão entre eixos.',
+            ],
+            [
+                'question' => 'Os campos de Horário e Atividade da Rotina Semanal são separados?',
+                'answer' => 'Sim! A rotina semanal possui dois campos claramente separados para cada atividade: <strong>Horário</strong> (ex: 08:00-08:30) com ícone de relógio, e <strong>Atividade</strong> com ícone de lápis para a descrição. Os labels facilitam o preenchimento e evitam confusão.',
+            ],
+            [
+                'question' => 'Onde encontro o botão de Registro Pós-Vivência?',
+                'answer' => 'O botão <strong>"Registro Pós-Vivência"</strong> aparece em dois locais na tela de dias do planejamento: no <strong>topo direito</strong> (barra de ações) e no <strong>rodapé</strong>. Ele fica visível quando o planejamento está com status "Enviado". Ao finalizar o registro, o status muda para "Registrado".',
+            ],
         ];
     }
 

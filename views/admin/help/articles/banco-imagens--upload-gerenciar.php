@@ -19,12 +19,17 @@
     <div class="article-step">
         <div class="step-number">2</div>
         <div class="step-content">
-            <h6>Clique no botão "Upload"</h6>
-            <p>No topo da visualização da pasta, clique no botão <strong>"Upload"</strong>. Uma janela de seleção de arquivos será aberta pelo navegador.</p>
+            <h6>Envie fotos via botão ou arrastar e soltar</h6>
+            <p>Existem <strong>duas formas</strong> de enviar imagens para a pasta:</p>
             <ul>
-                <li><strong>Seleção múltipla:</strong> você pode selecionar várias fotos de uma vez segurando a tecla <code>Ctrl</code> (ou <code>Cmd</code> no Mac) ao clicar nos arquivos</li>
+                <li><strong>Botão "Enviar Imagens":</strong> clique no botão no topo da página. Um modal abre com área de seleção e zona de drop</li>
+                <li><strong>Arrastar e soltar:</strong> arraste imagens diretamente do seu computador para qualquer lugar da página. Uma zona azul de drop aparece automaticamente com o texto "Solte as imagens aqui"</li>
+            </ul>
+            <p>Em ambos os casos, o modal de upload exibe uma <strong>pré-visualização</strong> das imagens selecionadas antes do envio.</p>
+            <ul>
+                <li><strong>Seleção múltipla:</strong> segure <code>Ctrl</code> (ou <code>Cmd</code> no Mac) para selecionar várias fotos</li>
                 <li><strong>Formatos aceitos:</strong> JPG, JPEG e PNG</li>
-                <li>Outros formatos de imagem não são aceitos e serão rejeitados pelo sistema</li>
+                <li>Dentro do modal, também é possível arrastar imagens para a zona de drop</li>
             </ul>
         </div>
     </div>

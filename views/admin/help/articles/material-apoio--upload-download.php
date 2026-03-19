@@ -19,11 +19,16 @@
     <div class="article-step">
         <div class="step-number">2</div>
         <div class="step-content">
-            <h6>Clique no botão "Upload"</h6>
-            <p>Dentro da pasta desejada, clique no botão <strong>"Upload"</strong> disponível no topo da listagem de arquivos. O formulário de envio será exibido com os seguintes campos:</p>
+            <h6>Envie via botão ou arrastar e soltar</h6>
+            <p>Existem <strong>duas formas</strong> de enviar materiais:</p>
             <ul>
-                <li><strong>Arquivo:</strong> clique para selecionar o arquivo do seu computador</li>
-                <li><strong>Título:</strong> nome descritivo do material. Se deixado em branco, o sistema preenche automaticamente com o nome original do arquivo (sem a extensão)</li>
+                <li><strong>Botão "Enviar Arquivo":</strong> clique no botão no topo da página. Um modal abre com campos de título e zona de drop</li>
+                <li><strong>Arrastar e soltar:</strong> arraste um arquivo diretamente do seu computador para a página. Uma zona azul aparece com "Solte o arquivo aqui". O modal abre automaticamente com o arquivo já selecionado</li>
+            </ul>
+            <p>O formulário de envio contém:</p>
+            <ul>
+                <li><strong>Título:</strong> nome descritivo do material. Se deixado em branco, o sistema preenche automaticamente com o nome original do arquivo</li>
+                <li><strong>Arquivo:</strong> clique para selecionar ou arraste para a zona de drop no modal. O nome e tamanho do arquivo selecionado são exibidos abaixo</li>
             </ul>
         </div>
     </div>
