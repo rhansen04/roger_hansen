@@ -7,6 +7,12 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+// Composer autoloader (mPDF, Twig, etc.)
+$composerAutoload = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require $composerAutoload;
+}
+
 // Autoloader manual robusto
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';

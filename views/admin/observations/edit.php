@@ -168,14 +168,14 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <div class="collapse" id="guide-general">
                             <div class="card card-body bg-light border-0 mt-1 small">
                                 <ul class="mb-0 ps-3">
-                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
-                                    <li>Quais atividades, objetos ou brinquedos a crianca demonstra maior interesse em explorar?</li>
-                                    <li>Quais sao suas facilidades e dificuldades?</li>
-                                    <li>Como a crianca interage com os colegas e professores?</li>
-                                    <li>Em que atividades a crianca demonstra autonomia? O que faz por conta propria?</li>
-                                    <li>Como a crianca lida com situacoes desafiadoras?</li>
-                                    <li>Como a crianca expressa suas emocoes?</li>
-                                    <li>Quais sao as caracteristicas mais marcantes no comportamento da crianca?</li>
+                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
+                                    <li>Quais atividades, objetos ou brinquedos a criança demonstra maior interesse em explorar?</li>
+                                    <li>Quais são suas facilidades e dificuldades?</li>
+                                    <li>Como a criança interage com os colegas e professores?</li>
+                                    <li>Em que atividades a criança demonstra autonomia? O que faz por conta própria?</li>
+                                    <li>Como a criança lida com situações desafiadoras?</li>
+                                    <li>Como a criança expressa suas emoções?</li>
+                                    <li>Quais são as características mais marcantes no comportamento da criança?</li>
                                 </ul>
                             </div>
                         </div>
@@ -183,7 +183,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                     <?php endif; ?>
                     <textarea name="observation_general" class="form-control auto-save-field" rows="5"
                         data-field="observation_general" <?php echo $readonlyAttr; ?>
-                        placeholder="Registre aqui observacoes gerais sobre o desenvolvimento do aluno neste periodo..."><?php echo htmlspecialchars($observation['observation_general'] ?? ''); ?></textarea>
+                        placeholder="Registre aqui observações gerais sobre o desenvolvimento do aluno neste período..."><?php echo htmlspecialchars($observation['observation_general'] ?? ''); ?></textarea>
                 </div>
                 <div class="tab-pane fade" id="panel-movement" role="tabpanel">
                     <label class="form-label fw-bold">Eixo Atividade de Movimento</label>
@@ -195,9 +195,9 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <div class="collapse" id="guide-movement">
                             <div class="card card-body bg-light border-0 mt-1 small">
                                 <ul class="mb-0 ps-3">
-                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
-                                    <li>Prudencia: Como a crianca se movimenta? E cuidadosa?</li>
-                                    <li>Persistencia: Insiste quando enfrenta dificuldades?</li>
+                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
+                                    <li>Prudência: Como a criança se movimenta? É cuidadosa?</li>
+                                    <li>Persistência: Insiste quando enfrenta dificuldades?</li>
                                     <li>Medo e Coragem: Apresenta medos excessivos ou enfrenta desafios?</li>
                                     <li>Qualidade do Movimento: Movimentos equilibrados, precisos, tensos ou relaxados?</li>
                                 </ul>
@@ -219,12 +219,12 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <div class="collapse" id="guide-manual">
                             <div class="card card-body bg-light border-0 mt-1 small">
                                 <ul class="mb-0 ps-3">
-                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
-                                    <li>Capacidade de Brincar: A crianca brinca e se diverte? Brinca sozinha?</li>
-                                    <li>Concentracao: Concentra-se nos brinquedos e atividades manuais?</li>
+                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
+                                    <li>Capacidade de Brincar: A criança brinca e se diverte? Brinca sozinha?</li>
+                                    <li>Concentração: Concentra-se nos brinquedos e atividades manuais?</li>
                                     <li>Variedade: Explora diferentes tipos de brinquedos e atividades?</li>
                                     <li>Profundidade: Brinca mais tempo com um mesmo brinquedo?</li>
-                                    <li>Interatividade: Como a crianca interage com os brinquedos e com outras criancas durante as atividades manuais?</li>
+                                    <li>Interatividade: Como a criança interage com os brinquedos e com outras crianças durante as atividades manuais?</li>
                                 </ul>
                             </div>
                         </div>
@@ -244,12 +244,12 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <div class="collapse" id="guide-music">
                             <div class="card card-body bg-light border-0 mt-1 small">
                                 <ul class="mb-0 ps-3">
-                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
-                                    <li>Preferencias Musicais: Quais sao as preferencias da crianca em relacao a tipos sonoros, musicas e instrumentos?</li>
-                                    <li>Sincronia: A crianca acompanha os movimentos e sons de forma sincronizada?</li>
-                                    <li>Canto: A crianca canta ou cantarola sozinha?</li>
-                                    <li>Concentracao: Como e a concentracao da crianca durante atividades musicais?</li>
-                                    <li>Reacoes: Quais sao as reacoes da crianca a diferentes sons e musicas?</li>
+                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
+                                    <li>Preferências Musicais: Quais são as preferências da criança em relação a tipos sonoros, músicas e instrumentos?</li>
+                                    <li>Sincronia: A criança acompanha os movimentos e sons de forma sincronizada?</li>
+                                    <li>Canto: A criança canta ou cantarola sozinha?</li>
+                                    <li>Concentração: Como é a concentração da criança durante atividades musicais?</li>
+                                    <li>Reações: Quais são as reações da criança a diferentes sons e músicas?</li>
                                 </ul>
                             </div>
                         </div>
@@ -269,11 +269,11 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <div class="collapse" id="guide-stories">
                             <div class="card card-body bg-light border-0 mt-1 small">
                                 <ul class="mb-0 ps-3">
-                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
-                                    <li>Reacoes Corporais e Faciais: Como a crianca reage aos contos?</li>
-                                    <li>Expressoes de Emocoes: Como a crianca expressa emocoes durante os contos?</li>
-                                    <li>Preferencias: Quais sao as preferencias da crianca em relacao a sons, rimas, momentos dos contos e historias?</li>
-                                    <li>Imitacao: A crianca imita gestos e palavras dos contos?</li>
+                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
+                                    <li>Reações Corporais e Faciais: Como a criança reage aos contos?</li>
+                                    <li>Expressões de Emoções: Como a criança expressa emoções durante os contos?</li>
+                                    <li>Preferências: Quais são as preferências da criança em relação a sons, rimas, momentos dos contos e histórias?</li>
+                                    <li>Imitação: A criança imita gestos e palavras dos contos?</li>
                                 </ul>
                             </div>
                         </div>
@@ -293,12 +293,12 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <div class="collapse" id="guide-pca">
                             <div class="card card-body bg-light border-0 mt-1 small">
                                 <ul class="mb-0 ps-3">
-                                    <li>Que mudancas voce observou nesse campo desde a ultima observacao?</li>
+                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
                                     <li>Capacidade de compreender palavras: Entende os significados das palavras?</li>
                                     <li>Capacidade de expressar palavras: Expressa palavras com sentido correto?</li>
                                     <li>Usa palavras trabalhadas no seu dia a dia?</li>
-                                    <li>Consegue expressar em palavras o que esta sentindo ou pensando?</li>
-                                    <li>Entende o sentido das historias de conversar?</li>
+                                    <li>Consegue expressar em palavras o que está sentindo ou pensando?</li>
+                                    <li>Entende o sentido das histórias de conversar?</li>
                                 </ul>
                             </div>
                         </div>
@@ -306,7 +306,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                     <?php endif; ?>
                     <textarea name="axis_pca" class="form-control auto-save-field" rows="5"
                         data-field="axis_pca" <?php echo $readonlyAttr; ?>
-                        placeholder="Descreva o desenvolvimento do aluno no Programa Comunicacao Ativa..."><?php echo htmlspecialchars($observation['axis_pca'] ?? ''); ?></textarea>
+                        placeholder="Descreva o desenvolvimento do aluno no Programa Comunicação Ativa..."><?php echo htmlspecialchars($observation['axis_pca'] ?? ''); ?></textarea>
                 </div>
             </div>
         </div>

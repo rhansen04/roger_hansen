@@ -306,13 +306,20 @@ class PortfolioController
         $classroomModel = new Classroom();
         $classroom = $classroomModel->find($portfolio['classroom_id']);
 
-        $pdfService = new \App\Services\PdfExportService();
-        $pdfContent = $pdfService->generatePortfolioPdf($portfolio, $classroom);
+        try {
+            $pdfService = new \App\Services\PdfExportService();
+            $pdfContent = $pdfService->generatePortfolioPdf($portfolio, $classroom);
 
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="portfolio_' . $portfolio['id'] . '.pdf"');
-        echo $pdfContent;
-        exit;
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="portfolio_' . $portfolio['id'] . '.pdf"');
+            echo $pdfContent;
+            exit;
+        } catch (\Throwable $e) {
+            error_log('Portfolio PDF export error (ID ' . $id . '): ' . $e->getMessage());
+            $_SESSION['error_message'] = 'Erro ao gerar PDF do portfolio. Verifique se a biblioteca mPDF esta instalada corretamente.';
+            header("Location: /admin/portfolios/{$id}");
+            exit;
+        }
     }
 
     /**

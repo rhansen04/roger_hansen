@@ -57,6 +57,9 @@
             <a href="/admin/portfolios/<?= $portfolio['id'] ?>/edit" class="btn btn-outline-primary">
                 <i class="fas fa-edit me-2"></i>Editar
             </a>
+            <a href="/admin/portfolios/<?= $portfolio['id'] ?>/export-pdf" class="btn btn-outline-info" target="_blank">
+                <i class="fas fa-eye me-2"></i>Visualizar PDF
+            </a>
             <form method="POST" action="/admin/portfolios/<?= $portfolio['id'] ?>/finalize" class="d-inline"
                   onsubmit="return confirm('Finalizar este portfolio? Ele nao podera mais ser editado.')">
                 <button type="submit" class="btn btn-success"><i class="fas fa-check me-2"></i>Finalizar</button>

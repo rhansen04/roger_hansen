@@ -150,21 +150,32 @@
 <?php endif; ?>
 
 <?php if ($canEdit): ?>
+<!-- Drag-and-Drop Zone -->
+<div id="dropZone" class="card border-2 border-dashed border-primary bg-light mb-4" style="display:none;">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+        <h5 class="text-primary fw-bold">Solte as imagens aqui</h5>
+        <p class="text-muted mb-0">JPG ou PNG</p>
+    </div>
+</div>
+
 <!-- Upload Modal -->
 <div class="modal fade" id="uploadModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="/admin/image-bank/folder/<?= $folder['id'] ?>/upload" enctype="multipart/form-data">
+            <form method="POST" action="/admin/image-bank/folder/<?= $folder['id'] ?>/upload" enctype="multipart/form-data" id="uploadForm">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-upload me-2"></i>Enviar Imagens</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Selecione as imagens (JPG/PNG)</label>
-                        <input type="file" name="images[]" class="form-control" accept="image/jpeg,image/png" multiple required>
-                        <div class="form-text">Imagens serao redimensionadas para max 1920px de largura.</div>
+                    <div id="dropZoneModal" class="border-2 border-dashed rounded p-4 text-center mb-3" style="border:2px dashed #007e66;cursor:pointer;transition:background .2s;">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                        <p class="mb-1 fw-bold">Arraste imagens aqui ou clique para selecionar</p>
+                        <small class="text-muted">JPG/PNG - Maximo 1920px de largura</small>
+                        <input type="file" name="images[]" class="form-control mt-2" accept="image/jpeg,image/png" multiple required id="fileInput">
                     </div>
+                    <div id="filePreview" class="row g-2"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -190,6 +201,84 @@ function confirmDeleteImage(id) {
         form.submit();
     }
 }
+
+// Drag-and-drop support
+(function() {
+    var dropZone = document.getElementById('dropZone');
+    var dropZoneModal = document.getElementById('dropZoneModal');
+    var fileInput = document.getElementById('fileInput');
+    var filePreview = document.getElementById('filePreview');
+    var uploadForm = document.getElementById('uploadForm');
+
+    if (!dropZone) return;
+
+    // Page-level drag-and-drop: show drop zone overlay
+    var dragCounter = 0;
+    document.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        dragCounter++;
+        if (dragCounter === 1) dropZone.style.display = 'block';
+    });
+    document.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter === 0) dropZone.style.display = 'none';
+    });
+    document.addEventListener('dragover', function(e) { e.preventDefault(); });
+    document.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dragCounter = 0;
+        dropZone.style.display = 'none';
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files);
+            var modal = new bootstrap.Modal(document.getElementById('uploadModal'));
+            modal.show();
+        }
+    });
+
+    // Modal drop zone
+    if (dropZoneModal) {
+        dropZoneModal.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.background = '#e8f5e9';
+        });
+        dropZoneModal.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.background = '';
+        });
+        dropZoneModal.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.background = '';
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                showPreview(e.dataTransfer.files);
+            }
+        });
+    }
+
+    // Preview on file select
+    if (fileInput) {
+        fileInput.addEventListener('change', function() { showPreview(this.files); });
+    }
+
+    function showPreview(files) {
+        if (!filePreview) return;
+        filePreview.innerHTML = '';
+        Array.from(files).forEach(function(file) {
+            if (!file.type.match('image.*')) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var col = document.createElement('div');
+                col.className = 'col-4 col-md-3';
+                col.innerHTML = '<img src="' + e.target.result + '" class="img-fluid rounded" style="height:80px;object-fit:cover;width:100%;" alt="">' +
+                    '<small class="text-muted d-block text-truncate">' + file.name + '</small>';
+                filePreview.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+})();
 
 // Auto-save caption
 document.querySelectorAll('.caption-input').forEach(input => {

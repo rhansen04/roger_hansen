@@ -61,13 +61,22 @@ $statusLabel = ['draft' => 'Rascunho', 'submitted' => 'Enviado', 'registered' =>
             <i class="fas fa-calendar-day me-2"></i>DIAS DO PLANEJAMENTO
         </h2>
     </div>
-    <div>
-        <a href="/admin/planning/<?= $submission['id'] ?>" class="btn btn-outline-primary btn-sm me-1">
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="/admin/planning/<?= $submission['id'] ?>" class="btn btn-outline-primary btn-sm">
             <i class="fas fa-eye me-1"></i> Ver Completo
         </a>
         <a href="/admin/planning/<?= $submission['id'] ?>/routine" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-clock me-1"></i> Rotina Semanal
         </a>
+        <?php if ($submission['status'] === 'submitted'): ?>
+        <a href="/admin/planning/<?= $submission['id'] ?>/registration" class="btn btn-success btn-sm">
+            <i class="fas fa-clipboard-check me-1"></i> Registro Pos-Vivencia
+        </a>
+        <?php elseif ($submission['status'] === 'registered'): ?>
+        <a href="/admin/planning/<?= $submission['id'] ?>/registration" class="btn btn-outline-success btn-sm">
+            <i class="fas fa-check-double me-1"></i> Ver Registro
+        </a>
+        <?php endif; ?>
     </div>
 </div>
 

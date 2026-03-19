@@ -43,6 +43,9 @@ $migrations = [
     '028_create_portfolios.sql',
     '029_create_support_materials.sql',
     '030_create_notifications.sql',
+    '031_create_planning_daily_routines.sql',
+    '032_create_planning_daily_entries.sql',
+    '033_alter_observations_nullable_content.sql',
 ];
 
 $migrationDir = __DIR__ . '/../migrations/';

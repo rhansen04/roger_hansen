@@ -25,6 +25,11 @@
     <strong>Dica:</strong> Os cards servem como atalho visual. Você também pode usar o botão <strong>"Nova Observação"</strong> normalmente — a diferença é que os cards já abrem na aba correta.
 </div>
 
+<div class="help-tip help-tip-success">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>Novidade v2.1:</strong> Os textos dos eixos preenchidos na criação agora são <strong>salvos automaticamente</strong> junto com o registro. Você não precisa mais salvar primeiro e depois editar — tudo é gravado de uma vez.
+</div>
+
 <div class="article-steps">
     <div class="article-step">
         <div class="step-number">1</div>
@@ -98,6 +103,7 @@
                 </li>
             </ol>
             <p>Cada eixo contém um campo <strong>textarea</strong> com <strong>5 linhas visíveis</strong>, mas sem limite de texto. Clique na aba correspondente para navegar entre os eixos. Não é necessário preencher todos de uma vez — o auto-save permite preencher gradualmente.</p>
+            <p>Cada eixo também possui <strong>perguntas orientadoras</strong> — clique no link <i class="fas fa-lightbulb text-warning"></i> <em>"Perguntas orientadoras"</em> abaixo do nome do eixo para expandir. As perguntas ajudam a direcionar o olhar pedagógico, como: "Que mudanças você observou?", "Como a criança expressa suas emoções?", entre outras.</p>
         </div>
     </div>
 </div>

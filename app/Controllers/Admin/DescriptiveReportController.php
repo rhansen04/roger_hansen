@@ -433,13 +433,20 @@ Equipe Pedagogica';
         $classroomModel = new Classroom();
         $classroom = !empty($report['classroom_id']) ? $classroomModel->find($report['classroom_id']) : null;
 
-        $pdfService = new \App\Services\PdfExportService();
-        $pdfContent = $pdfService->generateDescriptiveReportPdf($report, $student, $classroom);
+        try {
+            $pdfService = new \App\Services\PdfExportService();
+            $pdfContent = $pdfService->generateDescriptiveReportPdf($report, $student, $classroom);
 
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="parecer_' . $report['id'] . '.pdf"');
-        echo $pdfContent;
-        exit;
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="parecer_' . $report['id'] . '.pdf"');
+            echo $pdfContent;
+            exit;
+        } catch (\Throwable $e) {
+            error_log('Descriptive Report PDF export error (ID ' . $id . '): ' . $e->getMessage());
+            $_SESSION['error_message'] = 'Erro ao gerar PDF do parecer. Verifique se a biblioteca mPDF esta instalada corretamente.';
+            header("Location: /admin/descriptive-reports/{$id}");
+            exit;
+        }
     }
 
     /**

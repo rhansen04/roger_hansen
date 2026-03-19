@@ -153,11 +153,20 @@
 <?php endif; ?>
 
 <?php if ($canUpload): ?>
+<!-- Drag-and-Drop Zone -->
+<div id="dropZone" class="card border-2 border-dashed border-primary bg-light mb-4" style="display:none;">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+        <h5 class="text-primary fw-bold">Solte o arquivo aqui</h5>
+        <p class="text-muted mb-0">PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, ZIP, MP4, MP3</p>
+    </div>
+</div>
+
 <!-- Upload Modal -->
 <div class="modal fade" id="uploadModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="/admin/support-materials/folder/<?= $folder['id'] ?>/upload" enctype="multipart/form-data">
+            <form method="POST" action="/admin/support-materials/folder/<?= $folder['id'] ?>/upload" enctype="multipart/form-data" id="uploadForm">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-upload me-2"></i>Enviar Arquivo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -167,10 +176,14 @@
                         <label class="form-label fw-bold">Titulo do Material</label>
                         <input type="text" name="title" class="form-control" placeholder="Deixe vazio para usar o nome do arquivo">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Arquivo <span class="text-danger">*</span></label>
-                        <input type="file" name="file" class="form-control" required>
-                        <div class="form-text">PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, ZIP, MP4, MP3</div>
+                    <div id="dropZoneModal" class="border-2 border-dashed rounded p-4 text-center mb-3" style="border:2px dashed #007e66;cursor:pointer;transition:background .2s;">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                        <p class="mb-1 fw-bold">Arraste o arquivo aqui ou clique para selecionar</p>
+                        <small class="text-muted">PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, ZIP, MP4, MP3</small>
+                        <input type="file" name="file" class="form-control mt-2" required id="fileInput">
+                    </div>
+                    <div id="fileInfo" class="text-muted small" style="display:none;">
+                        <i class="fas fa-file me-1"></i><span id="fileName"></span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -187,6 +200,73 @@
 <form id="deleteMaterialForm" method="POST" style="display:none;"></form>
 
 <script>
+// Drag-and-drop support
+(function() {
+    var dropZone = document.getElementById('dropZone');
+    var dropZoneModal = document.getElementById('dropZoneModal');
+    var fileInput = document.getElementById('fileInput');
+    var fileInfo = document.getElementById('fileInfo');
+    var fileName = document.getElementById('fileName');
+
+    if (!dropZone) return;
+
+    var dragCounter = 0;
+    document.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        dragCounter++;
+        if (dragCounter === 1) dropZone.style.display = 'block';
+    });
+    document.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter === 0) dropZone.style.display = 'none';
+    });
+    document.addEventListener('dragover', function(e) { e.preventDefault(); });
+    document.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dragCounter = 0;
+        dropZone.style.display = 'none';
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            showFileInfo(e.dataTransfer.files[0]);
+            var modal = new bootstrap.Modal(document.getElementById('uploadModal'));
+            modal.show();
+        }
+    });
+
+    if (dropZoneModal) {
+        dropZoneModal.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.background = '#e8f5e9';
+        });
+        dropZoneModal.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.background = '';
+        });
+        dropZoneModal.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.background = '';
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                showFileInfo(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) showFileInfo(this.files[0]);
+        });
+    }
+
+    function showFileInfo(file) {
+        if (fileInfo && fileName) {
+            fileName.textContent = file.name + ' (' + (file.size > 1048576 ? (file.size / 1048576).toFixed(1) + ' MB' : Math.round(file.size / 1024) + ' KB') + ')';
+            fileInfo.style.display = 'block';
+        }
+    }
+})();
+
 function confirmDeleteMaterial(id, title) {
     if (confirm('Tem certeza que deseja excluir o material "' + title + '"?\n\nEsta acao nao pode ser desfeita.')) {
         const form = document.getElementById('deleteMaterialForm');

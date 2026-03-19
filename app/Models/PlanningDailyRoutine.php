@@ -154,7 +154,11 @@ class PlanningDailyRoutine
     {
         try {
             $this->db->beginTransaction();
-            $this->deleteBySubmission($submissionId);
+
+            // Delete inline (not via deleteBySubmission) so exceptions
+            // propagate to this try/catch instead of being swallowed.
+            $delStmt = $this->db->prepare("DELETE FROM planning_daily_routines WHERE submission_id = ?");
+            $delStmt->execute([$submissionId]);
 
             $sql = "INSERT INTO planning_daily_routines (submission_id, day_of_week, time_slot, activity_description, sort_order)
                     VALUES (:submission_id, :day_of_week, :time_slot, :activity_description, :sort_order)";
@@ -174,7 +178,9 @@ class PlanningDailyRoutine
             $this->db->commit();
             return true;
         } catch (PDOException $e) {
-            $this->db->rollBack();
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             error_log("Erro ao salvar rotinas em lote: " . $e->getMessage());
             return false;
         }

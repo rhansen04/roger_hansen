@@ -63,21 +63,27 @@
                 ?>
                     <div class="routine-entry mb-2 p-2 bg-light rounded border" data-day="<?= $dayNum ?>">
                         <?php if ($canEdit): ?>
-                            <div class="d-flex gap-2 mb-1">
-                                <input type="text"
-                                       name="routines[<?= $dayNum ?>][<?= $idx ?>][time_slot]"
-                                       class="form-control form-control-sm"
-                                       placeholder="08:00-08:30"
-                                       value="<?= htmlspecialchars($activity['time_slot']) ?>"
-                                       style="max-width: 130px;">
-                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-activity" title="Remover">
+                            <div class="d-flex gap-2 mb-1 align-items-center">
+                                <div>
+                                    <label class="form-label mb-0 small fw-bold text-muted"><i class="fas fa-clock me-1"></i>Horario</label>
+                                    <input type="text"
+                                           name="routines[<?= $dayNum ?>][<?= $idx ?>][time_slot]"
+                                           class="form-control form-control-sm"
+                                           placeholder="08:00-08:30"
+                                           value="<?= htmlspecialchars($activity['time_slot']) ?>"
+                                           style="max-width: 130px;">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-activity mt-3" title="Remover">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <textarea name="routines[<?= $dayNum ?>][<?= $idx ?>][activity_description]"
-                                      class="form-control form-control-sm"
-                                      rows="2"
-                                      placeholder="Descricao da atividade"><?= htmlspecialchars($activity['activity_description']) ?></textarea>
+                            <div class="mt-1">
+                                <label class="form-label mb-0 small fw-bold text-muted"><i class="fas fa-pencil-alt me-1"></i>Atividade</label>
+                                <textarea name="routines[<?= $dayNum ?>][<?= $idx ?>][activity_description]"
+                                          class="form-control form-control-sm"
+                                          rows="2"
+                                          placeholder="Descreva a atividade realizada neste horario"><?= htmlspecialchars($activity['activity_description']) ?></textarea>
+                            </div>
                         <?php else: ?>
                             <div class="d-flex align-items-center mb-1">
                                 <span class="badge bg-primary me-2"><?= htmlspecialchars($activity['time_slot']) ?></span>
@@ -137,20 +143,26 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'routine-entry mb-2 p-2 bg-light rounded border';
             div.setAttribute('data-day', day);
             div.innerHTML = `
-                <div class="d-flex gap-2 mb-1">
-                    <input type="text"
-                           name="routines[${day}][${idx}][time_slot]"
-                           class="form-control form-control-sm"
-                           placeholder="08:00-08:30"
-                           style="max-width: 130px;">
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-activity" title="Remover">
+                <div class="d-flex gap-2 mb-1 align-items-center">
+                    <div>
+                        <label class="form-label mb-0 small fw-bold text-muted"><i class="fas fa-clock me-1"></i>Horario</label>
+                        <input type="text"
+                               name="routines[${day}][${idx}][time_slot]"
+                               class="form-control form-control-sm"
+                               placeholder="08:00-08:30"
+                               style="max-width: 130px;">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-activity mt-3" title="Remover">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <textarea name="routines[${day}][${idx}][activity_description]"
-                          class="form-control form-control-sm"
-                          rows="2"
-                          placeholder="Descricao da atividade"></textarea>
+                <div class="mt-1">
+                    <label class="form-label mb-0 small fw-bold text-muted"><i class="fas fa-pencil-alt me-1"></i>Atividade</label>
+                    <textarea name="routines[${day}][${idx}][activity_description]"
+                              class="form-control form-control-sm"
+                              rows="2"
+                              placeholder="Descreva a atividade realizada neste horario"></textarea>
+                </div>
             `;
 
             // Insert before the "add" button wrapper

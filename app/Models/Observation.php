@@ -131,11 +131,13 @@ class Observation
         try {
             $sql = "INSERT INTO observations (
                         student_id, user_id, semester, year, status,
+                        content, title,
                         observation_general, axis_movement, axis_manual,
                         axis_music, axis_stories, axis_pca,
                         created_at, updated_at
                     ) VALUES (
                         :student_id, :user_id, :semester, :year, 'in_progress',
+                        :content, :title,
                         :observation_general, :axis_movement, :axis_manual,
                         :axis_music, :axis_stories, :axis_pca,
                         :created_at, :updated_at
@@ -149,6 +151,8 @@ class Observation
                 ':user_id' => $data['user_id'],
                 ':semester' => $data['semester'],
                 ':year' => $data['year'],
+                ':content' => $data['observation_general'] ?? '',
+                ':title' => 'Observacao ' . ($data['semester'] ?? '') . 'o Sem/' . ($data['year'] ?? ''),
                 ':observation_general' => $data['observation_general'] ?? '',
                 ':axis_movement' => $data['axis_movement'] ?? '',
                 ':axis_manual' => $data['axis_manual'] ?? '',

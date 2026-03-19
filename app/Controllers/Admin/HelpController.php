@@ -108,21 +108,21 @@ class HelpController
             ],
             'observacoes' => [
                 'title' => 'Observações Pedagógicas',
-                'description' => 'Registre observações semestrais organizadas por 6 eixos pedagógicos com atalhos visuais, salvamento automático, finalização e controle de permissões. Todos os perfis podem criar.',
+                'description' => 'Registre observações semestrais organizadas por 6 eixos pedagógicos com perguntas orientadoras, salvamento automático, finalização e controle de permissões.',
                 'icon' => 'fas fa-clipboard-list',
                 'color' => '#6f42c1',
                 'articles' => [
                     'criar-observacao' => [
                         'title' => 'Criar uma Observação',
-                        'summary' => 'Use os 6 cards coloridos de eixos como atalho ou o botão "Nova Observação". Selecione aluno, semestre e ano. Preencha os eixos em abas separadas. Disponível para todos os perfis.',
+                        'summary' => 'Selecione aluno, semestre e ano. Preencha os 6 eixos em abas separadas com perguntas orientadoras em cada eixo. Os textos dos eixos são salvos junto com o registro. Disponível para todos os perfis.',
                         'time' => 6,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-18',
                     ],
                     'eixos-pedagogicos' => [
                         'title' => 'Os 6 Eixos Pedagógicos',
-                        'summary' => 'Entenda cada eixo: Observação Geral, Movimento, Atividade Manual, Atividade Musical, Contos e Programa Comunicação Ativa (PCA).',
+                        'summary' => 'Entenda cada eixo: Observação Geral, Movimento, Atividade Manual, Atividade Musical, Contos e Programa Comunicação Ativa (PCA). Cada eixo possui perguntas orientadoras com acentuação correta.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-18',
                     ],
                     'auto-save-finalizar' => [
                         'title' => 'Salvamento Automático e Finalização',
@@ -172,7 +172,7 @@ class HelpController
             ],
             'portfolio' => [
                 'title' => 'Portfólio da Turma',
-                'description' => 'Monte portfólios semestrais por turma com mensagem da professora, fotos por eixo, correção IA e exportação em PDF de 14+ páginas.',
+                'description' => 'Monte portfólios semestrais por turma com mensagem da professora, fotos por eixo, correção IA, pré-visualização e exportação em PDF de 14+ páginas.',
                 'icon' => 'fas fa-images',
                 'color' => '#e83e8c',
                 'articles' => [
@@ -190,15 +190,15 @@ class HelpController
                     ],
                     'finalizar-exportar-portfolio' => [
                         'title' => 'Finalizar e Exportar PDF',
-                        'summary' => 'Finalize o portfólio, solicite revisão via coordenador e exporte PDF completo: capa, textos institucionais, mensagem, eixos com fotos.',
+                        'summary' => 'Visualize o PDF antes de finalizar com o botão "Visualizar PDF". Finalize para bloquear edição, solicite revisão via coordenador e exporte PDF completo: capa, textos institucionais, mensagem, eixos com fotos.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-18',
                     ],
                 ],
             ],
             'banco-imagens' => [
                 'title' => 'Banco de Imagens',
-                'description' => 'Organize fotos por turma e aluno. Upload múltiplo com redimensionamento automático, legendas editáveis e organização por pastas.',
+                'description' => 'Organize fotos por turma e aluno. Upload múltiplo com arrastar e soltar (drag-and-drop), redimensionamento automático, legendas editáveis e organização por pastas.',
                 'icon' => 'fas fa-camera',
                 'color' => '#17a2b8',
                 'articles' => [
@@ -210,9 +210,9 @@ class HelpController
                     ],
                     'upload-gerenciar' => [
                         'title' => 'Upload, Legendas e Organização',
-                        'summary' => 'Faça upload de múltiplas fotos (JPG/PNG, redimensionadas para max 1920px). Edite legendas inline, mova entre pastas e exclua fotos.',
+                        'summary' => 'Arraste e solte imagens diretamente na página ou use o modal de upload. Pré-visualização antes do envio. Múltiplas fotos (JPG/PNG, max 1920px). Legendas inline, mover entre pastas e excluir.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-18',
                     ],
                 ],
             ],
@@ -236,9 +236,9 @@ class HelpController
                     ],
                     'card-diario' => [
                         'title' => 'Preenchimento do Dia (Card Diário)',
-                        'summary' => 'Formulário diário sem seção "Identificação". Eixos renomeados para "Eixo de Atividades" com seleção por botões toggle horizontais. Palavra do dia mantida.',
+                        'summary' => 'Formulário diário com seleção de eixo por botões toggle. Ao selecionar um eixo, apenas os objetivos de aprendizagem daquele eixo ficam visíveis. Palavra do dia (PCA) mantida.',
                         'time' => 5,
-                        'release' => '2026-03-16',
+                        'release' => '2026-03-18',
                     ],
                     'usar-templates' => [
                         'title' => 'Templates de Planejamento',
@@ -254,15 +254,15 @@ class HelpController
                     ],
                     'registro-pos-vivencia' => [
                         'title' => 'Registro Pós-Vivência',
-                        'summary' => 'Após finalizar o planejamento, preencha o registro do período: síntese do desenvolvimento, execução e justificativa. Cobre a quinzena inteira.',
+                        'summary' => 'Após enviar o planejamento, acesse o registro pós-vivência pelo botão verde no topo da grade de dias. Preencha síntese do desenvolvimento, execução e justificativa.',
                         'time' => 4,
-                        'release' => '2026-03-16',
+                        'release' => '2026-03-18',
                     ],
                     'calendario-rotina' => [
                         'title' => 'Calendário e Rotina Semanal',
-                        'summary' => 'Visualize planejamentos no calendário mensal. Crie rotinas diárias com horários e atividades para cada dia da semana (Seg-Sex).',
+                        'summary' => 'Visualize planejamentos no calendário mensal. Crie rotinas com campos separados de Horário e Atividade para cada dia da semana (Seg-Sex). Salvar funciona corretamente.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-18',
                     ],
                     'dependencia-campos' => [
                         'title' => 'Dependência entre Campos',
@@ -274,7 +274,7 @@ class HelpController
             ],
             'material-apoio' => [
                 'title' => 'Material de Apoio',
-                'description' => 'Repositório centralizado de materiais pedagógicos organizados em pastas hierárquicas: Eixos de Atividades, Centros de Aprendizagem e Famílias de Brinquedos.',
+                'description' => 'Repositório centralizado de materiais pedagógicos organizados em pastas hierárquicas. Upload com arrastar e soltar, download preservando nome original.',
                 'icon' => 'fas fa-folder-open',
                 'color' => '#795548',
                 'articles' => [
@@ -286,9 +286,9 @@ class HelpController
                     ],
                     'upload-download' => [
                         'title' => 'Upload e Download de Materiais',
-                        'summary' => 'Envie PDFs, documentos e arquivos. Faça download preservando o nome original. Admin faz upload/exclusão; professores e coordenadores baixam.',
+                        'summary' => 'Arraste e solte arquivos ou use o botão de upload. Envie PDFs, documentos e arquivos. Download preserva o nome original. Admin faz upload/exclusão; professores e coordenadores baixam.',
                         'time' => 4,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-18',
                     ],
                 ],
             ],
