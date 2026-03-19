@@ -309,7 +309,7 @@ Equipe Pedagogica';
 
         if ($reportModel->update($id, $data)) {
             $_SESSION['success_message'] = 'Parecer atualizado com sucesso!';
-            header('Location: /admin/descriptive-reports/' . $id);
+            header('Location: /admin/descriptive-reports/' . $id . '/edit');
             exit;
         }
 
@@ -447,6 +447,72 @@ Equipe Pedagogica';
             header("Location: /admin/descriptive-reports/{$id}");
             exit;
         }
+    }
+
+    /**
+     * AJAX: Recompilar texto a partir da observacao vinculada
+     */
+    public function recompile($id)
+    {
+        header('Content-Type: application/json');
+
+        $reportModel = new DescriptiveReport();
+        $report = $reportModel->find($id);
+
+        if (!$report) {
+            echo json_encode(['success' => false, 'error' => 'Parecer nao encontrado.']);
+            exit;
+        }
+
+        if (empty($report['observation_id'])) {
+            echo json_encode(['success' => false, 'error' => 'Nenhuma observacao vinculada a este parecer.']);
+            exit;
+        }
+
+        $obsModel = new Observation();
+        $observation = $obsModel->find($report['observation_id']);
+
+        if (!$observation) {
+            echo json_encode(['success' => false, 'error' => 'Observacao vinculada nao encontrada.']);
+            exit;
+        }
+
+        // Compilar texto dos eixos
+        $parts = [];
+        if (!empty($observation['observation_general'])) {
+            $parts[] = $observation['observation_general'];
+        }
+        if (!empty($observation['axis_movement'])) {
+            $parts[] = "Atividade de Movimento:\n" . $observation['axis_movement'];
+        }
+        if (!empty($observation['axis_manual'])) {
+            $parts[] = "Atividade Manual:\n" . $observation['axis_manual'];
+        }
+        if (!empty($observation['axis_music'])) {
+            $parts[] = "Atividade Musical:\n" . $observation['axis_music'];
+        }
+        if (!empty($observation['axis_stories'])) {
+            $parts[] = "Atividade de Contos:\n" . $observation['axis_stories'];
+        }
+        if (!empty($observation['axis_pca'])) {
+            $parts[] = "Programa Comunicacao Ativa (PCA):\n" . $observation['axis_pca'];
+        }
+
+        $studentText = implode("\n\n", $parts);
+
+        if (empty($studentText)) {
+            echo json_encode(['success' => false, 'error' => 'A observacao vinculada nao possui texto nos eixos.']);
+            exit;
+        }
+
+        // Atualizar o parecer
+        $reportModel->update($id, [
+            'student_text' => $studentText,
+            'student_text_edited' => $studentText,
+        ]);
+
+        echo json_encode(['success' => true, 'text' => $studentText]);
+        exit;
     }
 
     /**

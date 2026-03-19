@@ -351,6 +351,7 @@ $router->post('/admin/descriptive-reports/{id}/finalize', [AdminDescriptiveRepor
 $router->post('/admin/descriptive-reports/{id}/reopen', [AdminDescriptiveReportController::class, 'reopen']);
 $router->post('/admin/descriptive-reports/{id}/request-revision', [AdminDescriptiveReportController::class, 'requestRevision']);
 $router->post('/admin/descriptive-reports/{id}/correct-text', [AdminDescriptiveReportController::class, 'correctText']);
+$router->post('/admin/descriptive-reports/{id}/recompile', [AdminDescriptiveReportController::class, 'recompile']);
 $router->get('/admin/descriptive-reports/{id}/export-pdf', [AdminDescriptiveReportController::class, 'exportPdf']);
 
 // Rotas Admin - Banco de Imagens

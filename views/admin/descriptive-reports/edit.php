@@ -61,6 +61,24 @@
     </div>
 <?php endif; ?>
 
+<?php if (!empty($report['observation_id'])): ?>
+    <div class="alert alert-info mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <i class="fas fa-info-circle me-2"></i>
+            O texto deste parecer foi compilado da <strong>Observacao #<?php echo $report['observation_id']; ?></strong>.
+            Para editar os eixos individualmente, acesse a observacao original.
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/admin/observations/<?php echo $report['observation_id']; ?>/edit" class="btn btn-outline-primary btn-sm" target="_blank">
+                <i class="fas fa-external-link-alt me-1"></i> Editar Observacao
+            </a>
+            <button type="button" class="btn btn-outline-success btn-sm" onclick="recompileFromObservation()" id="btnRecompile">
+                <i class="fas fa-sync-alt me-1"></i> Recompilar Texto
+            </button>
+        </div>
+    </div>
+<?php endif; ?>
+
 <form method="POST" action="/admin/descriptive-reports/<?php echo $report['id']; ?>/update" id="editForm">
 
     <!-- Tabs -->
@@ -243,6 +261,36 @@ document.getElementById('cover_photo_url').addEventListener('input', function() 
         preview.style.display = 'none';
     }
 });
+
+// Recompilar texto da observacao
+function recompileFromObservation() {
+    if (!confirm('Isso substituira o texto atual pelo texto atualizado da observacao. Deseja continuar?')) return;
+    const btn = document.getElementById('btnRecompile');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Recompilando...';
+
+    fetch('/admin/descriptive-reports/<?php echo $report['id']; ?>/recompile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Recompilar Texto';
+        if (data.success) {
+            textarea.value = data.text;
+            updateCharCount();
+            alert('Texto recompilado com sucesso!');
+        } else {
+            alert('Erro: ' + (data.error || 'Nao foi possivel recompilar.'));
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Recompilar Texto';
+        alert('Erro de conexao.');
+    });
+}
 
 // Correcao automatica via IA
 function correctTextAI() {
