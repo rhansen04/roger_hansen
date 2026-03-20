@@ -191,6 +191,9 @@ if (section("01. Banco de Dados — Conexão e Tabelas", 'db')) {
         exit(1);
     }
 
+    // Garantir que tabelas auto-criadas por models já existam antes da verificação
+    new \App\Models\CoordinatorComment();
+
     $requiredTables = [
         'users', 'schools', 'classrooms', 'classroom_students',
         'students', 'courses', 'sections', 'lessons',
@@ -199,7 +202,7 @@ if (section("01. Banco de Dados — Conexão e Tabelas", 'db')) {
         'observations', 'planning_templates', 'planning_template_sections',
         'planning_template_fields', 'planning_submissions',
         'planning_submission_answers', 'planning_daily_entries',
-        'planning_daily_routine', 'descriptive_reports', 'portfolios',
+        'planning_daily_routines', 'descriptive_reports', 'portfolios',
         'coordinator_comments', 'image_folders', 'image_bank',
         'support_material_folders', 'support_materials',
         'notifications', 'notification_settings',
@@ -399,8 +402,8 @@ if (section("05. Turmas — CRUD e Matrícula de Alunos", 'classrooms')) {
                 'name' => 'Turma Teste Auto ' . time(),
                 'school_id' => $schoolRow['id'],
                 'teacher_id' => $profRow['id'],
-                'age_group' => '4-5 anos',
-                'period' => 'manhã',
+                'age_group' => '3-6',
+                'period' => 'morning',
                 'school_year' => 2026,
             ]);
             test("create() turma com dados válidos", (bool)$classroomId, $currentSection);
