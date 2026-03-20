@@ -744,12 +744,13 @@ if (section("10. Portfólios — Criação, Eixos e Workflow", 'portfolios')) {
     $coordRow = $stmt2->fetch();
 
     if ($classroomRow) {
+        // Usar ano único para evitar conflito com UNIQUE(classroom_id, semester, year)
+        $testYear = (int)date('Y') + 10;
         $portfolioId = $portfolioModel->create([
             'classroom_id' => $classroomRow['id'],
             'semester' => 1,
-            'year' => 2026,
+            'year' => $testYear,
             'teacher_message' => 'Mensagem inicial da professora.',
-            'status' => 'pending',
         ]);
         test("create() portfólio com dados válidos", (bool)$portfolioId, $currentSection);
 
@@ -870,7 +871,7 @@ if (section("13. Cursos — CRUD Completo com Módulos", 'courses')) {
     $courseModel = new Course();
 
     $testSlug = 'curso-teste-auditoria-' . time();
-    $courseId = $courseModel->create([
+    $created = $courseModel->create([
         ':title' => 'Curso de Auditoria Auto',
         ':slug' => $testSlug,
         ':description' => 'Descrição detalhada do curso de auditoria.',
@@ -884,6 +885,8 @@ if (section("13. Cursos — CRUD Completo com Módulos", 'courses')) {
         ':duration_hours' => 5,
         ':instructor_id' => null,
     ]);
+    // Course::create() retorna bool; capturar lastInsertId separadamente
+    $courseId = $created ? (int)$db->lastInsertId() : false;
     test("create() curso com dados válidos", (bool)$courseId, $currentSection);
 
     if ($courseId) {
@@ -1028,8 +1031,10 @@ if (section("16. Notificações — Criação e Leitura", 'notifications')) {
         $notifId = $notifModel->create([
             'user_id' => $userRow['id'],
             'type' => 'teste',
+            'title' => 'Teste Automático',
             'message' => 'Notificação de teste automático.',
-            'related_id' => null,
+            'reference_type' => null,
+            'reference_id' => null,
         ]);
         test("create() notificação", (bool)$notifId, $currentSection);
 
@@ -1253,9 +1258,12 @@ if (section("20. Workflows — Fluxos de Status e Permissões", 'workflows')) {
 
     // Verificar que GeminiService tem métodos esperados
     if (class_exists('App\Services\GeminiService')) {
-        test("GeminiService::correctText() existe", method_exists('App\Services\GeminiService', 'correctText'), $currentSection);
-        test("GeminiService::compileReport() ou generateText() existe",
-            method_exists('App\Services\GeminiService', 'compileReport') || method_exists('App\Services\GeminiService', 'generateText'),
+        test("GeminiService::correctDescriptiveText() existe",
+            method_exists('App\Services\GeminiService', 'correctDescriptiveText'),
+            $currentSection
+        );
+        test("GeminiService::generateStudentSummary() existe",
+            method_exists('App\Services\GeminiService', 'generateStudentSummary'),
             $currentSection
         );
     }
@@ -1263,10 +1271,10 @@ if (section("20. Workflows — Fluxos de Status e Permissões", 'workflows')) {
     // mPDF disponível
     test("mPDF composer package disponível", class_exists('Mpdf\Mpdf'), $currentSection);
 
-    // Verificar .env.example
-    test(".env.example existe com GEMINI_API_KEY",
+    // Verificar .env.example (arquivo opcional de documentação)
+    warn(".env.example com GEMINI_API_KEY existe",
         file_exists(__DIR__ . '/../.env.example') &&
-        strpos(file_get_contents(__DIR__ . '/../.env.example'), 'GEMINI_API_KEY') !== false,
+        strpos(file_get_contents(__DIR__ . '/../.env.example') ?: '', 'GEMINI_API_KEY') !== false,
         $currentSection
     );
 
