@@ -176,40 +176,68 @@
                     <thead class="bg-light">
                         <tr>
                             <th class="ps-4 py-3" style="width: 15%;">Data</th>
-                            <th class="py-3" style="width: 12%;">Tipo</th>
-                            <th class="py-3" style="width: 48%;">Conteúdo</th>
+                            <th class="py-3" style="width: 16%;">Período</th>
+                            <th class="py-3" style="width: 39%;">Resumo</th>
                             <th class="py-3" style="width: 20%;">Professor</th>
+                            <th class="py-3 text-center" style="width: 10%;">Status</th>
                             <th class="py-3 text-center" style="width: 5%;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($observations as $obs): ?>
+                        <?php
+                        $createdAt = $obs['created_at'] ?? null;
+                        $createdLabel = $createdAt ? date('d/m/Y', strtotime($createdAt)) : '-';
+
+                        $semesterLabel = !empty($obs['semester']) ? ((int) $obs['semester']) . 'o Semestre' : 'Sem período';
+                        $yearLabel = !empty($obs['year']) ? (string) $obs['year'] : 'Ano não informado';
+
+                        $status = $obs['status'] ?? 'in_progress';
+                        $statusLabel = $status === 'finalized' ? 'Finalizado' : 'Em andamento';
+                        $statusClass = $status === 'finalized' ? 'success' : 'warning text-dark';
+
+                        $generalRaw = $obs['observation_general'] ?? '';
+                        $summaryText = '';
+                        $generalDecoded = json_decode($generalRaw, true);
+                        if (is_array($generalDecoded)) {
+                            foreach ($generalDecoded as $answer) {
+                                $answer = trim((string) $answer);
+                                if ($answer !== '') {
+                                    $summaryText = $answer;
+                                    break;
+                                }
+                            }
+                        } else {
+                            $summaryText = trim((string) $generalRaw);
+                        }
+
+                        if ($summaryText === '') {
+                            $summaryText = trim((string) ($obs['title'] ?? 'Observação pedagógica sem resumo preenchido.'));
+                        }
+
+                        if (mb_strlen($summaryText) > 140) {
+                            $summaryText = mb_substr($summaryText, 0, 140) . '...';
+                        }
+                        ?>
                         <tr>
-                            <td class="ps-4 small"><?php echo date('d/m/Y', strtotime($obs['observation_date'])); ?></td>
+                            <td class="ps-4 small"><?php echo htmlspecialchars($createdLabel); ?></td>
                             <td>
-                                <?php
-                                $badgeColors = [
-                                    'Comportamento' => 'primary',
-                                    'Aprendizado' => 'success',
-                                    'Saúde' => 'danger',
-                                    'Comunicação com Pais' => 'warning',
-                                    'Geral' => 'secondary'
-                                ];
-                                $color = $badgeColors[$obs['category']] ?? 'secondary';
-                                ?>
-                                <span class="badge bg-<?php echo $color; ?>">
-                                    <?php echo htmlspecialchars($obs['category']); ?>
+                                <span class="badge bg-light text-dark border">
+                                    <?php echo htmlspecialchars($semesterLabel . ' / ' . $yearLabel); ?>
                                 </span>
                             </td>
                             <td class="small">
-                                <strong><?php echo htmlspecialchars($obs['title']); ?></strong>
-                                <?php if (!empty($obs['description'])): ?>
-                                    <br><span class="text-muted"><?php echo nl2br(htmlspecialchars(substr($obs['description'], 0, 80))); ?><?php echo strlen($obs['description']) > 80 ? '...' : ''; ?></span>
-                                <?php endif; ?>
+                                <strong><?php echo htmlspecialchars($obs['title'] ?? 'Observação pedagógica'); ?></strong>
+                                <br><span class="text-muted"><?php echo htmlspecialchars($summaryText); ?></span>
                             </td>
                             <td class="small">
                                 <i class="fas fa-user-tie me-1"></i>
-                                <?php echo htmlspecialchars($obs['teacher_name']); ?>
+                                <?php echo htmlspecialchars($obs['teacher_name'] ?? 'Usuário desconhecido'); ?>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-<?php echo $statusClass; ?>">
+                                    <?php echo htmlspecialchars($statusLabel); ?>
+                                </span>
                             </td>
                             <td class="text-center">
                                 <a href="/admin/observations/<?php echo $obs['id']; ?>" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">

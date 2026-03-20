@@ -112,7 +112,7 @@ foreach ($axisOrder as $axisKey) {
 <!-- Card de Informacoes Basicas -->
 <div class="row">
     <div class="col-md-8">
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 observation-axes-card">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
                     <i class="fas fa-info-circle me-2"></i>Informacoes
@@ -185,17 +185,17 @@ foreach ($axisOrder as $axisKey) {
             </div>
             <div class="card-body p-4">
                 <div class="d-flex flex-wrap gap-3 mb-4">
-                    <div class="px-3 py-2 rounded-3" style="background:#eef8f5; min-width:160px;">
+                    <div class="px-3 py-2 rounded-3 observation-stat observation-stat-success">
                         <small class="text-muted d-block">Eixos preenchidos</small>
                         <strong class="fs-5" style="color: var(--primary-color, #007e66);"><?php echo $filledAxisCount; ?>/<?php echo count($axisCards); ?></strong>
                     </div>
-                    <div class="px-3 py-2 rounded-3" style="background:#fff6df; min-width:160px;">
+                    <div class="px-3 py-2 rounded-3 observation-stat observation-stat-warning">
                         <small class="text-muted d-block">Perguntas respondidas</small>
                         <strong class="fs-5" style="color:#9a6b00;"><?php echo $answeredQuestionCount; ?>/<?php echo $totalQuestionCount; ?></strong>
                     </div>
                 </div>
 
-                <ul class="nav nav-tabs" id="axesTabs" role="tablist">
+                <ul class="nav nav-tabs observation-tabs" id="axesTabs" role="tablist">
                     <?php foreach ($axisCards as $index => $axis): ?>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link <?php echo $index === 0 ? 'active' : ''; ?>" id="<?php echo $axis['tab_btn']; ?>" data-bs-toggle="tab" data-bs-target="#<?php echo $axis['tab_id']; ?>" type="button" role="tab">
@@ -227,7 +227,7 @@ foreach ($axisOrder as $axisKey) {
                                 <?php foreach ($axis['questions'] as $questionIndex => $question): ?>
                                     <?php $answer = trim((string) ($axis['answers'][$questionIndex] ?? '')); ?>
                                     <div class="col-12">
-                                        <div class="border rounded-3 p-3 h-100" style="background:<?php echo $answer !== '' ? '#ffffff' : '#f8f9fa'; ?>;">
+                                        <div class="border rounded-3 p-3 h-100 observation-answer-card <?php echo $answer !== '' ? 'is-answered' : 'is-empty'; ?>">
                                             <div class="d-flex align-items-start gap-3">
                                                 <span class="badge rounded-pill <?php echo $answer !== '' ? 'bg-success' : 'bg-secondary'; ?> mt-1">
                                                     <?php echo $questionIndex + 1; ?>
@@ -390,6 +390,114 @@ function confirmDelete(id) {
 </script>
 
 <style>
+.observation-stat {
+    min-width: 160px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.observation-stat-success {
+    background: #eef8f5;
+}
+
+.observation-stat-warning {
+    background: #fff6df;
+}
+
+.observation-tabs {
+    gap: 10px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding-bottom: 12px;
+}
+
+.observation-tabs .nav-link {
+    border: 0;
+    border-radius: 999px;
+    color: #4b5563;
+    background: transparent;
+    padding: 8px 0;
+    font-weight: 600;
+}
+
+.observation-tabs .nav-link.active {
+    background: rgba(0, 126, 102, 0.12);
+    color: var(--primary-color, #007e66);
+    padding: 8px 14px;
+}
+
+.observation-answer-card {
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.observation-answer-card.is-answered {
+    background: #ffffff;
+    border-color: #d9e8e3 !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.observation-answer-card.is-empty {
+    background: #f8f9fa;
+    border-color: #e5e7eb !important;
+}
+
+[data-theme="dark"] .observation-axes-card {
+    background: linear-gradient(180deg, #1f2b47 0%, #1b2540 100%) !important;
+}
+
+[data-theme="dark"] .observation-stat {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .observation-stat-success {
+    background: linear-gradient(135deg, rgba(19, 78, 74, 0.95), rgba(15, 118, 110, 0.78));
+}
+
+[data-theme="dark"] .observation-stat-warning {
+    background: linear-gradient(135deg, rgba(120, 53, 15, 0.92), rgba(146, 64, 14, 0.78));
+}
+
+[data-theme="dark"] .observation-stat strong {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .observation-stat .text-muted {
+    color: rgba(226, 232, 240, 0.78) !important;
+}
+
+[data-theme="dark"] .observation-tabs {
+    border-bottom-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="dark"] .observation-tabs .nav-link {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .observation-tabs .nav-link.active {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #7dd3c6 !important;
+    box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.18);
+}
+
+[data-theme="dark"] .observation-answer-card.is-answered {
+    background: #243250 !important;
+    border-color: #35507a !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="dark"] .observation-answer-card.is-empty {
+    background: #1b2740 !important;
+    border-color: #2f4263 !important;
+}
+
+[data-theme="dark"] .observation-answer-card p,
+[data-theme="dark"] .observation-answer-card div,
+[data-theme="dark"] .observation-answer-card span {
+    color: #e5edf7 !important;
+}
+
+[data-theme="dark"] .observation-answer-card .text-muted {
+    color: #94a3b8 !important;
+}
+
 @media print {
     .btn, .breadcrumb, nav, button, .card-body .d-grid {
         display: none !important;
