@@ -42,8 +42,9 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
     </div>
 </div>
 
-<form action="/admin/observations/<?php echo $observation['id']; ?>/update" method="POST" id="observationForm">
+<form action="/admin/observations/<?php echo $observation['id']; ?>/update" method="POST" id="observationForm" novalidate>
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+    <div id="validationSummary" class="alert alert-danger d-none" role="alert"></div>
     <!-- Dados basicos -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
@@ -155,9 +156,14 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                                   class="form-control axis-question-field"
                                   rows="2"
                                   data-axis="<?= $axisData['field'] ?>"
+                                  data-axis-label="<?= htmlspecialchars($axisData['name'], ENT_QUOTES) ?>"
+                                  data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
                                   <?php echo $readonlyAttr; ?>
                                   <?php echo !$isFinalized ? 'required' : ''; ?>><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
+                        <?php if (!$isFinalized): ?>
+                            <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
+                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -227,6 +233,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
     const isFinalized = <?php echo $isFinalized ? 'true' : 'false'; ?>;
     const indicator = document.getElementById('autoSaveIndicator');
     const indicatorText = document.getElementById('autoSaveText');
+    const summaryEl = document.getElementById('validationSummary');
 
     if (isFinalized) return;
 
@@ -236,6 +243,82 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
     function getAxisValues(axisField) {
         const textareas = document.querySelectorAll('textarea[data-axis="' + axisField + '"]');
         return Array.from(textareas).map(function(t) { return t.value.trim(); });
+    }
+
+    function clearValidationState() {
+        if (summaryEl) {
+            summaryEl.classList.add('d-none');
+            summaryEl.innerHTML = '';
+        }
+
+        document.querySelectorAll('.is-invalid').forEach(function(field) {
+            field.classList.remove('is-invalid');
+        });
+    }
+
+    function activateTabForField(field) {
+        const pane = field.closest('.tab-pane');
+        if (!pane) return;
+
+        const tabButton = document.querySelector('[data-bs-target="#' + pane.id + '"]');
+        if (tabButton) {
+            new bootstrap.Tab(tabButton).show();
+        }
+    }
+
+    function validateForm() {
+        clearValidationState();
+
+        const missing = [];
+        const student = document.getElementById('student_id');
+
+        if (student && !student.disabled && !student.value) {
+            student.classList.add('is-invalid');
+            missing.push({
+                field: student,
+                label: 'Selecione um aluno.'
+            });
+        }
+
+        document.querySelectorAll('.axis-question-field[required]').forEach(function(textarea) {
+            if (textarea.value.trim()) return;
+
+            textarea.classList.add('is-invalid');
+            missing.push({
+                field: textarea,
+                label: textarea.getAttribute('data-axis-label') + ': ' + textarea.getAttribute('data-question')
+            });
+        });
+
+        if (!missing.length) {
+            return true;
+        }
+
+        if (missing[0].field !== student) {
+            activateTabForField(missing[0].field);
+        }
+
+        if (summaryEl) {
+            const intro = missing.length === 1
+                ? 'Falta responder 1 campo obrigatório:'
+                : 'Faltam responder ' + missing.length + ' campos obrigatórios:';
+            const items = missing.slice(0, 6).map(function(item) {
+                return '<li>' + item.label + '</li>';
+            }).join('');
+            const extra = missing.length > 6
+                ? '<p class="mb-0 mt-2 small">Há mais campos pendentes além dos listados acima.</p>'
+                : '';
+
+            summaryEl.innerHTML = '<strong>' + intro + '</strong><ul class="mb-0 mt-2">' + items + '</ul>' + extra;
+            summaryEl.classList.remove('d-none');
+            summaryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        setTimeout(function() {
+            missing[0].field.focus();
+        }, 150);
+
+        return false;
     }
 
     function autoSaveAxis(axisField) {
@@ -272,6 +355,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
     document.querySelectorAll('.axis-question-field').forEach(function(field) {
         field.addEventListener('input', function() {
             hasUnsavedChanges = true;
+            field.classList.remove('is-invalid');
             const axis = this.getAttribute('data-axis');
             if (saveTimeouts[axis]) clearTimeout(saveTimeouts[axis]);
             saveTimeouts[axis] = setTimeout(function() { autoSaveAxis(axis); }, 2000);
@@ -294,7 +378,13 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 
     var form = document.getElementById('observationForm');
     if (form) {
-        form.addEventListener('submit', function() { hasUnsavedChanges = false; });
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
+            }
+            hasUnsavedChanges = false;
+        });
     }
 })();
 </script>

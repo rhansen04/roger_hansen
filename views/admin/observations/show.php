@@ -27,6 +27,45 @@
 <?php
 $status = $observation['status'] ?? 'in_progress';
 $isFinalized = ($status === 'finalized');
+include __DIR__ . '/_questions.php';
+
+$axisOrder = ['general', 'movement', 'manual', 'music', 'stories', 'pca'];
+$axisCards = [];
+$filledAxisCount = 0;
+$answeredQuestionCount = 0;
+$totalQuestionCount = 0;
+
+foreach ($axisOrder as $axisKey) {
+    $axisData = $axisQuestions[$axisKey];
+    $answers = parseAxisAnswers($observation[$axisData['field']] ?? '', count($axisData['questions']));
+    $answered = 0;
+
+    foreach ($answers as $answer) {
+        if (trim((string) $answer) !== '') {
+            $answered++;
+        }
+    }
+
+    if ($answered > 0) {
+        $filledAxisCount++;
+    }
+
+    $answeredQuestionCount += $answered;
+    $totalQuestionCount += count($axisData['questions']);
+
+    $axisCards[] = [
+        'key' => $axisKey,
+        'name' => $axisData['name'],
+        'field' => $axisData['field'],
+        'icon' => $axisData['icon'],
+        'tab_id' => $axisData['tab_id'],
+        'tab_btn' => $axisData['tab_btn'],
+        'questions' => $axisData['questions'],
+        'answers' => $answers,
+        'answered' => $answered,
+        'total' => count($axisData['questions']),
+    ];
+}
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -145,64 +184,67 @@ $isFinalized = ($status === 'finalized');
                 </h5>
             </div>
             <div class="card-body p-4">
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <div class="px-3 py-2 rounded-3" style="background:#eef8f5; min-width:160px;">
+                        <small class="text-muted d-block">Eixos preenchidos</small>
+                        <strong class="fs-5" style="color: var(--primary-color, #007e66);"><?php echo $filledAxisCount; ?>/<?php echo count($axisCards); ?></strong>
+                    </div>
+                    <div class="px-3 py-2 rounded-3" style="background:#fff6df; min-width:160px;">
+                        <small class="text-muted d-block">Perguntas respondidas</small>
+                        <strong class="fs-5" style="color:#9a6b00;"><?php echo $answeredQuestionCount; ?>/<?php echo $totalQuestionCount; ?></strong>
+                    </div>
+                </div>
+
                 <ul class="nav nav-tabs" id="axesTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="tab-general" data-bs-toggle="tab" data-bs-target="#panel-general" type="button" role="tab">
-                            <i class="fas fa-file-alt me-1"></i> Observacao Geral
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-movement" data-bs-toggle="tab" data-bs-target="#panel-movement" type="button" role="tab">
-                            <i class="fas fa-running me-1"></i> Movimento
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-manual" data-bs-toggle="tab" data-bs-target="#panel-manual" type="button" role="tab">
-                            <i class="fas fa-hands me-1"></i> Manual
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-music" data-bs-toggle="tab" data-bs-target="#panel-music" type="button" role="tab">
-                            <i class="fas fa-music me-1"></i> Musical
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-stories" data-bs-toggle="tab" data-bs-target="#panel-stories" type="button" role="tab">
-                            <i class="fas fa-book-open me-1"></i> Contos
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-pca" data-bs-toggle="tab" data-bs-target="#panel-pca" type="button" role="tab">
-                            <i class="fas fa-comments me-1"></i> Comunicacao Ativa
-                        </button>
-                    </li>
+                    <?php foreach ($axisCards as $index => $axis): ?>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link <?php echo $index === 0 ? 'active' : ''; ?>" id="<?php echo $axis['tab_btn']; ?>" data-bs-toggle="tab" data-bs-target="#<?php echo $axis['tab_id']; ?>" type="button" role="tab">
+                                <i class="<?php echo $axis['icon']; ?> me-1"></i> <?php echo htmlspecialchars($axis['name']); ?>
+                                <span class="badge rounded-pill ms-2 <?php echo $axis['answered'] === $axis['total'] ? 'bg-success' : 'bg-secondary'; ?>">
+                                    <?php echo $axis['answered']; ?>/<?php echo $axis['total']; ?>
+                                </span>
+                            </button>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
 
                 <div class="tab-content pt-4" id="axesTabContent">
-                    <?php
-                    $axes = [
-                        'panel-general' => ['label' => 'Observacao Geral', 'field' => 'observation_general', 'active' => true],
-                        'panel-movement' => ['label' => 'Eixo Atividade de Movimento', 'field' => 'axis_movement', 'active' => false],
-                        'panel-manual' => ['label' => 'Eixo Atividade Manual', 'field' => 'axis_manual', 'active' => false],
-                        'panel-music' => ['label' => 'Eixo Atividade Musical', 'field' => 'axis_music', 'active' => false],
-                        'panel-stories' => ['label' => 'Eixo Atividade de Contos', 'field' => 'axis_stories', 'active' => false],
-                        'panel-pca' => ['label' => 'Eixo Programa Comunicacao Ativa', 'field' => 'axis_pca', 'active' => false],
-                    ];
-                    foreach ($axes as $panelId => $axis):
-                        $value = $observation[$axis['field']] ?? '';
-                        $activeClass = $axis['active'] ? 'show active' : '';
-                    ?>
-                        <div class="tab-pane fade <?php echo $activeClass; ?>" id="<?php echo $panelId; ?>" role="tabpanel">
-                            <?php if (!empty(trim($value))): ?>
-                                <div class="bg-light p-4 rounded">
-                                    <p class="mb-0" style="white-space: pre-wrap; line-height: 1.8;"><?php echo htmlspecialchars($value); ?></p>
+                    <?php foreach ($axisCards as $index => $axis): ?>
+                        <div class="tab-pane fade <?php echo $index === 0 ? 'show active' : ''; ?>" id="<?php echo $axis['tab_id']; ?>" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1" style="color: var(--primary-color, #007e66);">
+                                        <i class="<?php echo $axis['icon']; ?> me-2"></i><?php echo htmlspecialchars($axis['name']); ?>
+                                    </h6>
+                                    <small class="text-muted">Cada resposta aparece vinculada à pergunta orientadora correspondente.</small>
                                 </div>
-                            <?php else: ?>
-                                <div class="bg-light p-4 rounded text-muted text-center">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Nenhum registro para este eixo.
-                                </div>
-                            <?php endif; ?>
+                                <span class="badge <?php echo $axis['answered'] === $axis['total'] ? 'bg-success' : 'bg-warning text-dark'; ?> px-3 py-2">
+                                    <?php echo $axis['answered']; ?> de <?php echo $axis['total']; ?> respondidas
+                                </span>
+                            </div>
+
+                            <div class="row g-3">
+                                <?php foreach ($axis['questions'] as $questionIndex => $question): ?>
+                                    <?php $answer = trim((string) ($axis['answers'][$questionIndex] ?? '')); ?>
+                                    <div class="col-12">
+                                        <div class="border rounded-3 p-3 h-100" style="background:<?php echo $answer !== '' ? '#ffffff' : '#f8f9fa'; ?>;">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <span class="badge rounded-pill <?php echo $answer !== '' ? 'bg-success' : 'bg-secondary'; ?> mt-1">
+                                                    <?php echo $questionIndex + 1; ?>
+                                                </span>
+                                                <div class="flex-grow-1">
+                                                    <p class="fw-semibold mb-2"><?php echo htmlspecialchars($question); ?></p>
+                                                    <?php if ($answer !== ''): ?>
+                                                        <div class="mb-0" style="white-space: pre-wrap; line-height: 1.7;"><?php echo nl2br(htmlspecialchars($answer)); ?></div>
+                                                    <?php else: ?>
+                                                        <p class="mb-0 text-muted">Sem resposta registrada para esta pergunta.</p>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -259,16 +301,8 @@ $isFinalized = ($status === 'finalized');
                 <div class="mb-0">
                     <small class="text-muted d-block mb-2">Preenchimento</small>
                     <?php
-                    $axisLabels = [
-                        'observation_general' => 'Geral',
-                        'axis_movement' => 'Movimento',
-                        'axis_manual' => 'Manual',
-                        'axis_music' => 'Musical',
-                        'axis_stories' => 'Contos',
-                        'axis_pca' => 'Com. Ativa',
-                    ];
-                    foreach ($axisLabels as $field => $label):
-                        $filled = !empty(trim($observation[$field] ?? ''));
+                    foreach ($axisCards as $axis):
+                        $filled = $axis['answered'] > 0;
                     ?>
                         <div class="d-flex align-items-center mb-1">
                             <?php if ($filled): ?>
@@ -276,7 +310,7 @@ $isFinalized = ($status === 'finalized');
                             <?php else: ?>
                                 <i class="far fa-circle text-muted me-2"></i>
                             <?php endif; ?>
-                            <small><?php echo $label; ?></small>
+                            <small><?php echo htmlspecialchars($axis['name']); ?> <span class="text-muted">(<?php echo $axis['answered']; ?>/<?php echo $axis['total']; ?>)</span></small>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -329,6 +363,7 @@ include __DIR__ . '/_coordinator_feedback.php';
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                 <form action="/admin/observations/<?php echo $observation['id']; ?>/reopen" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                     <button type="submit" class="btn btn-warning">
                         <i class="fas fa-lock-open me-2"></i> Sim, Reabrir
                     </button>
@@ -340,7 +375,9 @@ include __DIR__ . '/_coordinator_feedback.php';
 <?php endif; ?>
 
 <!-- Form oculto para delete -->
-<form id="deleteForm" method="POST" style="display: none;"></form>
+<form id="deleteForm" method="POST" style="display: none;">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+</form>
 
 <script>
 function confirmDelete(id) {

@@ -14,8 +14,9 @@
     </h2>
 </div>
 
-<form action="/admin/observations" method="POST" id="observationForm">
+<form action="/admin/observations" method="POST" id="observationForm" novalidate>
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+    <div id="validationSummary" class="alert alert-danger d-none" role="alert"></div>
     <!-- Dados basicos -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
@@ -107,8 +108,11 @@
                                   class="form-control axis-question-field"
                                   rows="2"
                                   data-axis="<?= $axisData['field'] ?>"
+                                  data-axis-label="<?= htmlspecialchars($axisData['name'], ENT_QUOTES) ?>"
+                                  data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
                                   required></textarea>
+                        <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -137,6 +141,7 @@
 (function() {
     var form = document.getElementById('observationForm');
     var studentEl = document.getElementById('student_id');
+    var summaryEl = document.getElementById('validationSummary');
     var params = new URLSearchParams(window.location.search);
     var focus = params.get('focus');
     var focusMap = {
@@ -160,6 +165,84 @@
         });
     }
 
+    function clearValidationState() {
+        if (summaryEl) {
+            summaryEl.classList.add('d-none');
+            summaryEl.innerHTML = '';
+        }
+
+        document.querySelectorAll('.is-invalid').forEach(function(field) {
+            field.classList.remove('is-invalid');
+        });
+    }
+
+    function activateTabForField(field) {
+        var pane = field.closest('.tab-pane');
+        if (!pane) return;
+
+        var tabButton = document.querySelector('[data-bs-target="#' + pane.id + '"]');
+        if (tabButton) {
+            new bootstrap.Tab(tabButton).show();
+        }
+    }
+
+    function validateForm() {
+        clearValidationState();
+        syncRequiredFields();
+
+        var missing = [];
+
+        if (!studentEl || !studentEl.value) {
+            missing.push({
+                field: studentEl,
+                label: 'Selecione um aluno.'
+            });
+        }
+
+        document.querySelectorAll('.axis-question-field').forEach(function(textarea) {
+            if (!textarea.required) return;
+            if (textarea.value.trim()) return;
+
+            textarea.classList.add('is-invalid');
+            missing.push({
+                field: textarea,
+                label: textarea.getAttribute('data-axis-label') + ': ' + textarea.getAttribute('data-question')
+            });
+        });
+
+        if (!missing.length) {
+            return true;
+        }
+
+        if (missing[0].field === studentEl) {
+            studentEl.classList.add('is-invalid');
+        } else {
+            activateTabForField(missing[0].field);
+        }
+
+        if (summaryEl) {
+            var intro = missing.length === 1
+                ? 'Falta responder 1 campo obrigatório:'
+                : 'Faltam responder ' + missing.length + ' campos obrigatórios:';
+            var items = missing.slice(0, 6).map(function(item) {
+                return '<li>' + item.label + '</li>';
+            }).join('');
+            var extra = missing.length > 6
+                ? '<p class="mb-0 mt-2 small">Há mais campos pendentes além dos listados acima.</p>'
+                : '';
+
+            summaryEl.innerHTML = '<strong>' + intro + '</strong><ul class="mb-0 mt-2">' + items + '</ul>' + extra;
+            summaryEl.classList.remove('d-none');
+            summaryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        setTimeout(function() {
+            missing[0].field.focus();
+        }, 150);
+
+        return false;
+    }
+
     syncRequiredFields();
 
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(tabButton) {
@@ -176,13 +259,24 @@
     });
 
     form.addEventListener('submit', function(e) {
-        if (!studentEl || !studentEl.value) {
+        if (!validateForm()) {
             e.preventDefault();
-            alert('Por favor, selecione um aluno.');
-            if (studentEl.tagName === 'SELECT') studentEl.focus();
             return false;
         }
-        syncRequiredFields();
+    });
+
+    document.querySelectorAll('select, textarea').forEach(function(field) {
+        field.addEventListener('input', function() {
+            if (field.value.trim()) {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        field.addEventListener('change', function() {
+            if (field.value.trim()) {
+                field.classList.remove('is-invalid');
+            }
+        });
     });
 })();
 
