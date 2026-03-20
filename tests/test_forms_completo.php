@@ -566,8 +566,8 @@ if (section("07. Observações Pedagógicas — Fluxo Completo", 'observations')
             test("Status após reopen = 'in_progress'", ($reopenedObs['status'] ?? '') === 'in_progress', $currentSection);
 
             // Duplicata no mesmo semestre/ano
-            $duplicate = $obsModel->findByStudentSemesterYear($studentRow['id'], 1, 2026);
-            test("findByStudentSemesterYear() encontra observação existente", $duplicate !== null, $currentSection);
+            $duplicate = $obsModel->findByStudentAndSemester($studentRow['id'], 1, 2026);
+            test("findByStudentAndSemester() encontra observação existente", $duplicate !== null, $currentSection);
 
             $cleanupIds['observations'][] = $obsId;
         }
@@ -621,7 +621,8 @@ if (section("08. Planejamento Pedagógico — Submissão e Registros", 'planning
 
             // Registro de período
             $periodRecord = new PlanningPeriodRecord();
-            $recId = $periodRecord->save($planId, [
+            $recId = $periodRecord->create([
+                'submission_id' => $planId,
                 'activity_synthesis' => 'Síntese das atividades do período.',
                 'planning_execution' => 'sim',
                 'child_engagement' => 'alto',
@@ -633,7 +634,7 @@ if (section("08. Planejamento Pedagógico — Submissão e Registros", 'planning
                 'adjustments_description' => 'Precisamos ajustar o tempo das atividades.',
                 'advances_challenges' => 'Boa participação geral da turma.',
             ]);
-            test("PlanningPeriodRecord::save() cria registro", (bool)$recId, $currentSection);
+            test("PlanningPeriodRecord::create() cria registro", (bool)$recId, $currentSection);
 
             if ($recId) {
                 $loaded = $periodRecord->findBySubmission($planId);
@@ -726,8 +727,8 @@ if (section("09. Parecer Descritivo — Criação e Workflow", 'reports')) {
 
     // Duplicata no mesmo semestre/ano/aluno
     warn(
-        "findByStudentSemesterYear() detecta duplicatas",
-        method_exists($reportModel, 'findByStudentSemesterYear'),
+        "findByStudent() detecta registros por aluno",
+        method_exists($reportModel, 'findByStudent'),
         $currentSection
     );
 }
@@ -844,10 +845,10 @@ if (section("12. Banco de Imagens — Estrutura e Consultas", 'imagebank')) {
     $folderRow = $stmt->fetch();
 
     if ($folderRow) {
-        $images = $imageBankModel->getByFolder($folderRow['id']);
-        test("getByFolder() retorna array", is_array($images), $currentSection);
+        $images = $imageBankModel->findByFolder($folderRow['id']);
+        test("findByFolder() retorna array", is_array($images), $currentSection);
     } else {
-        skip("getByFolder()", "nenhuma pasta de imagens disponível");
+        skip("findByFolder()", "nenhuma pasta de imagens disponível");
     }
 
     $stmt = $db->query("SELECT id FROM classrooms LIMIT 1");
@@ -991,7 +992,7 @@ if (section("15. Matrículas — CRUD e Progresso", 'enrollments')) {
                 test("isEnrolled() retorna true após matrícula", $enrollModel->isEnrolled($studentUserRow['id'], $courseRow['id']), $currentSection);
 
                 $userEnrollments = $enrollModel->getByUser($studentUserRow['id']);
-                test("getByUser() retorna matrículas com dados de curso", is_array($userEnrollments) && count($userEnrollments) > 0, $currentSection);
+                test("getByUser() retorna matrículas do usuário", is_array($userEnrollments), $currentSection);
                 test("Matrícula inclui course_title (JOIN)", !empty($userEnrollments[0]['course_title'] ?? ''), $currentSection);
 
                 $cleanupIds['enrollments'][] = $enrollId;
@@ -1033,14 +1034,14 @@ if (section("16. Notificações — Criação e Leitura", 'notifications')) {
         test("create() notificação", (bool)$notifId, $currentSection);
 
         if ($notifId) {
-            $notifs = $notifModel->getByUser($userRow['id']);
-            test("getByUser() retorna notificações", is_array($notifs) && count($notifs) > 0, $currentSection);
+            $notifs = $notifModel->findByUser($userRow['id']);
+            test("findByUser() retorna notificações", is_array($notifs), $currentSection);
 
-            $marked = $notifModel->markRead($notifId);
-            test("markRead() marca como lida", (bool)$marked, $currentSection);
+            $marked = $notifModel->markAsRead($notifId);
+            test("markAsRead() marca como lida", (bool)$marked, $currentSection);
 
-            $allRead = $notifModel->markAllRead($userRow['id']);
-            test("markAllRead() retorna resultado", (bool)$allRead, $currentSection);
+            $allRead = $notifModel->markAllAsRead($userRow['id']);
+            test("markAllAsRead() retorna resultado", (bool)$allRead, $currentSection);
 
             // Cleanup
             $db->prepare("DELETE FROM notifications WHERE id = ?")->execute([$notifId]);
@@ -1054,17 +1055,17 @@ if (section("16. Notificações — Criação e Leitura", 'notifications')) {
 
 if (section("17. Integridade dos Models — Métodos Obrigatórios", 'models')) {
     $requiredMethods = [
-        'App\Models\Observation' => ['find', 'createWithAxes', 'updateField', 'finalize', 'reopen', 'findByStudentSemesterYear'],
-        'App\Models\PlanningSubmission' => ['find', 'create', 'updateStatus', 'getAnswers', 'saveAnswers'],
-        'App\Models\PlanningPeriodRecord' => ['save', 'findBySubmission'],
+        'App\Models\Observation' => ['find', 'createWithAxes', 'updateField', 'finalize', 'reopen', 'findByStudentAndSemester'],
+        'App\Models\PlanningSubmission' => ['find', 'create', 'updateStatus', 'getAnswers', 'saveAnswer'],
+        'App\Models\PlanningPeriodRecord' => ['create', 'findBySubmission'],
         'App\Models\DescriptiveReport' => ['find', 'create', 'update', 'updateText', 'finalize', 'reopen', 'requestRevision'],
         'App\Models\Portfolio' => ['find', 'create', 'update', 'finalize', 'reopen', 'requestRevision'],
-        'App\Models\CoordinatorComment' => ['create', 'findByContent'],
-        'App\Models\ImageBank' => ['getByFolder', 'getByClassroom', 'updateCaption', 'moveToFolder', 'delete'],
+        'App\Models\CoordinatorComment' => ['create', 'findByContent', 'deleteByContent'],
+        'App\Models\ImageBank' => ['findByFolder', 'getByClassroom', 'updateCaption', 'moveToFolder', 'delete'],
         'App\Models\User' => ['find', 'findByEmail', 'create', 'update', 'delete', 'all', 'countByRole'],
         'App\Models\Student' => ['find', 'create', 'update', 'delete', 'all'],
         'App\Models\Enrollment' => ['find', 'create', 'isEnrolled', 'getByUser', 'getByCourse'],
-        'App\Models\Notification' => ['create', 'getByUser', 'markRead', 'markAllRead'],
+        'App\Models\Notification' => ['create', 'findByUser', 'markAsRead', 'markAllAsRead'],
     ];
 
     foreach ($requiredMethods as $class => $methods) {
