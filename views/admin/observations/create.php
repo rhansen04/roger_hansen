@@ -15,6 +15,7 @@
 </div>
 
 <form action="/admin/observations" method="POST" id="observationForm">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
     <!-- Dados basicos -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
@@ -93,7 +94,8 @@
 
             <div class="tab-content pt-4" id="axesTabContent">
                 <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData): ?>
-                <div class="tab-pane fade <?= $first ? 'show active' : '' ?>" id="<?= $axisData['tab_id'] ?>" role="tabpanel">
+                <div class="tab-pane fade <?= $first ? 'show active' : '' ?>" id="<?= $axisData['tab_id'] ?>" role="tabpanel"
+                     data-axis-field="<?= $axisData['field'] ?>">
                     <h6 class="fw-bold mb-3" style="color: var(--primary-color, #007e66);"><?= $axisData['name'] ?></h6>
                     <?php foreach ($axisData['questions'] as $qIdx => $question): ?>
                     <div class="mb-4 p-3 bg-light rounded border-start border-3 border-primary">
@@ -102,8 +104,9 @@
                             <?= htmlspecialchars($question) ?> <span class="text-danger">*</span>
                         </label>
                         <textarea name="<?= $axisData['field'] ?>[<?= $qIdx ?>]"
-                                  class="form-control"
+                                  class="form-control axis-question-field"
                                   rows="2"
+                                  data-axis="<?= $axisData['field'] ?>"
                                   placeholder="Sua resposta..."
                                   required></textarea>
                     </div>
@@ -131,16 +134,57 @@
 
 <script>
 // Validacao do formulario
-document.getElementById('observationForm').addEventListener('submit', function(e) {
-    const studentId = document.getElementById('student_id').value;
-    if (!studentId) {
-        e.preventDefault();
-        alert('Por favor, selecione um aluno.');
-        var el = document.getElementById('student_id');
-        if (el.tagName === 'SELECT') el.focus();
-        return false;
+(function() {
+    var form = document.getElementById('observationForm');
+    var studentEl = document.getElementById('student_id');
+    var params = new URLSearchParams(window.location.search);
+    var focus = params.get('focus');
+    var focusMap = {
+        'general': 'observation_general',
+        'movement': 'axis_movement',
+        'manual': 'axis_manual',
+        'music': 'axis_music',
+        'stories': 'axis_stories',
+        'pca': 'axis_pca'
+    };
+    var focusedAxis = focusMap[focus] || null;
+
+    function syncRequiredFields() {
+        var textareas = document.querySelectorAll('.axis-question-field');
+        textareas.forEach(function(textarea) {
+            if (!focusedAxis) {
+                textarea.required = true;
+                return;
+            }
+            textarea.required = (textarea.getAttribute('data-axis') === focusedAxis);
+        });
     }
-});
+
+    syncRequiredFields();
+
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(tabButton) {
+        tabButton.addEventListener('shown.bs.tab', function(event) {
+            if (!focusedAxis) return;
+            var targetSelector = event.target.getAttribute('data-bs-target');
+            var targetPane = targetSelector ? document.querySelector(targetSelector) : null;
+            var axisField = targetPane ? targetPane.getAttribute('data-axis-field') : null;
+            if (axisField) {
+                focusedAxis = axisField;
+                syncRequiredFields();
+            }
+        });
+    });
+
+    form.addEventListener('submit', function(e) {
+        if (!studentEl || !studentEl.value) {
+            e.preventDefault();
+            alert('Por favor, selecione um aluno.');
+            if (studentEl.tagName === 'SELECT') studentEl.focus();
+            return false;
+        }
+        syncRequiredFields();
+    });
+})();
 
 // Select2 para busca de alunos (se disponivel e nao for hidden)
 var studentSelect = document.querySelector('select#student_id');

@@ -43,6 +43,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 </div>
 
 <form action="/admin/observations/<?php echo $observation['id']; ?>/update" method="POST" id="observationForm">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
     <!-- Dados basicos -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
@@ -209,6 +210,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                 <form action="/admin/observations/<?php echo $observation['id']; ?>/finalize" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-check-circle me-2"></i> Sim, Finalizar
                     </button>
@@ -244,11 +246,13 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>'
             },
             body: JSON.stringify({
                 field: axisField,
-                value: JSON.stringify(getAxisValues(axisField))
+                value: JSON.stringify(getAxisValues(axisField)),
+                csrf_token: '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>'
             })
         })
         .then(function(r) { return r.json(); })
