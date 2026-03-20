@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Models\Student;
 use App\Models\School;
+use App\Core\Security\Csrf;
 
 class StudentController
 {
@@ -25,17 +26,69 @@ class StudentController
 
     public function store()
     {
+        Csrf::verify();
+
+        $errors = [];
+
+        // BUG-021: validate name
+        $name = trim($_POST['name'] ?? '');
+        if (empty($name)) {
+            $errors[] = 'O nome do aluno é obrigatório.';
+        }
+
+        // BUG-022: validate birth_date
+        $birthDate = $_POST['birth_date'] ?? '';
+        if (!empty($birthDate)) {
+            $d = \DateTime::createFromFormat('Y-m-d', $birthDate);
+            if (!$d || $d->format('Y-m-d') !== $birthDate || $d > new \DateTime()) {
+                $errors[] = 'Data de nascimento inválida.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['error_message'] = implode(' ', $errors);
+            return $this->create();
+        }
+
+        $schoolId = (int)($_POST['school_id'] ?? 0);
+        if ($schoolId > 0) {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare("SELECT id FROM schools WHERE id = ? LIMIT 1");
+            $stmt->execute([$schoolId]);
+            if (!$stmt->fetch()) {
+                $_SESSION['error_message'] = 'Escola inválida.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/students'));
+                exit;
+            }
+        }
+
         $data = [
-            'name' => $_POST['name'] ?? '',
-            'birth_date' => $_POST['birth_date'] ?? '',
-            'school_id' => $_POST['school_id'] ?? null,
+            'name' => $name,
+            'birth_date' => $birthDate,
+            'school_id' => $schoolId ?: null,
             'photo_url' => null
         ];
 
         // Lógica simples de upload se houver foto
         if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
+            $maxSize = 5 * 1024 * 1024; // 5 MB
+            if ($_FILES['photo']['size'] > $maxSize) {
+                $_SESSION['error_message'] = 'Arquivo muito grande. Máximo 5MB.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                exit;
+            }
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES['photo']['tmp_name']);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($mime, $allowedMimes)) {
+                $_SESSION['error_message'] = 'Tipo de arquivo não permitido.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                exit;
+            }
+
             $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-            $filename = time() . '.' . $ext;
+            $filename = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
             $uploadPath = __DIR__ . '/../../../public/uploads/students/' . $filename;
 
             if (!is_dir(dirname($uploadPath))) {
@@ -128,6 +181,8 @@ class StudentController
 
     public function update($id)
     {
+        Csrf::verify();
+
         $studentModel = new Student();
         $student = $studentModel->find($id);
 
@@ -137,17 +192,67 @@ class StudentController
             exit;
         }
 
+        $errors = [];
+
+        // BUG-021: validate name
+        $name = trim($_POST['name'] ?? '');
+        if (empty($name)) {
+            $errors[] = 'O nome do aluno é obrigatório.';
+        }
+
+        // BUG-022: validate birth_date
+        $birthDate = $_POST['birth_date'] ?? '';
+        if (!empty($birthDate)) {
+            $d = \DateTime::createFromFormat('Y-m-d', $birthDate);
+            if (!$d || $d->format('Y-m-d') !== $birthDate || $d > new \DateTime()) {
+                $errors[] = 'Data de nascimento inválida.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['error_message'] = implode(' ', $errors);
+            return $this->edit($id);
+        }
+
+        $schoolId = (int)($_POST['school_id'] ?? 0);
+        if ($schoolId > 0) {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare("SELECT id FROM schools WHERE id = ? LIMIT 1");
+            $stmt->execute([$schoolId]);
+            if (!$stmt->fetch()) {
+                $_SESSION['error_message'] = 'Escola inválida.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/students'));
+                exit;
+            }
+        }
+
         $data = [
-            'name' => $_POST['name'] ?? '',
-            'birth_date' => $_POST['birth_date'] ?? '',
-            'school_id' => $_POST['school_id'] ?? null,
+            'name' => $name,
+            'birth_date' => $birthDate,
+            'school_id' => $schoolId ?: null,
             'photo_url' => $student['photo_url'] // Mantém foto atual
         ];
 
         // Upload de nova foto (opcional)
         if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
+            $maxSize = 5 * 1024 * 1024; // 5 MB
+            if ($_FILES['photo']['size'] > $maxSize) {
+                $_SESSION['error_message'] = 'Arquivo muito grande. Máximo 5MB.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                exit;
+            }
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES['photo']['tmp_name']);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($mime, $allowedMimes)) {
+                $_SESSION['error_message'] = 'Tipo de arquivo não permitido.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                exit;
+            }
+
             $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-            $filename = time() . '.' . $ext;
+            $filename = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
             $uploadPath = __DIR__ . '/../../../public/uploads/students/' . $filename;
 
             if (!is_dir(dirname($uploadPath))) {
@@ -158,8 +263,8 @@ class StudentController
                 // Deletar foto antiga se existir
                 if ($student['photo_url']) {
                     $oldPhotoPath = __DIR__ . '/../../../public' . $student['photo_url'];
-                    if (file_exists($oldPhotoPath)) {
-                        unlink($oldPhotoPath);
+                    if (file_exists($oldPhotoPath) && !unlink($oldPhotoPath)) {
+                        error_log('Falha ao remover arquivo: ' . $oldPhotoPath);
                     }
                 }
                 $data['photo_url'] = '/uploads/students/' . $filename;
@@ -201,8 +306,8 @@ class StudentController
         // Deletar foto se existir
         if ($student['photo_url']) {
             $photoPath = __DIR__ . '/../../../public' . $student['photo_url'];
-            if (file_exists($photoPath)) {
-                unlink($photoPath);
+            if (file_exists($photoPath) && !unlink($photoPath)) {
+                error_log('Falha ao remover arquivo: ' . $photoPath);
             }
         }
 

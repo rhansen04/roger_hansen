@@ -52,7 +52,9 @@
             <p>O professor registra observações sobre cada criança, organizadas em 6 eixos pedagógicos:</p>
             <ul>
                 <li><strong>Auto-save:</strong> o texto é salvo automaticamente a cada pausa na digitação, sem risco de perder conteúdo</li>
+                <li><strong>Perguntas numeradas:</strong> cada eixo exibe suas perguntas orientadoras numeradas, cada uma com seu próprio campo de resposta obrigatório</li>
                 <li><strong>Finalização:</strong> ao finalizar, a observação fica protegida contra edição e disponível para o coordenador</li>
+                <li><strong>Feedbacks da Coordenação:</strong> coordenadores podem registrar comentários diretamente na observação, com notificação ao professor</li>
                 <li><strong>Semestral:</strong> as observações são separadas por semestre (1º ou 2º), facilitando o acompanhamento longitudinal</li>
             </ul>
         </div>
@@ -78,8 +80,9 @@
             <h6>Portfólio da Turma — Registro Coletivo</h6>
             <p>Documento coletivo por turma com 5 eixos pedagógicos:</p>
             <ul>
-                <li><strong>Fotos por eixo:</strong> cada eixo permite upload de fotos com legendas descritivas</li>
+                <li><strong>Fotos por eixo:</strong> selecione fotos do Banco de Imagens interno da turma para cada eixo, com legendas descritivas</li>
                 <li><strong>Texto coletivo:</strong> descreva as vivências e aprendizagens do grupo</li>
+                <li><strong>Feedbacks da Coordenação:</strong> coordenadores podem registrar comentários diretamente no portfólio, com notificação automática ao professor</li>
                 <li><strong>Exportar PDF:</strong> gere um portfólio visual completo da turma</li>
             </ul>
         </div>
@@ -166,14 +169,22 @@
 </div>
 
 <h6 class="mt-4 mb-3">Organização do Menu Lateral</h6>
-<p>O menu lateral está organizado nas seguintes seções:</p>
+<p>O menu lateral se adapta ao perfil do usuário logado:</p>
+
+<p><strong>Professor</strong> — menu simplificado em ordem pedagógica:</p>
 <ul>
-    <li><strong>Cadastros:</strong> Alunos, Escolas, Usuários</li>
-    <li><strong>Ensino:</strong> Cursos, Matrículas, Turmas, Planejamento, Templates</li>
-    <li><strong>Pedagógico:</strong> Observações, Pareceres, Portfólios, Banco de Imagens, Material de Apoio</li>
-    <li><strong>Comunicação:</strong> Contatos, Notificações</li>
-    <li><strong>Análises:</strong> Relatórios, Dashboard de Vídeos</li>
-    <li><strong>Ajuda:</strong> Central de Ajuda, Tour desta Página</li>
+    <li>Turmas → Observações → Planejamentos (com sub-item <strong>Rotina Semanal</strong>) → Material de Apoio → Pareceres → Portfólios → Banco de Imagens</li>
+</ul>
+
+<p><strong>Coordenador</strong> — menu dedicado de supervisão:</p>
+<ul>
+    <li>Turmas → Observações → Pareceres → Portfólios → Gestão de Professores → Acompanhamento de Cursos</li>
+</ul>
+
+<p><strong>Administrador</strong> — 3 módulos globais fixos + navegação contextual por escola:</p>
+<ul>
+    <li><strong>Módulos globais:</strong> Escolas, Usuários, Cursos + Material de Apoio</li>
+    <li><strong>Contexto de escola:</strong> ao clicar em <strong>"Entrar no Ambiente"</strong> de uma escola, um submenu filtrado é ativado: Turmas, Alunos, Observações, Pareceres, Planejamentos, Portfólios, Banco de Imagens — todos filtrados pela escola selecionada</li>
 </ul>
 
 <div class="help-tip help-tip-success">

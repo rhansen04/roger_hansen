@@ -40,7 +40,14 @@ class Enrollment
     }
     
     /**
-     * Buscar matrículas de um usuário com progresso real calculado
+     * Buscar matrículas de um usuário com progresso real calculado.
+     *
+     * Recalcula `overall_progress_percentage` a partir dos dados reais de
+     * `lessons` e `course_progress` e, se o valor calculado divergir do
+     * valor cacheado no banco, persiste o novo valor via UPDATE imediato.
+     * Isso mantém o cache em `enrollments` sempre sincronizado, evitando
+     * que leituras SQL diretas (StudentPanelController, ParentPanelController,
+     * etc.) retornem um percentual desatualizado.
      */
     public function getByUser($userId)
     {
@@ -62,13 +69,23 @@ class Enrollment
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$userId]);
             $rows = $stmt->fetchAll();
-            // Calcular percentual real e sobrescrever o campo cacheado
+            // Calcular percentual real, sincronizar cache no banco se divergiu
             foreach ($rows as &$row) {
-                $total = (int) $row['real_total_lessons'];
-                $done  = (int) $row['real_completed_lessons'];
-                $row['overall_progress_percentage'] = $total > 0
-                    ? round($done / $total * 100, 0)
-                    : 0;
+                $total    = (int) $row['real_total_lessons'];
+                $done     = (int) $row['real_completed_lessons'];
+                $computed = $total > 0 ? round($done / $total * 100, 0) : 0;
+
+                // Sincronizar cache no banco se divergiu
+                if ((int)$row['overall_progress_percentage'] !== (int)$computed) {
+                    try {
+                        $this->db->prepare("UPDATE enrollments SET overall_progress_percentage = ? WHERE id = ?")
+                                 ->execute([$computed, $row['id']]);
+                    } catch (\PDOException $e) {
+                        error_log("Enrollment::getByUser sync: " . $e->getMessage());
+                    }
+                }
+
+                $row['overall_progress_percentage'] = $computed;
             }
             return $rows;
         } catch (PDOException $e) {
@@ -105,8 +122,11 @@ class Enrollment
     public function create($data)
     {
         try {
-            $sql = "INSERT INTO enrollments (user_id, course_id, status, payment_status)
-                    VALUES (:user_id, :course_id, :status, :payment_status)";
+            if (!isset($data['enrollment_date'])) {
+                $data['enrollment_date'] = date('Y-m-d H:i:s');
+            }
+            $sql = "INSERT INTO enrollments (user_id, course_id, status, payment_status, enrollment_date)
+                    VALUES (:user_id, :course_id, :status, :payment_status, :enrollment_date)";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute($data);
         } catch (PDOException $e) {

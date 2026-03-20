@@ -5,8 +5,10 @@ namespace App\Controllers\Admin;
 use App\Models\PlanningSubmission;
 use App\Models\PlanningTemplate;
 use App\Models\PlanningDailyRoutine;
+use App\Models\PlanningPeriodRecord;
 use App\Models\Classroom;
 use App\Models\Notification;
+use App\Core\Security\Csrf;
 
 class PlanningController
 {
@@ -67,8 +69,20 @@ class PlanningController
 
     public function store()
     {
+        Csrf::verify();
+
         if (empty($_POST['template_id']) || empty($_POST['classroom_id']) || empty($_POST['period_start']) || empty($_POST['period_end'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatórios.';
+            header('Location: /admin/planning/create');
+            exit;
+        }
+
+        $periodStart = $_POST['period_start'];
+        $periodEnd   = $_POST['period_end'];
+        $startDate = \DateTime::createFromFormat('Y-m-d', $periodStart);
+        $endDate   = \DateTime::createFromFormat('Y-m-d', $periodEnd);
+        if (!$startDate || !$endDate || $startDate > $endDate) {
+            $_SESSION['error_message'] = 'Período inválido: data de início deve ser anterior ao término.';
             header('Location: /admin/planning/create');
             exit;
         }
@@ -78,8 +92,8 @@ class PlanningController
             'template_id' => $_POST['template_id'],
             'teacher_id' => $_SESSION['user_id'],
             'classroom_id' => $_POST['classroom_id'],
-            'period_start' => $_POST['period_start'],
-            'period_end' => $_POST['period_end'],
+            'period_start' => $periodStart,
+            'period_end' => $periodEnd,
         ];
 
         $submissionId = $subModel->create($data);
@@ -118,7 +132,7 @@ class PlanningController
 
         // Teachers can only see their own
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -156,7 +170,7 @@ class PlanningController
 
         // Only draft/submitted can be edited
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -181,6 +195,8 @@ class PlanningController
 
     public function update($id)
     {
+        Csrf::verify();
+
         $subModel = new PlanningSubmission();
         $submission = $subModel->find($id);
 
@@ -236,8 +252,10 @@ class PlanningController
 
         $role = $_SESSION['user_role'] ?? 'admin';
 
-        $year = (int) ($_GET['year'] ?? date('Y'));
-        $month = (int) ($_GET['month'] ?? date('n'));
+        $month = (int)($_GET['month'] ?? date('n'));
+        $year  = (int)($_GET['year'] ?? date('Y'));
+        if ($month < 1 || $month > 12) $month = (int)date('n');
+        if ($year < 2020 || $year > 2030) $year = (int)date('Y');
 
         // Get classrooms for filter
         $classrooms = ($role === 'teacher')
@@ -333,7 +351,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -362,6 +380,8 @@ class PlanningController
 
     public function saveRoutine($id)
     {
+        Csrf::verify();
+
         $subModel = new PlanningSubmission();
         $routineModel = new PlanningDailyRoutine();
 
@@ -373,7 +393,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -425,7 +445,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -483,9 +503,18 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
+            exit;
+        }
+
+        $d = \DateTime::createFromFormat('Y-m-d', $date);
+        $start = new \DateTime($submission['period_start']);
+        $end   = new \DateTime($submission['period_end']);
+        if (!$d || $d < $start || $d > $end) {
+            $_SESSION['error_message'] = 'Data fora do período do planejamento.';
+            header('Location: /admin/planning/' . $id . '/days');
             exit;
         }
 
@@ -526,6 +555,8 @@ class PlanningController
      */
     public function dayUpdate($id, $date)
     {
+        Csrf::verify();
+
         $subModel = new PlanningSubmission();
 
         $submission = $subModel->find($id);
@@ -536,13 +567,18 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
         }
 
         $dailyEntry = $subModel->findOrCreateDailyEntry($id, $date);
+        if (!$dailyEntry) {
+            $_SESSION['error_message'] = 'Não foi possível carregar o dia do planejamento.';
+            header('Location: /admin/planning/' . $id . '/days');
+            exit;
+        }
 
         if (!empty($_POST['answers']) && is_array($_POST['answers'])) {
             foreach ($_POST['answers'] as $fieldId => $value) {
@@ -570,6 +606,8 @@ class PlanningController
      */
     public function finalize($id)
     {
+        Csrf::verify();
+
         $subModel = new PlanningSubmission();
 
         $submission = $subModel->find($id);
@@ -580,7 +618,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -592,16 +630,22 @@ class PlanningController
             exit;
         }
 
-        $subModel->updateStatus($id, 'submitted');
+        $updated = $subModel->updateStatus($id, 'submitted');
 
-        // Notificar coordenadores
-        Notification::notifyAllCoordenadores(
-            'planning',
-            'Planejamento enviado para revisao',
-            'O professor ' . ($_SESSION['user_name'] ?? '') . ' enviou o planejamento da turma ' . ($submission['classroom_name'] ?? '') . '.',
-            'planning',
-            $id
-        );
+        if ($updated) {
+            // Notificar coordenadores apenas se o status foi alterado com sucesso
+            try {
+                Notification::notifyAllCoordenadores(
+                    'planning',
+                    'Planejamento enviado para revisao',
+                    'O professor ' . ($_SESSION['user_name'] ?? '') . ' enviou o planejamento da turma ' . ($submission['classroom_name'] ?? '') . '.',
+                    'planning',
+                    $id
+                );
+            } catch (\Throwable $e) {
+                error_log('finalize: falha ao notificar coordenadores para planejamento ' . $id . ': ' . $e->getMessage());
+            }
+        }
 
         $_SESSION['success_message'] = 'Planejamento finalizado e enviado para revisao!';
         header("Location: /admin/planning/{$id}/days");
@@ -624,7 +668,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -658,6 +702,8 @@ class PlanningController
      */
     public function saveRegistration($id)
     {
+        Csrf::verify();
+
         $subModel = new PlanningSubmission();
 
         $submission = $subModel->find($id);
@@ -668,7 +714,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -702,6 +748,8 @@ class PlanningController
 
     public function deleteRoutineEntry($id)
     {
+        Csrf::verify();
+
         $routineModel = new PlanningDailyRoutine();
         $entry = $routineModel->find($id);
 
@@ -715,7 +763,7 @@ class PlanningController
         $submission = $subModel->find($entry['submission_id']);
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission && $submission['teacher_id'] != $_SESSION['user_id']) {
+        if ($role === 'teacher' && $submission && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -747,6 +795,148 @@ class PlanningController
                 $subModel->saveAnswer($submissionId, $fieldId, $sectionId, trim($value), null);
             }
         }
+    }
+
+    // --- Registros do Período ---
+
+    public function recordCreate($id)
+    {
+        $subModel = new PlanningSubmission();
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $recordModel = new PlanningPeriodRecord();
+        $recordModel->createTable();
+
+        $existing = $recordModel->findBySubmission($id);
+        if ($existing) {
+            header("Location: /admin/planning/{$id}/record/edit");
+            exit;
+        }
+
+        return $this->render('planning/record_form', [
+            'submission' => $submission,
+            'record' => [],
+            'isEdit' => false,
+            'pageTitle' => 'Registro do Período'
+        ]);
+    }
+
+    public function recordStore($id)
+    {
+        Csrf::verify();
+
+        $subModel = new PlanningSubmission();
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $recordModel = new PlanningPeriodRecord();
+        $recordModel->createTable();
+
+        $data = [
+            'submission_id'                    => $id,
+            'activity_synthesis'               => trim($_POST['activity_synthesis'] ?? ''),
+            'planning_execution'               => $_POST['planning_execution'] ?? '',
+            'planning_execution_justification' => trim($_POST['planning_execution_justification'] ?? ''),
+            'child_engagement'                 => $_POST['child_engagement'] ?? '',
+            'child_engagement_comment'         => trim($_POST['child_engagement_comment'] ?? ''),
+            'adjustments_time'                 => isset($_POST['adjustments_time']) ? 1 : 0,
+            'adjustments_space'                => isset($_POST['adjustments_space']) ? 1 : 0,
+            'adjustments_materials'            => isset($_POST['adjustments_materials']) ? 1 : 0,
+            'adjustments_mediation'            => isset($_POST['adjustments_mediation']) ? 1 : 0,
+            'adjustments_interest'             => isset($_POST['adjustments_interest']) ? 1 : 0,
+            'adjustments_description'          => trim($_POST['adjustments_description'] ?? ''),
+            'children_novelty'                 => trim($_POST['children_novelty'] ?? ''),
+            'advances_challenges'              => trim($_POST['advances_challenges'] ?? ''),
+            'support_pedagogical'              => isset($_POST['support_pedagogical']) ? 1 : 0,
+            'support_organizational'           => isset($_POST['support_organizational']) ? 1 : 0,
+            'support_formative'                => isset($_POST['support_formative']) ? 1 : 0,
+            'support_structural'               => isset($_POST['support_structural']) ? 1 : 0,
+            'support_description'              => trim($_POST['support_description'] ?? ''),
+        ];
+        $result = $recordModel->create($data);
+
+        if ($result) {
+            $_SESSION['success_message'] = 'Registro do período salvo com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao salvar o registro.';
+        }
+        header('Location: /admin/planning');
+        exit;
+    }
+
+    public function recordEdit($id)
+    {
+        $subModel = new PlanningSubmission();
+        $submission = $subModel->find($id);
+        if (!$submission) {
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $recordModel = new PlanningPeriodRecord();
+        $record = $recordModel->findBySubmission($id);
+
+        if (!$record) {
+            header("Location: /admin/planning/{$id}/record/create");
+            exit;
+        }
+
+        return $this->render('planning/record_form', [
+            'submission' => $submission,
+            'record' => $record,
+            'isEdit' => true,
+            'pageTitle' => 'Editar Registro do Período'
+        ]);
+    }
+
+    public function recordUpdate($id)
+    {
+        Csrf::verify();
+
+        $recordModel = new PlanningPeriodRecord();
+        $record = $recordModel->findBySubmission($id);
+
+        if (!$record) {
+            header('Location: /admin/planning');
+            exit;
+        }
+
+        $data = [
+            'activity_synthesis'               => trim($_POST['activity_synthesis'] ?? ''),
+            'planning_execution'               => $_POST['planning_execution'] ?? '',
+            'planning_execution_justification' => trim($_POST['planning_execution_justification'] ?? ''),
+            'child_engagement'                 => $_POST['child_engagement'] ?? '',
+            'child_engagement_comment'         => trim($_POST['child_engagement_comment'] ?? ''),
+            'adjustments_time'                 => isset($_POST['adjustments_time']) ? 1 : 0,
+            'adjustments_space'                => isset($_POST['adjustments_space']) ? 1 : 0,
+            'adjustments_materials'            => isset($_POST['adjustments_materials']) ? 1 : 0,
+            'adjustments_mediation'            => isset($_POST['adjustments_mediation']) ? 1 : 0,
+            'adjustments_interest'             => isset($_POST['adjustments_interest']) ? 1 : 0,
+            'adjustments_description'          => trim($_POST['adjustments_description'] ?? ''),
+            'children_novelty'                 => trim($_POST['children_novelty'] ?? ''),
+            'advances_challenges'              => trim($_POST['advances_challenges'] ?? ''),
+            'support_pedagogical'              => isset($_POST['support_pedagogical']) ? 1 : 0,
+            'support_organizational'           => isset($_POST['support_organizational']) ? 1 : 0,
+            'support_formative'                => isset($_POST['support_formative']) ? 1 : 0,
+            'support_structural'               => isset($_POST['support_structural']) ? 1 : 0,
+            'support_description'              => trim($_POST['support_description'] ?? ''),
+        ];
+        $result = $recordModel->update($record['id'], $data);
+
+        if ($result) {
+            $_SESSION['success_message'] = 'Registro atualizado com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao atualizar o registro.';
+        }
+        header('Location: /admin/planning');
+        exit;
     }
 
     protected function render($view, $data = [])

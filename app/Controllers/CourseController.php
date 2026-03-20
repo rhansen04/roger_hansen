@@ -10,6 +10,7 @@ use App\Models\Section;
 use App\Models\VideoProgress;
 use App\Models\CourseProgress;
 use App\Core\Database\Connection;
+use App\Core\Security\Csrf;
 
 class CourseController
 {
@@ -157,6 +158,9 @@ class CourseController
 
         // Buscar progresso atual da licao
         $currentProgress = $videoProgressModel->getOrCreate($enrollment['id'], $lessonId, $lesson['video_duration'] ?? 0);
+        if (!$currentProgress) {
+            $currentProgress = ['is_completed' => false, 'current_position' => 0, 'watch_duration' => 0];
+        }
 
         // Contar total de licoes para progresso
         $totalLessons = 0;
@@ -214,6 +218,7 @@ class CourseController
      */
     public function enroll($slug)
     {
+        Csrf::verify();
         if (!isset($_SESSION['user_id'])) {
             header('Location: /login');
             exit;

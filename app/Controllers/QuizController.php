@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\Quiz;
 use App\Models\Course;
 use App\Core\Database\Connection;
+use App\Core\Security\Csrf;
 
 class QuizController
 {
@@ -56,7 +57,7 @@ class QuizController
         $stmt->execute([$quizId, $_SESSION['user_id']]);
         $attemptCount = (int)$stmt->fetch()['cnt'];
 
-        if ($quiz['attempts_allowed'] > 0 && $attemptCount >= $quiz['attempts_allowed']) {
+        if ($quiz['attempts_allowed'] !== null && (int)$quiz['attempts_allowed'] > 0 && $attemptCount >= $quiz['attempts_allowed']) {
             // Buscar melhor resultado
             $stmt = $this->db->prepare("SELECT * FROM quiz_attempts WHERE quiz_id = ? AND user_id = ? ORDER BY score DESC LIMIT 1");
             $stmt->execute([$quizId, $_SESSION['user_id']]);
@@ -96,6 +97,8 @@ class QuizController
      */
     public function submit($slug, $quizId)
     {
+        Csrf::verify();
+
         if (!isset($_SESSION['user_id'])) {
             header('Location: /login');
             exit;
@@ -139,13 +142,20 @@ class QuizController
                 $stmt = $this->db->prepare("SELECT is_correct FROM quiz_answers WHERE id = ? AND question_id = ?");
                 $stmt->execute([$userAnswer, $q['id']]);
                 $answer = $stmt->fetch();
-                if ($answer && $answer['is_correct']) {
+                if (!$answer) { continue; } // skip if answer not found
+                if ($answer['is_correct']) {
                     $earnedPoints += $q['points'];
                 }
             }
         }
 
-        $score = $totalPoints > 0 ? ($earnedPoints / $totalPoints) * 100 : 0;
+        if ($totalPoints <= 0) {
+            // avoid division by zero — treat as 0% score
+            $percentage = 0;
+        } else {
+            $percentage = round(($earnedPoints / $totalPoints) * 100, 2);
+        }
+        $score = $percentage;
         $passed = $score >= $quiz['passing_score'];
 
         // Salvar tentativa
@@ -179,7 +189,7 @@ class QuizController
             'quiz' => $quiz,
             'attempt' => $attempt,
             'attemptsUsed' => $attemptCount,
-            'noMoreAttempts' => $quiz['attempts_allowed'] > 0 && $attemptCount >= $quiz['attempts_allowed'],
+            'noMoreAttempts' => $quiz['attempts_allowed'] !== null && (int)$quiz['attempts_allowed'] > 0 && $attemptCount >= $quiz['attempts_allowed'],
         ]);
     }
 

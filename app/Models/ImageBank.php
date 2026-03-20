@@ -91,8 +91,8 @@ class ImageBank
 
             // Deletar arquivo do disco
             $filePath = __DIR__ . '/../../public/uploads/image-bank/' . $image['filename'];
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            if (file_exists($filePath) && !unlink($filePath)) {
+                error_log('Falha ao remover arquivo: ' . $filePath);
             }
 
             $sql = "DELETE FROM image_bank WHERE id = :id";
@@ -116,6 +116,30 @@ class ImageBank
         } catch (PDOException $e) {
             error_log("Erro ao atualizar legenda: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Buscar todas as imagens de uma turma (todas as pastas)
+     */
+    public function getByClassroom($classroomId)
+    {
+        try {
+            $sql = "SELECT ib.id, ib.filename, ib.caption, ib.original_name, f.folder_type, f.name as folder_name
+                    FROM image_bank ib
+                    INNER JOIN image_folders f ON ib.folder_id = f.id
+                    WHERE f.classroom_id = :classroom_id
+                    ORDER BY ib.created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':classroom_id' => $classroomId]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as &$row) {
+                $row['url'] = '/uploads/image-bank/' . $row['filename'];
+            }
+            return $rows;
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar imagens da turma: " . $e->getMessage());
+            return [];
         }
     }
 

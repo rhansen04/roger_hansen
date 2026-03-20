@@ -53,16 +53,17 @@
     <div class="article-step">
         <div class="step-number">4</div>
         <div class="step-content">
-            <h6>Ações Rápidas na Barra Lateral</h6>
-            <p>A barra lateral direita oferece atalhos para as tarefas mais comuns do coordenador:</p>
+            <h6>Menu Dedicado do Coordenador</h6>
+            <p>O coordenador tem um menu lateral dedicado à supervisão pedagógica, com acesso direto às suas funções principais:</p>
             <ul>
-                <li><strong>Gerenciar Turmas:</strong> acesse a lista de todas as turmas para supervisão</li>
-                <li><strong>Alunos:</strong> visualize o cadastro completo de crianças</li>
-                <li><strong>Observações:</strong> acesse o módulo de observações para revisar documentos pendentes</li>
-                <li><strong>Professores:</strong> visualize a equipe de professores</li>
-                <li><strong>Cursos:</strong> acesse os cursos de formação para acompanhamento</li>
-                <li><strong>Relatórios:</strong> acesse os relatórios pedagógicos e de desempenho</li>
+                <li><strong>Turmas:</strong> visão geral de todas as turmas sob supervisão</li>
+                <li><strong>Observações:</strong> revisar observações dos professores; registrar Feedbacks da Coordenação</li>
+                <li><strong>Pareceres:</strong> revisar pareceres descritivos; aprovar ou solicitar revisão</li>
+                <li><strong>Portfólios:</strong> acompanhar portfólios das turmas; registrar Feedbacks da Coordenação</li>
+                <li><strong>Gestão de Professores:</strong> visão geral dos professores, turmas e atividade pedagógica</li>
+                <li><strong>Acompanhamento de Cursos:</strong> relatório de progresso nos cursos de formação</li>
             </ul>
+            <p>Esse menu dedicado facilita a navegação do coordenador sem misturar com funções administrativas ou de professor.</p>
         </div>
     </div>
 

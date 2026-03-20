@@ -30,15 +30,15 @@ class HelpController
                     ],
                     'navegacao' => [
                         'title' => 'Navegação, Modo Escuro e Tours',
-                        'summary' => 'Menu lateral por papel, modo escuro persistente, tours interativos por página, sino de notificações e Central de Ajuda.',
+                        'summary' => 'Menu do Professor (ordem pedagógica, sub-item Rotina Semanal), menu do Coordenador (supervisão dedicada), menu do Admin (módulos globais + contexto de escola). Modo escuro, tours e Central de Ajuda.',
                         'time' => 5,
-                        'release' => '2026-03-01',
+                        'release' => '2026-03-19',
                     ],
                     'papeis-permissoes' => [
                         'title' => 'Papéis e Permissões',
-                        'summary' => 'Entenda o que cada papel (Admin, Professor, Coordenador) pode fazer em cada módulo: criação, edição, visualização, finalização e aprovação.',
+                        'summary' => 'Professor: turmas com coluna #, observações com perguntas numeradas, planejamento com Registro Final da Semana. Coordenador: menu dedicado com Feedbacks da Coordenação. Admin: contexto de escola + módulos globais.',
                         'time' => 6,
-                        'release' => '2026-03-01',
+                        'release' => '2026-03-19',
                     ],
                     'simulador-perfil' => [
                         'title' => 'Simulador de Perfil (Admin)',
@@ -76,15 +76,15 @@ class HelpController
             ],
             'turmas-alunos' => [
                 'title' => 'Turmas e Alunos',
-                'description' => 'Gerencie turmas (criar, ativar/desativar, vincular alunos) e cadastre alunos com foto, escola e resumo pedagógico via IA.',
+                'description' => 'Gerencie turmas (criar, ativar/desativar, vincular alunos) e cadastre alunos com foto, escola e resumo pedagógico via IA. Lista de alunos com coluna numerada (#).',
                 'icon' => 'fas fa-users',
                 'color' => '#fd7e14',
                 'articles' => [
                     'gerenciar-turmas' => [
                         'title' => 'Gerenciar Turmas',
-                        'summary' => 'Crie turmas com nome, escola, professor, faixa etária e período. Ative/desative turmas sem perder histórico. Na edição, acesse "Gerenciar Alunos" para vincular e visualizar alunos.',
+                        'summary' => 'Crie turmas com nome, escola, professor, faixa etária e período. Ative/desative turmas sem perder histórico. Lista de alunos com coluna numerada (#). Na edição, acesse "Gerenciar Alunos" para vincular e visualizar alunos.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-19',
                     ],
                     'vincular-alunos' => [
                         'title' => 'Vincular Alunos à Turma',
@@ -108,15 +108,15 @@ class HelpController
             ],
             'observacoes' => [
                 'title' => 'Observações Pedagógicas',
-                'description' => 'Registre observações semestrais organizadas por 6 eixos pedagógicos com perguntas orientadoras, salvamento automático, finalização e controle de permissões.',
+                'description' => 'Registre observações semestrais organizadas por 6 eixos com perguntas numeradas e campos individuais por pergunta, salvamento automático, finalização e feedbacks da coordenação.',
                 'icon' => 'fas fa-clipboard-list',
                 'color' => '#6f42c1',
                 'articles' => [
                     'criar-observacao' => [
                         'title' => 'Criar uma Observação',
-                        'summary' => 'Selecione aluno, semestre e ano. Preencha os 6 eixos em abas separadas com perguntas orientadoras em cada eixo. Os textos dos eixos são salvos junto com o registro. Disponível para todos os perfis.',
+                        'summary' => 'Selecione aluno, semestre e ano. Preencha os 6 eixos: cada pergunta orientadora é numerada e possui seu próprio campo de resposta obrigatório. Auto-save ativo. Feedbacks da Coordenação visíveis ao professor.',
                         'time' => 6,
-                        'release' => '2026-03-18',
+                        'release' => '2026-03-19',
                     ],
                     'eixos-pedagogicos' => [
                         'title' => 'Os 6 Eixos Pedagógicos',
@@ -135,6 +135,12 @@ class HelpController
                         'summary' => 'Todos os perfis (Professor, Coordenador, Admin) podem criar observações. Professor edita as suas. Coordenador visualiza todas, pode reabrir finalizadas. Admin tem acesso total.',
                         'time' => 4,
                         'release' => '2026-03-12',
+                    ],
+                    'feedback-coordenacao' => [
+                        'title' => 'Feedbacks da Coordenação',
+                        'summary' => 'Coordenadores registram feedbacks diretamente em Observações, Pareceres e Portfólios. Professor recebe notificação automática. Histórico cronológico com data e autor. Diferente da Solicitação de Revisão: não bloqueia o documento.',
+                        'time' => 4,
+                        'release' => '2026-03-19',
                     ],
                 ],
             ],
@@ -172,21 +178,21 @@ class HelpController
             ],
             'portfolio' => [
                 'title' => 'Portfólio da Turma',
-                'description' => 'Monte portfólios semestrais por turma com mensagem da professora, fotos por eixo, correção IA, pré-visualização e exportação em PDF de 14+ páginas.',
+                'description' => 'Monte portfólios semestrais por turma com fotos exclusivamente do Banco de Imagens, mensagem da professora, correção IA, feedbacks da coordenação e exportação em PDF de 14+ páginas.',
                 'icon' => 'fas fa-images',
                 'color' => '#e83e8c',
                 'articles' => [
                     'criar-portfolio' => [
                         'title' => 'Criar um Portfólio',
-                        'summary' => 'Selecione turma, semestre e ano. Adicione foto de capa e mensagem da professora. Cada combinação turma/semestre/ano é única.',
+                        'summary' => 'Selecione turma, semestre e ano. Foto de capa selecionada do Banco de Imagens interno (upload direto removido). Mensagem da professora. Cada combinação turma/semestre/ano é única.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-19',
                     ],
                     'eixos-fotos' => [
                         'title' => 'Eixos, Descrições e Fotos',
-                        'summary' => 'Preencha a descrição de cada eixo (Movimento, Manual, Musical, Contos, PCA) e adicione até 3 fotos com legendas por eixo.',
+                        'summary' => 'Preencha a descrição de cada eixo (Movimento, Manual, Musical, Contos, PCA) e selecione até 3 fotos por eixo exclusivamente do Banco de Imagens interno. Feedbacks da Coordenação visíveis com notificação ao professor.',
                         'time' => 6,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-19',
                     ],
                     'finalizar-exportar-portfolio' => [
                         'title' => 'Finalizar e Exportar PDF',
@@ -218,21 +224,21 @@ class HelpController
             ],
             'planejamento' => [
                 'title' => 'Planejamento Pedagógico',
-                'description' => 'Crie planejamentos quinzenais com templates, visualize e preencha por dia, finalize para revisão e registre a pós-vivência.',
+                'description' => 'Crie planejamentos quinzenais com templates, cards coloridos por dia (amarelo=Pendente, verde=Concluído), Registro Final da Semana, Rotina Semanal no menu e pós-vivência.',
                 'icon' => 'fas fa-calendar-alt',
                 'color' => '#6f42c1',
                 'articles' => [
                     'criar-planejamento' => [
                         'title' => 'Criar um Planejamento',
-                        'summary' => 'Escolha template, vincule turma, defina período quinzenal. Após criar, você será direcionado para a grade de dias úteis do período.',
+                        'summary' => 'Escolha template, vincule turma, defina período quinzenal. Listagem mostra coluna "Registros do Período" (badge Concluído/Pendente). Sub-item "Rotina Semanal" disponível diretamente no menu.',
                         'time' => 5,
-                        'release' => '2026-03-16',
+                        'release' => '2026-03-19',
                     ],
                     'visualizacao-quinzenal' => [
                         'title' => 'Visualização Quinzenal por Dias',
-                        'summary' => 'Grade de cards com os dias úteis (seg-sex) do período. Cada dia mostra status (vazio, rascunho, preenchido) e é clicável para abrir o formulário diário.',
+                        'summary' => 'Grade de cards compactos por dia: amarelo (Pendente) e verde (Concluído). Clique para abrir o formulário diário. Badge HOJE destaca o dia atual.',
                         'time' => 5,
-                        'release' => '2026-03-16',
+                        'release' => '2026-03-19',
                     ],
                     'card-diario' => [
                         'title' => 'Preenchimento do Dia (Card Diário)',
@@ -258,17 +264,37 @@ class HelpController
                         'time' => 4,
                         'release' => '2026-03-18',
                     ],
+                    'registro-final-semana' => [
+                        'title' => 'Registro Final da Semana',
+                        'summary' => 'Formulário de 7 campos vinculado a cada planejamento: síntese, execução, engajamento, ajustes, o que as crianças trouxeram, avanços/desafios, necessidade de apoio. Badge Concluído/Pendente na listagem.',
+                        'time' => 4,
+                        'release' => '2026-03-19',
+                    ],
                     'calendario-rotina' => [
                         'title' => 'Calendário e Rotina Semanal',
-                        'summary' => 'Visualize planejamentos no calendário mensal. Crie rotinas com campos separados de Horário e Atividade para cada dia da semana (Seg-Sex). Salvar funciona corretamente.',
+                        'summary' => 'Visualize planejamentos no calendário mensal. Sub-item "Rotina Semanal" acessível diretamente no menu. Crie rotinas com campos separados de Horário e Atividade para cada dia (Seg-Sex).',
                         'time' => 5,
-                        'release' => '2026-03-18',
+                        'release' => '2026-03-19',
                     ],
                     'dependencia-campos' => [
                         'title' => 'Dependência entre Campos',
                         'summary' => 'Configure campos que aparecem/ocultam conforme valor de outro campo. Ex: Eixo "Musical" → só objetivos musicais visíveis.',
                         'time' => 5,
                         'release' => '2026-03-01',
+                    ],
+                ],
+            ],
+            'admin' => [
+                'title' => 'Administrador — Contexto de Escola',
+                'description' => 'Menu reestruturado em 3 módulos globais (Escolas, Usuários, Cursos) e navegação contextual por escola com submenu filtrado. Botão "Entrar no Ambiente" em cada escola.',
+                'icon' => 'fas fa-building',
+                'color' => '#343a40',
+                'articles' => [
+                    'contexto-escola' => [
+                        'title' => 'Navegação Contextual por Escola',
+                        'summary' => 'Módulos globais (Escolas, Usuários, Cursos) sempre visíveis. Botão "Entrar no Ambiente" ativa submenu filtrado por escola: Turmas, Alunos, Observações, Pareceres, Planejamentos, Portfólios, Banco de Imagens.',
+                        'time' => 4,
+                        'release' => '2026-03-19',
                     ],
                 ],
             ],
@@ -294,7 +320,7 @@ class HelpController
             ],
             'notificacoes-fluxo' => [
                 'title' => 'Notificações e Fluxo de Aprovação',
-                'description' => 'Sistema de notificações internas com sino no header. Fluxo Professor → Coordenador para pareceres, portfólios e planejamentos.',
+                'description' => 'Sistema de notificações internas com sino no header. Fluxo Professor → Coordenador para pareceres, portfólios e planejamentos. Feedbacks da Coordenação com notificação automática.',
                 'icon' => 'fas fa-bell',
                 'color' => '#ffc107',
                 'articles' => [
@@ -306,9 +332,9 @@ class HelpController
                     ],
                     'fluxo-aprovacao' => [
                         'title' => 'Fluxo de Aprovação Professor → Coordenador',
-                        'summary' => 'Professor finaliza → coordenadores notificados. Coordenador solicita revisão com notas → professor notificado. Professor corrige e refinaliza.',
+                        'summary' => 'Professor finaliza → coordenadores notificados. Coordenador solicita revisão com notas → professor notificado. Professor corrige e refinaliza. Feedbacks da Coordenação: canal paralelo sem bloquear documentos.',
                         'time' => 5,
-                        'release' => '2026-03-12',
+                        'release' => '2026-03-19',
                     ],
                 ],
             ],
@@ -538,6 +564,35 @@ class HelpController
             [
                 'question' => 'Como os vídeos são rastreados?',
                 'answer' => 'O sistema registra cada sessão de vídeo automaticamente: horário de início/fim, tempo assistido, progresso antes/depois, dispositivo e IP. Veja tudo em <strong>Análises → Vídeos / Tracking</strong>.',
+            ],
+            // --- Novidades da Revisão 04 ---
+            [
+                'question' => 'O que mudou nas Observações na Revisão 4?',
+                'answer' => 'As perguntas orientadoras de cada eixo agora são <strong>numeradas e exibidas de forma expandida</strong>. Cada pergunta tem seu <strong>próprio campo de resposta obrigatório</strong>. Isso torna o registro mais estruturado e completo. Além disso, a seção <strong>"Feedbacks da Coordenação"</strong> agora aparece na página de cada observação, com notificação automática ao professor quando o coordenador registra um comentário.',
+            ],
+            [
+                'question' => 'O que é o Registro Final da Semana?',
+                'answer' => 'É um formulário de <strong>7 campos</strong> vinculado a cada planejamento, preenchido após a execução das atividades: Síntese da Semana, Execução do Planejamento, Engajamento das Crianças, Ajustes Realizados, O que as Crianças Trouxeram, Avanços e Desafios, e Necessidade de Apoio. Na listagem de planejamentos, um badge indica se o registro está <strong>Concluído</strong> (verde) ou <strong>Pendente</strong> (laranja).',
+            ],
+            [
+                'question' => 'Como as fotos são adicionadas ao Portfólio agora?',
+                'answer' => 'A partir da Revisão 4, o upload direto de fotos no portfólio foi removido. Todas as fotos — tanto a capa quanto as dos eixos — são selecionadas <strong>exclusivamente do Banco de Imagens interno</strong> da turma. Certifique-se de enviar as fotos ao Banco de Imagens antes de montar o portfólio.',
+            ],
+            [
+                'question' => 'O que são os Feedbacks da Coordenação?',
+                'answer' => 'São comentários registrados pelo coordenador diretamente em Observações, Pareceres e Portfólios. Diferente da "Solicitação de Revisão", os feedbacks <strong>não bloqueiam o documento</strong> — são orientações complementares. O professor recebe uma <strong>notificação automática</strong> quando um feedback é registrado, e pode ler o comentário na página do documento.',
+            ],
+            [
+                'question' => 'Como o Admin navega pelos dados de uma escola específica?',
+                'answer' => 'Na listagem de Escolas, clique em <strong>"Entrar no Ambiente"</strong>. Um submenu filtrado é ativado no menu lateral com: Turmas, Alunos, Observações, Pareceres, Planejamentos, Portfólios e Banco de Imagens — todos mostrando apenas os dados daquela escola. Clique em <strong>"Sair do Ambiente"</strong> para voltar à visão global.',
+            ],
+            [
+                'question' => 'Como acesso a Rotina Semanal rapidamente?',
+                'answer' => 'A Rotina Semanal está disponível como <strong>sub-item de Planejamentos</strong> no menu lateral do professor. Clique na seta ao lado de "Planejamentos" para expandir e ver o sub-item "Rotina Semanal" diretamente, sem precisar abrir um planejamento específico.',
+            ],
+            [
+                'question' => 'O que mudou na ordem do menu do Professor?',
+                'answer' => 'O menu do professor foi reordenado para refletir o fluxo pedagógico natural: <strong>Turmas → Observações → Planejamentos → Material de Apoio → Pareceres → Portfólios → Banco de Imagens</strong>. O Banco de Imagens foi movido para o final, depois do Portfólio, pois é uma ferramenta de suporte às demais.',
             ],
             // --- Escolas e Responsáveis ---
             [

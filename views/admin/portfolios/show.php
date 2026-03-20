@@ -175,6 +175,14 @@
 </div>
 <?php endforeach; ?>
 
+<?php
+// Coordinator feedback partial
+$contentType = 'portfolio';
+$contentId   = $portfolio['id'];
+$comments    = $comments ?? [];
+include __DIR__ . '/../observations/_coordinator_feedback.php';
+?>
+
 <!-- Revision Modal -->
 <?php if ($isCoordenador): ?>
 <div class="modal fade" id="revisionModal" tabindex="-1">

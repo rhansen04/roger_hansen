@@ -6,6 +6,7 @@ use App\Models\Classroom;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\User;
+use App\Core\Security\Csrf;
 
 class ClassroomController
 {
@@ -37,9 +38,22 @@ class ClassroomController
 
     public function store()
     {
+        Csrf::verify();
+
         if (empty($_POST['name']) || empty($_POST['school_id']) || empty($_POST['teacher_id'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatórios.';
             header('Location: /admin/classrooms/create');
+            exit;
+        }
+
+        // BUG-030: verify teacher_id belongs to a user with role='professor'
+        $teacherId = (int) $_POST['teacher_id'];
+        $db = \App\Core\Database\Connection::getInstance();
+        $stmt = $db->prepare("SELECT id FROM users WHERE id = ? AND role = 'professor' LIMIT 1");
+        $stmt->execute([$teacherId]);
+        if (!$stmt->fetch()) {
+            $_SESSION['error_message'] = 'Professor inválido.';
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/classrooms'));
             exit;
         }
 
@@ -78,6 +92,8 @@ class ClassroomController
 
     public function addStudent($id)
     {
+        Csrf::verify();
+
         $model = new Classroom();
         $classroom = $model->find($id);
 
@@ -104,18 +120,32 @@ class ClassroomController
 
             // Upload de foto
             if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
+                $maxSize = 5 * 1024 * 1024; // 5 MB
+                if ($_FILES['photo']['size'] > $maxSize) {
+                    $_SESSION['error_message'] = 'Arquivo muito grande. Máximo 5MB.';
+                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                    exit;
+                }
+
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $mime = $finfo->file($_FILES['photo']['tmp_name']);
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!in_array($mime, $allowedMimes)) {
+                    $_SESSION['error_message'] = 'Tipo de arquivo não permitido.';
+                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                    exit;
+                }
+
                 $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
-                    $filename = time() . '_' . uniqid() . '.' . $ext;
-                    $uploadPath = __DIR__ . '/../../../public/uploads/students/' . $filename;
+                $filename = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                $uploadPath = __DIR__ . '/../../../public/uploads/students/' . $filename;
 
-                    if (!is_dir(dirname($uploadPath))) {
-                        mkdir(dirname($uploadPath), 0775, true);
-                    }
+                if (!is_dir(dirname($uploadPath))) {
+                    mkdir(dirname($uploadPath), 0775, true);
+                }
 
-                    if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadPath)) {
-                        $studentData['photo_url'] = '/uploads/students/' . $filename;
-                    }
+                if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadPath)) {
+                    $studentData['photo_url'] = '/uploads/students/' . $filename;
                 }
             }
 
@@ -140,7 +170,8 @@ class ClassroomController
 
         // Fluxo legado: vincular aluno existente
         $studentId = $_POST['student_id'] ?? null;
-        if (empty($studentId)) {
+        // BUG-032: use integer check instead of empty()
+        if ((int)$studentId <= 0) {
             $_SESSION['error_message'] = 'Selecione um aluno.';
             header("Location: /admin/classrooms/{$id}");
             exit;
@@ -209,6 +240,15 @@ class ClassroomController
 
     public function update($id)
     {
+        Csrf::verify();
+
+        // BUG-032: use integer check instead of empty()
+        if ((int)$id <= 0) {
+            $_SESSION['error_message'] = 'Turma inválida.';
+            header('Location: /admin/classrooms');
+            exit;
+        }
+
         $model = new Classroom();
         $classroom = $model->find($id);
 
@@ -221,6 +261,17 @@ class ClassroomController
         if (empty($_POST['name']) || empty($_POST['school_id']) || empty($_POST['teacher_id'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatórios.';
             header("Location: /admin/classrooms/{$id}/edit");
+            exit;
+        }
+
+        // BUG-030: verify teacher_id belongs to a user with role='professor'
+        $teacherId = (int) $_POST['teacher_id'];
+        $db = \App\Core\Database\Connection::getInstance();
+        $stmt = $db->prepare("SELECT id FROM users WHERE id = ? AND role = 'professor' LIMIT 1");
+        $stmt->execute([$teacherId]);
+        if (!$stmt->fetch()) {
+            $_SESSION['error_message'] = 'Professor inválido.';
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/classrooms'));
             exit;
         }
 

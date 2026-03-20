@@ -6,13 +6,27 @@
             </h2>
             <p class="text-muted">Informações completas e alunos vinculados</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="/admin/schools" class="btn btn-outline-secondary me-2">
+        <div class="col-md-4 text-end d-flex justify-content-end align-items-start gap-2 flex-wrap">
+            <a href="/admin/schools" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i> Voltar
             </a>
             <a href="/admin/schools/<?php echo $school['id']; ?>/edit" class="btn btn-hansen">
                 <i class="fas fa-edit me-2"></i> Editar
             </a>
+            <?php $ctxActive = (($_SESSION['admin_school_context']['id'] ?? 0) == $school['id']); ?>
+            <?php if (!$ctxActive): ?>
+            <form method="POST" action="/admin/schools/<?php echo $school['id']; ?>/enter-context">
+                <button type="submit" class="btn btn-success fw-bold">
+                    <i class="fas fa-door-open me-2"></i> Entrar no Ambiente
+                </button>
+            </form>
+            <?php else: ?>
+            <form method="POST" action="/admin/schools/exit-context">
+                <button type="submit" class="btn btn-warning fw-bold">
+                    <i class="fas fa-sign-out-alt me-2"></i> Sair do Ambiente
+                </button>
+            </form>
+            <?php endif; ?>
         </div>
     </div>
 

@@ -77,7 +77,8 @@ $statusLabels = ['active' => 'Ativa', 'inactive' => 'Inativa'];
             <table class="table table-hover mb-0 align-middle">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4 py-3" style="width: 60px;">Foto</th>
+                        <th class="ps-4 py-3" style="width: 40px;">#</th>
+                        <th class="py-3" style="width: 60px;">Foto</th>
                         <th class="py-3">Nome</th>
                         <th class="py-3">Data de Nascimento</th>
                         <th class="py-3">Idade</th>
@@ -87,7 +88,7 @@ $statusLabels = ['active' => 'Ativa', 'inactive' => 'Inativa'];
                 <tbody>
                     <?php if (empty($students)): ?>
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fas fa-user-friends fa-3x mb-3"></i><br>
                                 Nenhum aluno vinculado a esta turma.
                                 <?php if (!empty($availableStudents)): ?>
@@ -96,8 +97,9 @@ $statusLabels = ['active' => 'Ativa', 'inactive' => 'Inativa'];
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($students as $student): ?>
+                        <?php foreach ($students as $idx => $student): ?>
                         <tr>
+                            <td class="ps-4 text-muted small fw-bold"><?= $idx + 1 ?></td>
                             <td class="ps-4">
                                 <?php if (!empty($student['photo_url'])): ?>
                                     <img src="<?= htmlspecialchars($student['photo_url']) ?>"

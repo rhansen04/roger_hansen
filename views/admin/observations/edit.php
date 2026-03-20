@@ -116,6 +116,8 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         </div>
     </div>
 
+    <?php include __DIR__ . '/_questions.php'; ?>
+
     <!-- Eixos Pedagogicos com Tabs -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
@@ -124,190 +126,41 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
             </h5>
         </div>
         <div class="card-body p-4">
-            <ul class="nav nav-tabs" id="axesTabs" role="tablist">
+            <ul class="nav nav-tabs flex-wrap" id="axesTabs" role="tablist">
+                <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData): ?>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="tab-general" data-bs-toggle="tab" data-bs-target="#panel-general" type="button" role="tab">
-                        <i class="fas fa-file-alt me-1"></i> Observacao Geral
+                    <button class="nav-link <?= $first ? 'active' : '' ?>" id="<?= $axisData['tab_btn'] ?>"
+                            data-bs-toggle="tab" data-bs-target="#<?= $axisData['tab_id'] ?>" type="button" role="tab">
+                        <i class="<?= $axisData['icon'] ?> me-1"></i> <?= $axisData['name'] ?>
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-movement" data-bs-toggle="tab" data-bs-target="#panel-movement" type="button" role="tab">
-                        <i class="fas fa-running me-1"></i> Movimento
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-manual" data-bs-toggle="tab" data-bs-target="#panel-manual" type="button" role="tab">
-                        <i class="fas fa-hands me-1"></i> Manual
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-music" data-bs-toggle="tab" data-bs-target="#panel-music" type="button" role="tab">
-                        <i class="fas fa-music me-1"></i> Musical
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-stories" data-bs-toggle="tab" data-bs-target="#panel-stories" type="button" role="tab">
-                        <i class="fas fa-book-open me-1"></i> Contos
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-pca" data-bs-toggle="tab" data-bs-target="#panel-pca" type="button" role="tab">
-                        <i class="fas fa-comments me-1"></i> Comunicacao Ativa
-                    </button>
-                </li>
+                <?php $first = false; endforeach; ?>
             </ul>
 
             <div class="tab-content pt-4" id="axesTabContent">
-                <div class="tab-pane fade show active" id="panel-general" role="tabpanel">
-                    <label class="form-label fw-bold">Observacao Geral</label>
-                    <?php if (!$isFinalized): ?>
-                    <div class="mb-2">
-                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-general" role="button">
-                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
-                        </a>
-                        <div class="collapse" id="guide-general">
-                            <div class="card card-body bg-light border-0 mt-1 small">
-                                <ul class="mb-0 ps-3">
-                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
-                                    <li>Quais atividades, objetos ou brinquedos a criança demonstra maior interesse em explorar?</li>
-                                    <li>Quais são suas facilidades e dificuldades?</li>
-                                    <li>Como a criança interage com os colegas e professores?</li>
-                                    <li>Em que atividades a criança demonstra autonomia? O que faz por conta própria?</li>
-                                    <li>Como a criança lida com situações desafiadoras?</li>
-                                    <li>Como a criança expressa suas emoções?</li>
-                                    <li>Quais são as características mais marcantes no comportamento da criança?</li>
-                                </ul>
-                            </div>
-                        </div>
+                <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData):
+                    $savedAnswers = parseAxisAnswers($observation[$axisData['field']] ?? '', count($axisData['questions']));
+                ?>
+                <div class="tab-pane fade <?= $first ? 'show active' : '' ?>" id="<?= $axisData['tab_id'] ?>" role="tabpanel"
+                     data-axis-field="<?= $axisData['field'] ?>">
+                    <h6 class="fw-bold mb-3" style="color: var(--primary-color, #007e66);"><?= $axisData['name'] ?></h6>
+                    <?php foreach ($axisData['questions'] as $qIdx => $question): ?>
+                    <div class="mb-4 p-3 bg-light rounded border-start border-3 border-primary">
+                        <label class="form-label fw-bold mb-2">
+                            <span class="badge bg-primary rounded-pill me-2"><?= $qIdx + 1 ?></span>
+                            <?= htmlspecialchars($question) ?> <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="<?= $axisData['field'] ?>[<?= $qIdx ?>]"
+                                  class="form-control axis-question-field"
+                                  rows="2"
+                                  data-axis="<?= $axisData['field'] ?>"
+                                  placeholder="Sua resposta..."
+                                  <?php echo $readonlyAttr; ?>
+                                  <?php echo !$isFinalized ? 'required' : ''; ?>><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
                     </div>
-                    <?php endif; ?>
-                    <textarea name="observation_general" class="form-control auto-save-field" rows="5"
-                        data-field="observation_general" <?php echo $readonlyAttr; ?>
-                        placeholder="Registre aqui observações gerais sobre o desenvolvimento do aluno neste período..."><?php echo htmlspecialchars($observation['observation_general'] ?? ''); ?></textarea>
+                    <?php endforeach; ?>
                 </div>
-                <div class="tab-pane fade" id="panel-movement" role="tabpanel">
-                    <label class="form-label fw-bold">Eixo Atividade de Movimento</label>
-                    <?php if (!$isFinalized): ?>
-                    <div class="mb-2">
-                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-movement" role="button">
-                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
-                        </a>
-                        <div class="collapse" id="guide-movement">
-                            <div class="card card-body bg-light border-0 mt-1 small">
-                                <ul class="mb-0 ps-3">
-                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
-                                    <li>Prudência: Como a criança se movimenta? É cuidadosa?</li>
-                                    <li>Persistência: Insiste quando enfrenta dificuldades?</li>
-                                    <li>Medo e Coragem: Apresenta medos excessivos ou enfrenta desafios?</li>
-                                    <li>Qualidade do Movimento: Movimentos equilibrados, precisos, tensos ou relaxados?</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    <textarea name="axis_movement" class="form-control auto-save-field" rows="5"
-                        data-field="axis_movement" <?php echo $readonlyAttr; ?>
-                        placeholder="Descreva o desenvolvimento do aluno nas atividades de movimento..."><?php echo htmlspecialchars($observation['axis_movement'] ?? ''); ?></textarea>
-                </div>
-                <div class="tab-pane fade" id="panel-manual" role="tabpanel">
-                    <label class="form-label fw-bold">Eixo Atividade Manual</label>
-                    <?php if (!$isFinalized): ?>
-                    <div class="mb-2">
-                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-manual" role="button">
-                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
-                        </a>
-                        <div class="collapse" id="guide-manual">
-                            <div class="card card-body bg-light border-0 mt-1 small">
-                                <ul class="mb-0 ps-3">
-                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
-                                    <li>Capacidade de Brincar: A criança brinca e se diverte? Brinca sozinha?</li>
-                                    <li>Concentração: Concentra-se nos brinquedos e atividades manuais?</li>
-                                    <li>Variedade: Explora diferentes tipos de brinquedos e atividades?</li>
-                                    <li>Profundidade: Brinca mais tempo com um mesmo brinquedo?</li>
-                                    <li>Interatividade: Como a criança interage com os brinquedos e com outras crianças durante as atividades manuais?</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    <textarea name="axis_manual" class="form-control auto-save-field" rows="5"
-                        data-field="axis_manual" <?php echo $readonlyAttr; ?>
-                        placeholder="Descreva o desenvolvimento do aluno nas atividades manuais..."><?php echo htmlspecialchars($observation['axis_manual'] ?? ''); ?></textarea>
-                </div>
-                <div class="tab-pane fade" id="panel-music" role="tabpanel">
-                    <label class="form-label fw-bold">Eixo Atividade Musical</label>
-                    <?php if (!$isFinalized): ?>
-                    <div class="mb-2">
-                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-music" role="button">
-                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
-                        </a>
-                        <div class="collapse" id="guide-music">
-                            <div class="card card-body bg-light border-0 mt-1 small">
-                                <ul class="mb-0 ps-3">
-                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
-                                    <li>Preferências Musicais: Quais são as preferências da criança em relação a tipos sonoros, músicas e instrumentos?</li>
-                                    <li>Sincronia: A criança acompanha os movimentos e sons de forma sincronizada?</li>
-                                    <li>Canto: A criança canta ou cantarola sozinha?</li>
-                                    <li>Concentração: Como é a concentração da criança durante atividades musicais?</li>
-                                    <li>Reações: Quais são as reações da criança a diferentes sons e músicas?</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    <textarea name="axis_music" class="form-control auto-save-field" rows="5"
-                        data-field="axis_music" <?php echo $readonlyAttr; ?>
-                        placeholder="Descreva o desenvolvimento do aluno nas atividades musicais..."><?php echo htmlspecialchars($observation['axis_music'] ?? ''); ?></textarea>
-                </div>
-                <div class="tab-pane fade" id="panel-stories" role="tabpanel">
-                    <label class="form-label fw-bold">Eixo Atividade de Contos</label>
-                    <?php if (!$isFinalized): ?>
-                    <div class="mb-2">
-                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-stories" role="button">
-                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
-                        </a>
-                        <div class="collapse" id="guide-stories">
-                            <div class="card card-body bg-light border-0 mt-1 small">
-                                <ul class="mb-0 ps-3">
-                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
-                                    <li>Reações Corporais e Faciais: Como a criança reage aos contos?</li>
-                                    <li>Expressões de Emoções: Como a criança expressa emoções durante os contos?</li>
-                                    <li>Preferências: Quais são as preferências da criança em relação a sons, rimas, momentos dos contos e histórias?</li>
-                                    <li>Imitação: A criança imita gestos e palavras dos contos?</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    <textarea name="axis_stories" class="form-control auto-save-field" rows="5"
-                        data-field="axis_stories" <?php echo $readonlyAttr; ?>
-                        placeholder="Descreva o desenvolvimento do aluno nas atividades de contos..."><?php echo htmlspecialchars($observation['axis_stories'] ?? ''); ?></textarea>
-                </div>
-                <div class="tab-pane fade" id="panel-pca" role="tabpanel">
-                    <label class="form-label fw-bold">Eixo Programa Comunicacao Ativa</label>
-                    <?php if (!$isFinalized): ?>
-                    <div class="mb-2">
-                        <a class="text-muted small text-decoration-none" data-bs-toggle="collapse" href="#guide-pca" role="button">
-                            <i class="fas fa-lightbulb me-1 text-warning"></i>Perguntas orientadoras <i class="fas fa-chevron-down ms-1" style="font-size:0.7em"></i>
-                        </a>
-                        <div class="collapse" id="guide-pca">
-                            <div class="card card-body bg-light border-0 mt-1 small">
-                                <ul class="mb-0 ps-3">
-                                    <li>Que mudanças você observou nesse campo desde a última observação?</li>
-                                    <li>Capacidade de compreender palavras: Entende os significados das palavras?</li>
-                                    <li>Capacidade de expressar palavras: Expressa palavras com sentido correto?</li>
-                                    <li>Usa palavras trabalhadas no seu dia a dia?</li>
-                                    <li>Consegue expressar em palavras o que está sentindo ou pensando?</li>
-                                    <li>Entende o sentido das histórias de conversar?</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    <textarea name="axis_pca" class="form-control auto-save-field" rows="5"
-                        data-field="axis_pca" <?php echo $readonlyAttr; ?>
-                        placeholder="Descreva o desenvolvimento do aluno no Programa Comunicação Ativa..."><?php echo htmlspecialchars($observation['axis_pca'] ?? ''); ?></textarea>
-                </div>
+                <?php $first = false; endforeach; ?>
             </div>
         </div>
     </div>
@@ -375,44 +228,15 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 
     if (isFinalized) return;
 
-    // Track original values for change detection
-    const originalValues = {};
-    const fields = document.querySelectorAll('.auto-save-field');
-
-    fields.forEach(function(field) {
-        originalValues[field.getAttribute('data-field')] = field.value;
-    });
-
     let hasUnsavedChanges = false;
-    let saveTimeout = null;
+    let saveTimeouts = {};
 
-    // Auto-save on blur and debounced on input
-    fields.forEach(function(field) {
-        field.addEventListener('blur', function() {
-            const fieldName = this.getAttribute('data-field');
-            if (this.value !== originalValues[fieldName]) {
-                autoSaveField(fieldName, this.value);
-                originalValues[fieldName] = this.value;
-            }
-        });
+    function getAxisValues(axisField) {
+        const textareas = document.querySelectorAll('textarea[data-axis="' + axisField + '"]');
+        return Array.from(textareas).map(function(t) { return t.value.trim(); });
+    }
 
-        field.addEventListener('input', function() {
-            hasUnsavedChanges = true;
-            const fieldName = this.getAttribute('data-field');
-
-            // Debounce: save after 2 seconds of inactivity
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(function() {
-                if (field.value !== originalValues[fieldName]) {
-                    autoSaveField(fieldName, field.value);
-                    originalValues[fieldName] = field.value;
-                }
-            }, 2000);
-        });
-    });
-
-    function autoSaveField(fieldName, value) {
-        // Show saving indicator
+    function autoSaveAxis(axisField) {
         indicator.style.display = 'inline';
         indicatorText.textContent = 'Salvando...';
 
@@ -423,11 +247,11 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                 'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
-                field: fieldName,
-                value: value
+                field: axisField,
+                value: JSON.stringify(getAxisValues(axisField))
             })
         })
-        .then(function(response) { return response.json(); })
+        .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.success) {
                 indicatorText.textContent = 'Salvo automaticamente as ' + data.saved_at;
@@ -436,13 +260,26 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                 indicatorText.textContent = 'Erro ao salvar: ' + data.message;
             }
         })
-        .catch(function(err) {
+        .catch(function() {
             indicatorText.textContent = 'Erro de conexao ao salvar';
-            console.error('Auto-save error:', err);
         });
     }
 
-    // Warn before leaving with unsaved changes
+    document.querySelectorAll('.axis-question-field').forEach(function(field) {
+        field.addEventListener('input', function() {
+            hasUnsavedChanges = true;
+            const axis = this.getAttribute('data-axis');
+            if (saveTimeouts[axis]) clearTimeout(saveTimeouts[axis]);
+            saveTimeouts[axis] = setTimeout(function() { autoSaveAxis(axis); }, 2000);
+        });
+
+        field.addEventListener('blur', function() {
+            const axis = this.getAttribute('data-axis');
+            if (saveTimeouts[axis]) clearTimeout(saveTimeouts[axis]);
+            autoSaveAxis(axis);
+        });
+    });
+
     window.addEventListener('beforeunload', function(e) {
         if (hasUnsavedChanges) {
             e.preventDefault();
@@ -451,12 +288,9 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         }
     });
 
-    // Clear warning on form submit
     var form = document.getElementById('observationForm');
     if (form) {
-        form.addEventListener('submit', function() {
-            hasUnsavedChanges = false;
-        });
+        form.addEventListener('submit', function() { hasUnsavedChanges = false; });
     }
 })();
 </script>

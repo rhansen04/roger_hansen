@@ -36,14 +36,20 @@
     <div class="article-step">
         <div class="step-number">3</div>
         <div class="step-content">
-            <h6>Envie a foto de capa</h6>
-            <p>A foto de capa do portfólio deve ser uma <strong>foto coletiva da turma</strong>:</p>
+            <h6>Selecione a foto de capa do Banco de Imagens</h6>
+            <p>A foto de capa do portfólio deve ser uma <strong>foto coletiva da turma</strong>, selecionada a partir do Banco de Imagens interno:</p>
             <ul>
+                <li>Clique em <strong>"Selecionar do Banco de Imagens"</strong> para abrir o modal de seleção</li>
                 <li>Escolha uma foto que represente o grupo de crianças da turma</li>
                 <li>Fotos de atividades em grupo, rodas ou momentos de confraternização funcionam muito bem</li>
                 <li>A foto será exibida na capa do documento PDF com o fundo verde institucional</li>
-                <li>Formatos aceitos: JPG, PNG. Recomenda-se orientação paisagem (horizontal) para melhor enquadramento</li>
+                <li><strong>Pré-requisito:</strong> as fotos devem ter sido previamente enviadas ao <a href="/admin/help/banco-imagens/upload-gerenciar">Banco de Imagens</a> da turma</li>
             </ul>
+
+            <div class="help-tip">
+                <i class="fas fa-lightbulb me-2"></i>
+                <strong>Importante (v4):</strong> O upload direto de fotos foi removido do portfólio. Todas as fotos — capa e eixos — são selecionadas exclusivamente do Banco de Imagens interno da turma. Isso centraliza o acervo fotográfico e facilita a reutilização das fotos.
+            </div>
         </div>
     </div>
 

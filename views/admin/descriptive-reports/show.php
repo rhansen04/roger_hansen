@@ -210,6 +210,14 @@
     </div>
 </div>
 
+<?php
+// Coordinator feedback partial
+$contentType = 'descriptive_report';
+$contentId   = $report['id'];
+$comments    = $comments ?? [];
+include __DIR__ . '/../observations/_coordinator_feedback.php';
+?>
+
 <!-- Modal de Revisao -->
 <?php if ($isCoordenadorOrAdmin): ?>
 <div class="modal fade" id="revisionModal" tabindex="-1">

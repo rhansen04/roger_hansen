@@ -73,6 +73,7 @@
                 <li><strong>Informações gerais</strong> — nome, escola, professor, faixa etária, período e ano letivo</li>
                 <li><strong>Lista de alunos matriculados</strong> — exibida em formato de tabela contendo:
                     <ul>
+                        <li><strong>#</strong> — coluna numerada com a posição do aluno na lista, facilitando a contagem e referência rápida</li>
                         <li><strong>Foto</strong> do aluno (ou ícone placeholder caso não tenha foto cadastrada)</li>
                         <li><strong>Nome completo</strong> do aluno</li>
                         <li><strong>Data de nascimento</strong></li>

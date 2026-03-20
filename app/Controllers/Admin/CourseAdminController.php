@@ -8,6 +8,7 @@ use App\Models\Section;
 use App\Models\Lesson;
 use App\Models\Enrollment;
 use App\Models\User;
+use App\Core\Security\Csrf;
 
 class CourseAdminController
 {
@@ -44,6 +45,7 @@ class CourseAdminController
 
     public function store()
     {
+        Csrf::verify();
         $data = [
             ':title' => $_POST['title'] ?? '',
             ':slug' => $this->generateSlug($_POST['title'] ?? ''),
@@ -59,9 +61,38 @@ class CourseAdminController
             ':instructor_id' => !empty($_POST['instructor_id']) ? $_POST['instructor_id'] : null,
         ];
 
+        // BUG-047: validate instructor_id exists
+        $instructorId = $_POST['instructor_id'] ?? '';
+        if (!empty($instructorId)) {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare("SELECT id FROM users WHERE id = ? LIMIT 1");
+            $stmt->execute([(int)$instructorId]);
+            if (!$stmt->fetch()) {
+                $_SESSION['error_message'] = 'Instrutor não encontrado.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
+            }
+        }
+
         // Upload cover image
         if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === 0) {
-            $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+            // BUG-046: extension whitelist
+            $ext = strtolower(pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION));
+            $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowedExts)) {
+                $_SESSION['error_message'] = 'Extensão de arquivo não permitida para a capa.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
+            }
+            // BUG-046: server-side MIME check
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES['cover_image']['tmp_name']);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($mime, $allowedMimes)) {
+                $_SESSION['error_message'] = 'Arquivo inválido para capa do curso.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
+            }
             $filename = 'course_' . time() . '.' . $ext;
             $uploadPath = __DIR__ . '/../../../public/uploads/courses/' . $filename;
 
@@ -143,6 +174,7 @@ class CourseAdminController
 
     public function update($id)
     {
+        Csrf::verify();
         $courseModel = new Course();
         $course = $courseModel->find($id);
 
@@ -167,9 +199,38 @@ class CourseAdminController
             ':instructor_id' => !empty($_POST['instructor_id']) ? $_POST['instructor_id'] : null,
         ];
 
+        // BUG-047: validate instructor_id exists
+        $instructorId = $_POST['instructor_id'] ?? '';
+        if (!empty($instructorId)) {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare("SELECT id FROM users WHERE id = ? LIMIT 1");
+            $stmt->execute([(int)$instructorId]);
+            if (!$stmt->fetch()) {
+                $_SESSION['error_message'] = 'Instrutor não encontrado.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
+            }
+        }
+
         // Upload new cover image
         if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === 0) {
-            $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+            // BUG-046: extension whitelist
+            $ext = strtolower(pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION));
+            $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowedExts)) {
+                $_SESSION['error_message'] = 'Extensão de arquivo não permitida para a capa.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
+            }
+            // BUG-046: server-side MIME check
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES['cover_image']['tmp_name']);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($mime, $allowedMimes)) {
+                $_SESSION['error_message'] = 'Arquivo inválido para capa do curso.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
+            }
             $filename = 'course_' . time() . '.' . $ext;
             $uploadPath = __DIR__ . '/../../../public/uploads/courses/' . $filename;
 

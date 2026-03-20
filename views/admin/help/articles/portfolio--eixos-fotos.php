@@ -63,17 +63,20 @@
                 <li>Esse texto aparecerá em uma página dedicada no PDF, antes da página de fotos do eixo</li>
             </ul>
 
-            <p class="mt-3"><strong>Bloco 2 — Fotos (até 3 por eixo):</strong></p>
+            <p class="mt-3"><strong>Bloco 2 — Fotos (até 3 por eixo) — exclusivamente do Banco de Imagens:</strong></p>
             <ul>
-                <li>Cada eixo possui <strong>3 slots de foto</strong> com os campos:
-                    <ul>
-                        <li><strong>URL da Foto:</strong> Cole a URL da imagem (do Banco de Imagens ou URL externa)</li>
-                        <li><strong>Legenda:</strong> Descrição breve da foto que aparecerá abaixo da imagem no PDF</li>
-                    </ul>
-                </li>
+                <li>Cada eixo possui <strong>3 slots de foto</strong></li>
+                <li>As fotos são selecionadas <strong>exclusivamente a partir do Banco de Imagens interno</strong> da turma — o upload direto no portfólio foi removido</li>
+                <li>Para cada slot, clique no botão <strong>"Selecionar do Banco de Imagens"</strong> — um modal exibe as fotos disponíveis na turma para seleção</li>
+                <li>Após selecionar a foto, adicione a <strong>legenda</strong> descritiva que aparecerá abaixo da imagem no PDF</li>
                 <li>As fotos devem representar <strong>atividades coletivas</strong> da turma no eixo</li>
                 <li>Não é obrigatório preencher os 3 slots — use quantas fotos forem adequadas</li>
             </ul>
+
+            <div class="help-tip">
+                <i class="fas fa-lightbulb me-2"></i>
+                <strong>Pré-requisito:</strong> Certifique-se de que as fotos da turma já foram enviadas ao <strong>Banco de Imagens</strong> antes de montar o portfólio. Acesse <strong>Banco de Imagens</strong> no menu para fazer o upload.
+            </div>
         </div>
     </div>
 
@@ -114,6 +117,17 @@
     </div>
     <figcaption>Cada aba de eixo contém um campo de descrição e 3 slots de foto com legenda</figcaption>
 </figure>
+
+<h6 class="fw-bold mt-4 mb-3">Feedbacks da Coordenação no Portfólio</h6>
+
+<p>Na página de visualização do portfólio, existe uma seção <strong>"Feedbacks da Coordenação"</strong> acessível ao coordenador:</p>
+
+<ul>
+    <li>O coordenador pode registrar observações e orientações sobre o portfólio diretamente nessa seção</li>
+    <li>O professor recebe uma <strong>notificação automática</strong> quando um feedback é registrado</li>
+    <li>Os feedbacks ficam visíveis para o professor e para o coordenador, com registro de data, hora e autor</li>
+    <li>Diferente da "Solicitação de Revisão" (que reabre o documento), os feedbacks são orientações complementares que não bloqueiam o fluxo de aprovação</li>
+</ul>
 
 <div class="help-tip help-tip-success">
     <i class="fas fa-check-circle me-2"></i>

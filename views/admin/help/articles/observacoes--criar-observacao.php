@@ -1,8 +1,13 @@
 <p class="lead">As observações pedagógicas são registros detalhados do desenvolvimento de cada aluno, organizados em 6 eixos temáticos e separados por semestre. Aqui você aprende a criar, preencher e gerenciar suas observações.</p>
 
+<div class="help-tip help-tip-success">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>Novidade v4:</strong> As observações agora exibem as perguntas de cada eixo de forma <strong>numerada</strong>, e cada pergunta possui seu <strong>próprio campo de resposta obrigatório</strong>. Isso garante um registro estruturado e completo por eixo.
+</div>
+
 <h6 class="fw-bold mt-4 mb-3">Atalhos rápidos: Cards dos 6 Eixos</h6>
 
-<p>Na listagem de observações (<strong>Ensino → Observações</strong>), você encontra <strong>6 cards coloridos</strong> representando os eixos pedagógicos. Ao clicar em um card, o formulário de nova observação abre com a aba daquele eixo já ativa:</p>
+<p>Na listagem de observações (<strong>Observações</strong> no menu), você encontra <strong>6 cards coloridos</strong> representando os eixos pedagógicos. Ao clicar em um card, o formulário de nova observação abre com a aba daquele eixo já ativa:</p>
 
 <div class="table-responsive">
     <table class="table table-sm table-bordered">
@@ -74,7 +79,7 @@
     <div class="article-step">
         <div class="step-number">4</div>
         <div class="step-content">
-            <h6>Preencher os 6 eixos pedagógicos</h6>
+            <h6>Preencher os 6 eixos pedagógicos — Perguntas Numeradas</h6>
             <p>O formulário de observação é organizado em <strong>6 abas</strong> (Bootstrap tabs), cada uma representando um eixo pedagógico:</p>
             <ol>
                 <li>
@@ -102,8 +107,15 @@
                     <p class="mb-1">Registros sobre comunicação ativa: expressão verbal, desenvolvimento de vocabulário, habilidades de conversa e comunicação não-verbal.</p>
                 </li>
             </ol>
-            <p>Cada eixo contém um campo <strong>textarea</strong> com <strong>5 linhas visíveis</strong>, mas sem limite de texto. Clique na aba correspondente para navegar entre os eixos. Não é necessário preencher todos de uma vez — o auto-save permite preencher gradualmente.</p>
-            <p>Cada eixo também possui <strong>perguntas orientadoras</strong> — clique no link <i class="fas fa-lightbulb text-warning"></i> <em>"Perguntas orientadoras"</em> abaixo do nome do eixo para expandir. As perguntas ajudam a direcionar o olhar pedagógico, como: "Que mudanças você observou?", "Como a criança expressa suas emoções?", entre outras.</p>
+
+            <p class="mt-3"><strong>Como as perguntas funcionam (novidade v4):</strong></p>
+            <p>Cada eixo exibe suas perguntas orientadoras de forma <strong>numerada e expandida</strong>, diferente da versão anterior onde as perguntas eram colapsáveis. Agora:</p>
+            <ul>
+                <li>Cada pergunta possui seu <strong>próprio campo de resposta</strong> (textarea dedicado)</li>
+                <li>Os campos são <strong>obrigatórios</strong> — é necessário preencher ao menos as perguntas do eixo para salvar</li>
+                <li>A numeração (1, 2, 3...) facilita a referência e o acompanhamento de cada aspecto pedagógico</li>
+                <li>O <strong>auto-save</strong> continua funcionando: cada campo é salvo automaticamente ao sair do campo ou após pausa na digitação</li>
+            </ul>
         </div>
     </div>
 </div>
@@ -158,6 +170,22 @@
             </tr>
         </tbody>
     </table>
+</div>
+
+<h6 class="fw-bold mt-4 mb-3">Feedbacks da Coordenação</h6>
+
+<p>Ao visualizar uma observação, o coordenador pode registrar feedbacks diretamente na página da observação. Para o professor, essa seção aparece logo abaixo do conteúdo da observação:</p>
+
+<ul>
+    <li><strong>Quem pode registrar:</strong> Coordenadores e Administradores</li>
+    <li><strong>Visibilidade para o professor:</strong> os feedbacks ficam visíveis ao professor que criou a observação</li>
+    <li><strong>Notificação automática:</strong> quando um coordenador registra um feedback, o professor recebe uma notificação interna com o aviso</li>
+    <li><strong>Histórico:</strong> os feedbacks são exibidos em ordem cronológica com data, hora e nome do coordenador</li>
+</ul>
+
+<div class="help-tip">
+    <i class="fas fa-lightbulb me-2"></i>
+    <strong>Dica para coordenadores:</strong> Use os feedbacks para orientar o professor de forma construtiva sem precisar solicitar uma revisão formal do documento. É uma comunicação direta e rápida sobre pontos específicos da observação.
 </div>
 
 <div class="help-tip help-tip-success">

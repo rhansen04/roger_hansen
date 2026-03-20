@@ -2,7 +2,7 @@
 
 <div class="help-tip">
     <i class="fas fa-lightbulb me-2"></i>
-    <strong>Você sabia?</strong> Você pode criar templates personalizados em <strong>Ensino → Templates Planej.</strong> para reutilizar estruturas de planejamento.
+    <strong>Você sabia?</strong> A Rotina Semanal está disponível diretamente no menu lateral como sub-item de Planejamentos, permitindo acesso rápido sem precisar abrir um planejamento específico.
 </div>
 
 <div class="article-steps">
@@ -10,7 +10,16 @@
         <div class="step-number">1</div>
         <div class="step-content">
             <h6>Acesse a seção de Planejamentos</h6>
-            <p>No menu lateral, clique em <strong>Ensino → Planejamentos</strong>. Você verá a lista de planejamentos existentes.</p>
+            <p>No menu lateral do professor, clique em <strong>Planejamentos</strong>. Você verá a listagem de planejamentos existentes, agora com informações ampliadas:</p>
+            <ul>
+                <li><strong>Coluna "Registros do Período":</strong> exibe um badge indicando o status do Registro Final da Semana vinculado a cada planejamento
+                    <ul>
+                        <li><span class="badge bg-success">Concluído</span> — o Registro Final da Semana foi preenchido e finalizado</li>
+                        <li><span class="badge bg-warning text-dark">Pendente</span> — o planejamento ainda não tem Registro Final da Semana</li>
+                    </ul>
+                </li>
+                <li>A coluna <strong>"Template"</strong> foi removida da listagem para simplificar a visualização</li>
+            </ul>
         </div>
     </div>
 

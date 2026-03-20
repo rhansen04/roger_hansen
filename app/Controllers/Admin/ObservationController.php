@@ -4,6 +4,8 @@ namespace App\Controllers\Admin;
 
 use App\Models\Observation;
 use App\Models\Student;
+use App\Models\CoordinatorComment;
+use App\Core\Security\Csrf;
 
 class ObservationController
 {
@@ -76,6 +78,8 @@ class ObservationController
      */
     public function store()
     {
+        Csrf::verify();
+
         // Validacoes
         if (empty($_POST['student_id']) || empty($_POST['semester']) || empty($_POST['year'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatorios (aluno, semestre e ano).';
@@ -103,12 +107,12 @@ class ObservationController
             'user_id' => $_SESSION['user_id'],
             'semester' => $_POST['semester'],
             'year' => $_POST['year'],
-            'observation_general' => trim($_POST['observation_general'] ?? ''),
-            'axis_movement' => trim($_POST['axis_movement'] ?? ''),
-            'axis_manual' => trim($_POST['axis_manual'] ?? ''),
-            'axis_music' => trim($_POST['axis_music'] ?? ''),
-            'axis_stories' => trim($_POST['axis_stories'] ?? ''),
-            'axis_pca' => trim($_POST['axis_pca'] ?? ''),
+            'observation_general' => $this->encodeAxisField('observation_general'),
+            'axis_movement' => $this->encodeAxisField('axis_movement'),
+            'axis_manual' => $this->encodeAxisField('axis_manual'),
+            'axis_music' => $this->encodeAxisField('axis_music'),
+            'axis_stories' => $this->encodeAxisField('axis_stories'),
+            'axis_pca' => $this->encodeAxisField('axis_pca'),
         ];
 
         $newId = $obsModel->createWithAxes($data);
@@ -141,15 +145,19 @@ class ObservationController
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Professor so ve suas proprias
-        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+        if ($userRole === 'professor' && (int)$observation['user_id'] !== (int)$userId) {
             $_SESSION['error_message'] = 'Voce nao tem permissao para ver esta observacao.';
             header('Location: /admin/observations');
             exit;
         }
 
+        $commentModel = new CoordinatorComment();
+        $comments = $commentModel->findByContent('observation', (int) $id);
+
         return $this->render('observations/show', [
             'observation' => $observation,
             'userRole' => $userRole,
+            'comments' => $comments,
         ]);
     }
 
@@ -172,7 +180,7 @@ class ObservationController
 
         // Professor so edita suas proprias e em andamento
         if ($userRole === 'professor') {
-            if ($observation['user_id'] != $userId) {
+            if ((int)$observation['user_id'] !== (int)$userId) {
                 $_SESSION['error_message'] = 'Voce nao tem permissao para editar esta observacao.';
                 header('Location: /admin/observations');
                 exit;
@@ -208,6 +216,8 @@ class ObservationController
      */
     public function update($id)
     {
+        Csrf::verify();
+
         $obsModel = new Observation();
         $observation = $obsModel->find($id);
 
@@ -221,7 +231,7 @@ class ObservationController
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Verificar permissoes
-        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+        if ($userRole === 'professor' && (int)$observation['user_id'] !== (int)$userId) {
             $_SESSION['error_message'] = 'Voce nao tem permissao para editar esta observacao.';
             header('Location: /admin/observations');
             exit;
@@ -237,12 +247,12 @@ class ObservationController
             'student_id' => $_POST['student_id'] ?? $observation['student_id'],
             'semester' => $_POST['semester'] ?? $observation['semester'],
             'year' => $_POST['year'] ?? $observation['year'],
-            'observation_general' => trim($_POST['observation_general'] ?? ''),
-            'axis_movement' => trim($_POST['axis_movement'] ?? ''),
-            'axis_manual' => trim($_POST['axis_manual'] ?? ''),
-            'axis_music' => trim($_POST['axis_music'] ?? ''),
-            'axis_stories' => trim($_POST['axis_stories'] ?? ''),
-            'axis_pca' => trim($_POST['axis_pca'] ?? ''),
+            'observation_general' => $this->encodeAxisField('observation_general'),
+            'axis_movement' => $this->encodeAxisField('axis_movement'),
+            'axis_manual' => $this->encodeAxisField('axis_manual'),
+            'axis_music' => $this->encodeAxisField('axis_music'),
+            'axis_stories' => $this->encodeAxisField('axis_stories'),
+            'axis_pca' => $this->encodeAxisField('axis_pca'),
         ];
 
         if ($obsModel->updateWithAxes($id, $data)) {
@@ -263,6 +273,27 @@ class ObservationController
     {
         header('Content-Type: application/json');
 
+        // Ler JSON do body
+        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+        // Verificar CSRF via header ou campo no body JSON
+        $csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($input['csrf_token'] ?? '');
+        $expected = $_SESSION['csrf_token'] ?? '';
+        if (empty($expected) || !hash_equals($expected, $csrfToken)) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Token invalido.']);
+            exit;
+        }
+
+        // Validar campo contra whitelist antes de qualquer acesso ao modelo
+        $allowedFields = ['observation_general', 'axis_movement', 'axis_manual', 'axis_music', 'axis_stories', 'axis_pca'];
+        $field = $input['field'] ?? '';
+        if (!in_array($field, $allowedFields)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Campo invalido.']);
+            exit;
+        }
+
         $obsModel = new Observation();
         $observation = $obsModel->find($id);
 
@@ -275,7 +306,7 @@ class ObservationController
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Verificar permissoes
-        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+        if ($userRole === 'professor' && (int)$observation['user_id'] !== (int)$userId) {
             echo json_encode(['success' => false, 'message' => 'Sem permissao.']);
             exit;
         }
@@ -285,19 +316,7 @@ class ObservationController
             exit;
         }
 
-        // Ler JSON do body
-        $input = json_decode(file_get_contents('php://input'), true);
-        if (!$input) {
-            $input = $_POST;
-        }
-
-        $field = $input['field'] ?? null;
         $value = $input['value'] ?? '';
-
-        if (!$field) {
-            echo json_encode(['success' => false, 'message' => 'Campo nao informado.']);
-            exit;
-        }
 
         $result = $obsModel->updateField($id, $field, $value);
 
@@ -318,6 +337,8 @@ class ObservationController
      */
     public function finalize($id)
     {
+        Csrf::verify();
+
         $obsModel = new Observation();
         $observation = $obsModel->find($id);
 
@@ -331,7 +352,7 @@ class ObservationController
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Somente o professor dono pode finalizar
-        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+        if ($userRole === 'professor' && (int)$observation['user_id'] !== (int)$userId) {
             $_SESSION['error_message'] = 'Voce nao tem permissao para finalizar esta observacao.';
             header('Location: /admin/observations');
             exit;
@@ -358,6 +379,8 @@ class ObservationController
      */
     public function reopen($id)
     {
+        Csrf::verify();
+
         $userRole = $_SESSION['user_role'] ?? 'professor';
 
         // Apenas coordenador e admin podem reabrir
@@ -397,6 +420,8 @@ class ObservationController
      */
     public function delete($id)
     {
+        Csrf::verify();
+
         $obsModel = new Observation();
         $observation = $obsModel->find($id);
 
@@ -410,7 +435,7 @@ class ObservationController
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Apenas dono ou admin pode deletar
-        if ($userRole === 'professor' && $observation['user_id'] != $userId) {
+        if ($userRole === 'professor' && (int)$observation['user_id'] !== (int)$userId) {
             $_SESSION['error_message'] = 'Voce nao tem permissao para excluir esta observacao.';
             header('Location: /admin/observations');
             exit;
@@ -423,7 +448,21 @@ class ObservationController
             exit;
         }
 
+        // Verificar se existe parecer descritivo vinculado a esta observacao
+        $db = \App\Core\Database\Connection::getInstance();
+        $stmt = $db->prepare("SELECT id FROM descriptive_reports WHERE observation_id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        if ($stmt->fetch()) {
+            $_SESSION['error_message'] = 'Nao e possivel excluir: esta observacao esta vinculada a um parecer descritivo.';
+            header('Location: /admin/observations/' . $id);
+            exit;
+        }
+
         $studentId = $observation['student_id'];
+
+        // Limpar comentários de coordenacao vinculados
+        $commentModel = new \App\Models\CoordinatorComment();
+        $commentModel->deleteByContent('observation', (int)$id);
 
         if ($obsModel->delete($id)) {
             $_SESSION['success_message'] = 'Observacao excluida com sucesso!';
@@ -433,6 +472,15 @@ class ObservationController
 
         header('Location: /admin/observations');
         exit;
+    }
+
+    private function encodeAxisField(string $fieldName): string
+    {
+        $raw = $_POST[$fieldName] ?? [];
+        if (is_array($raw)) {
+            return json_encode(array_values(array_map('trim', $raw)));
+        }
+        return trim((string) $raw);
     }
 
     protected function render($view, $data = [])

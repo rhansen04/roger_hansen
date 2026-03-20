@@ -300,6 +300,14 @@ $isFinalized = ($status === 'finalized');
     </div>
 </div>
 
+<?php
+// Coordinator feedback partial
+$contentType = 'observation';
+$contentId   = $observation['id'];
+$comments    = $comments ?? [];
+include __DIR__ . '/_coordinator_feedback.php';
+?>
+
 <?php if ($isFinalized && in_array($userRole, ['coordenador', 'admin'])): ?>
 <!-- Modal de Reabertura -->
 <div class="modal fade" id="reopenModal" tabindex="-1" aria-labelledby="reopenModalLabel" aria-hidden="true">

@@ -69,6 +69,7 @@ use App\Controllers\Admin\ImageBankController as AdminImageBankController;
 use App\Controllers\Admin\PortfolioController as AdminPortfolioController;
 use App\Controllers\Admin\SupportMaterialController as AdminSupportMaterialController;
 use App\Controllers\Admin\RoleSimulatorController as AdminRoleSimulatorController;
+use App\Controllers\Admin\CoordinatorFeedbackController as AdminCoordinatorFeedbackController;
 
 $router = new Router();
 
@@ -141,6 +142,8 @@ $router->get('/admin/students/{id}/ai-summary', [AdminStudentController::class, 
 $router->get('/admin/schools', [AdminSchoolController::class, 'index']);
 $router->get('/admin/schools/create', [AdminSchoolController::class, 'create']);
 $router->post('/admin/schools', [AdminSchoolController::class, 'store']);
+$router->post('/admin/schools/{id}/enter-context', [AdminSchoolController::class, 'enterContext']);
+$router->post('/admin/schools/exit-context', [AdminSchoolController::class, 'exitContext']);
 $router->get('/admin/schools/{id}', [AdminSchoolController::class, 'show']);
 $router->get('/admin/schools/{id}/edit', [AdminSchoolController::class, 'edit']);
 $router->post('/admin/schools/{id}/update', [AdminSchoolController::class, 'update']);
@@ -328,6 +331,10 @@ $router->get('/admin/planning/{id}', [AdminPlanningController::class, 'show']);
 $router->get('/admin/planning/{id}/edit', [AdminPlanningController::class, 'edit']);
 $router->post('/admin/planning/{id}/update', [AdminPlanningController::class, 'update']);
 $router->post('/admin/planning/{id}/delete', [AdminPlanningController::class, 'delete']);
+$router->get('/admin/planning/{id}/record/create', [AdminPlanningController::class, 'recordCreate']);
+$router->post('/admin/planning/{id}/record', [AdminPlanningController::class, 'recordStore']);
+$router->get('/admin/planning/{id}/record/edit', [AdminPlanningController::class, 'recordEdit']);
+$router->post('/admin/planning/{id}/record/update', [AdminPlanningController::class, 'recordUpdate']);
 
 // Rotas Admin - Notificacoes
 $router->get('/admin/notifications', [AdminNotificationController::class, 'index']);
@@ -356,6 +363,7 @@ $router->get('/admin/descriptive-reports/{id}/export-pdf', [AdminDescriptiveRepo
 
 // Rotas Admin - Banco de Imagens
 $router->get('/admin/image-bank', [AdminImageBankController::class, 'index']);
+$router->get('/admin/api/image-bank/classroom/{classroomId}', [AdminImageBankController::class, 'apiByClassroom']);
 $router->get('/admin/image-bank/{classroomId}', [AdminImageBankController::class, 'classroom']);
 $router->get('/admin/image-bank/folder/{folderId}', [AdminImageBankController::class, 'folder']);
 $router->post('/admin/image-bank/folder/{folderId}/upload', [AdminImageBankController::class, 'upload']);
@@ -375,6 +383,9 @@ $router->post('/admin/portfolios/{id}/request-revision', [AdminPortfolioControll
 $router->post('/admin/portfolios/{id}/reopen', [AdminPortfolioController::class, 'reopen']);
 $router->post('/admin/portfolios/{id}/correct-text', [AdminPortfolioController::class, 'correctText']);
 $router->get('/admin/portfolios/{id}/export-pdf', [AdminPortfolioController::class, 'exportPdf']);
+
+// Rotas Admin - Feedback da Coordenacao
+$router->post('/admin/coordinator-feedback', [AdminCoordinatorFeedbackController::class, 'store']);
 
 // Rotas Admin - Material de Apoio
 $router->get('/admin/support-materials', [AdminSupportMaterialController::class, 'index']);

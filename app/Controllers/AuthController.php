@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\User;
 use App\Core\Database\Connection;
 use App\Services\MailerService;
+use App\Core\Security\Csrf;
 
 class AuthController
 {
@@ -18,6 +19,15 @@ class AuthController
 
     public function login()
     {
+        Csrf::verify();
+
+        // Rate limiting: max 5 attempts in 15 minutes
+        $attempts = $_SESSION['login_attempts'] ?? 0;
+        $lastAttempt = $_SESSION['login_last_attempt'] ?? 0;
+        if ($attempts >= 5 && (time() - $lastAttempt) < 900) {
+            return $this->render('login', ['error' => 'Muitas tentativas. Aguarde 15 minutos.']);
+        }
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
@@ -25,15 +35,20 @@ class AuthController
         $user = $userModel->findByEmail($email);
 
         if ($user && password_verify($password, $user['password'])) {
+            unset($_SESSION['login_attempts'], $_SESSION['login_last_attempt']);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
+            session_regenerate_id(true);
 
             $userModel->updateLastLogin($user['id']);
 
             $this->redirectByRole($user['role']);
             exit;
         }
+
+        $_SESSION['login_attempts'] = ($attempts + 1);
+        $_SESSION['login_last_attempt'] = time();
 
         return $this->render('login', ['error' => 'E-mail ou senha inválidos.']);
     }
@@ -57,6 +72,7 @@ class AuthController
 
     public function register()
     {
+        Csrf::verify();
         $name = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -66,7 +82,9 @@ class AuthController
         $errors = [];
         if (empty($name)) $errors[] = 'Nome é obrigatório.';
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'E-mail inválido.';
-        if (strlen($password) < 6) $errors[] = 'Senha deve ter pelo menos 6 caracteres.';
+        if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            $errors[] = 'Senha deve ter pelo menos 8 caracteres, incluindo letras e números.';
+        }
         if ($password !== $passwordConfirm) $errors[] = 'Senhas não conferem.';
 
         // Check unique email
@@ -110,6 +128,7 @@ class AuthController
 
     public function sendResetLink()
     {
+        Csrf::verify();
         $email = trim($_POST['email'] ?? '');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -160,6 +179,7 @@ class AuthController
 
     public function resetPassword()
     {
+        Csrf::verify();
         $token = $_POST['token'] ?? '';
         $password = $_POST['password'] ?? '';
         $passwordConfirm = $_POST['password_confirm'] ?? '';

@@ -3,28 +3,33 @@
 namespace App\Models;
 
 use App\Core\Database\Connection;
+use App\Models\PlanningSubmissionAnswer;
 use PDO;
 use PDOException;
 
 class PlanningSubmission
 {
     protected $db;
+    protected $answerModel;
 
     public function __construct()
     {
         $this->db = Connection::getInstance();
+        $this->answerModel = new PlanningSubmissionAnswer();
     }
 
     public function all($filters = [])
     {
         try {
             $sql = "SELECT ps.*, pt.title as template_title, u.name as teacher_name,
-                           c.name as classroom_name, s.name as school_name
+                           c.name as classroom_name, s.name as school_name,
+                           ppr.id as period_record_id
                     FROM planning_submissions ps
                     LEFT JOIN planning_templates pt ON ps.template_id = pt.id
                     LEFT JOIN users u ON ps.teacher_id = u.id
                     LEFT JOIN classrooms c ON ps.classroom_id = c.id
                     LEFT JOIN schools s ON c.school_id = s.id
+                    LEFT JOIN planning_period_records ppr ON ppr.submission_id = ps.id
                     WHERE 1=1";
             $params = [];
 
@@ -131,15 +136,7 @@ class PlanningSubmission
 
     public function getAnswers($submissionId)
     {
-        try {
-            $sql = "SELECT * FROM planning_submission_answers WHERE submission_id = ?";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$submissionId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erro ao buscar respostas: " . $e->getMessage());
-            return [];
-        }
+        return $this->answerModel->getBySubmission((int) $submissionId);
     }
 
     public function getAnswersIndexed($submissionId)
@@ -154,22 +151,13 @@ class PlanningSubmission
 
     public function saveAnswer($submissionId, $fieldId, $sectionId, $answerText, $answerJson = null)
     {
-        try {
-            $sql = "INSERT INTO planning_submission_answers (submission_id, field_id, section_id, answer_text, answer_json)
-                    VALUES (:submission_id, :field_id, :section_id, :answer_text, :answer_json)
-                    ON DUPLICATE KEY UPDATE answer_text = VALUES(answer_text), answer_json = VALUES(answer_json)";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
-                ':submission_id' => $submissionId,
-                ':field_id' => $fieldId,
-                ':section_id' => $sectionId,
-                ':answer_text' => $answerText,
-                ':answer_json' => $answerJson
-            ]);
-        } catch (PDOException $e) {
-            error_log("Erro ao salvar resposta: " . $e->getMessage());
-            return false;
-        }
+        return $this->answerModel->upsertStatic([
+            ':submission_id' => $submissionId,
+            ':field_id'      => $fieldId,
+            ':section_id'    => $sectionId,
+            ':answer_text'   => $answerText,
+            ':answer_json'   => $answerJson,
+        ]);
     }
 
     public function getByTeacher($teacherId)
@@ -218,40 +206,24 @@ class PlanningSubmission
 
     public function getAnswersForDay($submissionId, $dailyEntryId)
     {
-        try {
-            $stmt = $this->db->prepare("SELECT * FROM planning_submission_answers WHERE submission_id = ? AND daily_entry_id = ?");
-            $stmt->execute([$submissionId, $dailyEntryId]);
-            $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $indexed = [];
-            foreach ($answers as $a) {
-                $indexed[$a['field_id']] = $a;
-            }
-            return $indexed;
-        } catch (PDOException $e) {
-            error_log("Erro ao buscar respostas do dia: " . $e->getMessage());
-            return [];
+        $answers = $this->answerModel->getByDailyEntry((int) $submissionId, (int) $dailyEntryId);
+        $indexed = [];
+        foreach ($answers as $a) {
+            $indexed[$a['field_id']] = $a;
         }
+        return $indexed;
     }
 
     public function saveAnswerForDay($submissionId, $fieldId, $sectionId, $dailyEntryId, $answerText, $answerJson = null)
     {
-        try {
-            $sql = "INSERT INTO planning_submission_answers (submission_id, field_id, section_id, daily_entry_id, answer_text, answer_json)
-                    VALUES (:submission_id, :field_id, :section_id, :daily_entry_id, :answer_text, :answer_json)
-                    ON DUPLICATE KEY UPDATE answer_text = VALUES(answer_text), answer_json = VALUES(answer_json)";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
-                ':submission_id' => $submissionId,
-                ':field_id' => $fieldId,
-                ':section_id' => $sectionId,
-                ':daily_entry_id' => $dailyEntryId,
-                ':answer_text' => $answerText,
-                ':answer_json' => $answerJson
-            ]);
-        } catch (PDOException $e) {
-            error_log("Erro ao salvar resposta do dia: " . $e->getMessage());
-            return false;
-        }
+        return $this->answerModel->upsertDaily([
+            ':submission_id'  => $submissionId,
+            ':field_id'       => $fieldId,
+            ':section_id'     => $sectionId,
+            ':daily_entry_id' => $dailyEntryId,
+            ':answer_text'    => $answerText,
+            ':answer_json'    => $answerJson,
+        ]);
     }
 
     public function updateDailyEntryStatus($entryId, $status)
@@ -267,18 +239,11 @@ class PlanningSubmission
 
     public function getRegistrationAnswers($submissionId)
     {
-        try {
-            $stmt = $this->db->prepare("SELECT * FROM planning_submission_answers WHERE submission_id = ? AND daily_entry_id IS NULL");
-            $stmt->execute([$submissionId]);
-            $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $indexed = [];
-            foreach ($answers as $a) {
-                $indexed[$a['field_id']] = $a;
-            }
-            return $indexed;
-        } catch (PDOException $e) {
-            error_log("Erro ao buscar respostas de registro: " . $e->getMessage());
-            return [];
+        $answers = $this->answerModel->getStatic((int) $submissionId);
+        $indexed = [];
+        foreach ($answers as $a) {
+            $indexed[$a['field_id']] = $a;
         }
+        return $indexed;
     }
 }

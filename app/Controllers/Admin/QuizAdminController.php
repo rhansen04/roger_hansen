@@ -60,8 +60,9 @@ class QuizAdminController
     public function store($courseId)
     {
         $quizModel = new Quiz();
+        $sectionId = (int)($_POST['section_id'] ?? 0);
         $data = [
-            ':section_id' => $_POST['section_id'] ?? 0,
+            ':section_id' => $sectionId > 0 ? $sectionId : null,
             ':lesson_id' => !empty($_POST['lesson_id']) ? $_POST['lesson_id'] : null,
             ':title' => $_POST['title'] ?? '',
             ':description' => $_POST['description'] ?? '',
@@ -184,6 +185,20 @@ class QuizAdminController
      */
     public function addQuestion($quizId)
     {
+        // BUG-053: whitelist question_type
+        $allowedTypes = ['multiple_choice', 'true_false', 'single_choice'];
+        $questionType = in_array($_POST['question_type'] ?? '', $allowedTypes) ? $_POST['question_type'] : 'multiple_choice';
+
+        // BUG-054: validate correct_answer index
+        $correctIndex = (int)($_POST['correct_answer'] ?? -1);
+        $answers = $_POST['answers'] ?? [];
+        if ($correctIndex < 0 || !isset($answers[$correctIndex])) {
+            // no valid correct answer provided — return error
+            $_SESSION['error_message'] = 'Selecione uma resposta correta válida.';
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+            exit;
+        }
+
         $stmt = $this->db->prepare("
             INSERT INTO quiz_questions (quiz_id, question_text, question_type, sort_order, points)
             VALUES (?, ?, ?, ?, ?)
@@ -191,7 +206,7 @@ class QuizAdminController
         $stmt->execute([
             $quizId,
             $_POST['question_text'] ?? '',
-            $_POST['question_type'] ?? 'multiple_choice',
+            $questionType,
             $_POST['sort_order'] ?? 0,
             $_POST['points'] ?? 1,
         ]);
@@ -199,15 +214,24 @@ class QuizAdminController
         $questionId = $this->db->lastInsertId();
 
         // Adicionar respostas se enviadas
-        if (!empty($_POST['answers']) && is_array($_POST['answers'])) {
-            $correctAnswer = $_POST['correct_answer'] ?? 0;
-            foreach ($_POST['answers'] as $i => $answerText) {
+        if (!empty($answers) && is_array($answers)) {
+            $hasCorrect = false;
+            foreach ($answers as $i => $answerText) {
                 if (empty(trim($answerText))) continue;
+                $isCorrect = ($i == $correctIndex) ? 1 : 0;
+                if ($isCorrect) { $hasCorrect = true; }
                 $stmt = $this->db->prepare("
                     INSERT INTO quiz_answers (question_id, answer_text, is_correct, sort_order)
                     VALUES (?, ?, ?, ?)
                 ");
-                $stmt->execute([$questionId, $answerText, ($i == $correctAnswer) ? 1 : 0, $i]);
+                $stmt->execute([$questionId, $answerText, $isCorrect, $i]);
+            }
+
+            // BUG-055: verify at least one correct answer was set
+            if (!$hasCorrect) {
+                $_SESSION['error_message'] = 'A questão deve ter pelo menos uma resposta correta.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/courses'));
+                exit;
             }
         }
 

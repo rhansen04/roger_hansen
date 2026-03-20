@@ -13,6 +13,8 @@
                 <li>Acessa todos os relatórios e dashboards analíticos</li>
                 <li>Visualiza e gerencia observações, pareceres e portfólios de todas as turmas</li>
                 <li>Gerencia notificações e contatos recebidos</li>
+                <li><strong>Navegação contextual por escola:</strong> pode entrar no "Ambiente" de cada escola específica, ativando um submenu filtrado com Turmas, Alunos, Observações, Pareceres, Planejamentos, Portfólios e Banco de Imagens daquela escola</li>
+                <li>Menu estruturado em 3 módulos globais: Escolas, Usuários e Cursos + Material de Apoio</li>
             </ul>
         </div>
     </div>
@@ -21,13 +23,13 @@
         <div class="step-number">2</div>
         <div class="step-content">
             <h6>Professor — Trabalho Pedagógico</h6>
-            <p>O professor é responsável pelo registro pedagógico das suas turmas:</p>
+            <p>O professor é responsável pelo registro pedagógico das suas turmas. O menu é ordenado por fluxo de trabalho:</p>
             <ul>
-                <li><strong>Turmas:</strong> cria e edita suas próprias turmas, vincula e desvincula alunos</li>
-                <li><strong>Observações:</strong> cria e edita observações pedagógicas das crianças das suas turmas</li>
+                <li><strong>Turmas:</strong> cria e edita suas próprias turmas, vincula e desvincula alunos (lista de alunos com coluna numerada #)</li>
+                <li><strong>Observações:</strong> cria e edita observações pedagógicas; cada pergunta de cada eixo possui seu próprio campo de resposta obrigatório</li>
+                <li><strong>Planejamentos:</strong> cria planejamentos quinzenais; acessa a Rotina Semanal via sub-item no menu; visualiza o status dos dias (amarelo=Pendente, verde=Concluído); preenche o Registro Final da Semana</li>
                 <li><strong>Pareceres:</strong> elabora pareceres descritivos, usa correção por IA e exporta PDF</li>
-                <li><strong>Portfólios:</strong> cria portfólios coletivos das suas turmas com fotos e textos</li>
-                <li><strong>Planejamento:</strong> cria planejamentos pedagógicos usando os templates disponíveis</li>
+                <li><strong>Portfólios:</strong> cria portfólios coletivos; fotos adicionadas exclusivamente a partir do Banco de Imagens interno</li>
                 <li><strong>Banco de Imagens:</strong> faz upload de fotos, adiciona legendas e organiza por turma</li>
                 <li><strong>Cursos:</strong> acessa cursos atribuídos e acompanha seu próprio progresso</li>
                 <li><strong>Limitações:</strong> não pode aprovar documentos, não acessa relatórios gerais nem gerencia outros usuários</li>
@@ -39,13 +41,15 @@
         <div class="step-number">3</div>
         <div class="step-content">
             <h6>Coordenador — Supervisão Pedagógica</h6>
-            <p>O coordenador supervisiona o trabalho dos professores sem criar documentos diretamente:</p>
+            <p>O coordenador tem um menu dedicado com foco em supervisão e acompanhamento:</p>
             <ul>
-                <li><strong>Visualização completa:</strong> vê todas as observações, pareceres e portfólios de todas as turmas e professores</li>
-                <li><strong>Reabrir documentos:</strong> pode reabrir observações e pareceres já finalizados para correção</li>
-                <li><strong>Solicitar revisão:</strong> envia o documento de volta ao professor com anotações específicas sobre o que precisa ser ajustado</li>
+                <li><strong>Turmas:</strong> visualiza todas as turmas das escolas sob supervisão</li>
+                <li><strong>Observações:</strong> vê todas as observações; pode registrar Feedbacks da Coordenação com notificação automática ao professor</li>
+                <li><strong>Pareceres:</strong> revisa pareceres; solicita revisão com notas; registra Feedbacks da Coordenação</li>
+                <li><strong>Portfólios:</strong> acompanha portfólios; registra Feedbacks da Coordenação</li>
+                <li><strong>Gestão de Professores:</strong> visão geral dos professores e suas turmas</li>
+                <li><strong>Acompanhamento de Cursos:</strong> relatório de progresso nos cursos de formação</li>
                 <li><strong>Banco de Imagens:</strong> acesso somente para visualização, não pode fazer upload nem editar</li>
-                <li><strong>Limitações:</strong> não cria observações, pareceres ou portfólios. Seu papel é revisar e orientar.</li>
             </ul>
         </div>
     </div>

@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Models\PlanningTemplate;
+use App\Core\Security\Csrf;
 
 class PlanningTemplateController
 {
@@ -26,6 +27,8 @@ class PlanningTemplateController
 
     public function store()
     {
+        Csrf::verify();
+
         if (empty($_POST['title'])) {
             $_SESSION['error_message'] = 'Informe o título do template.';
             header('Location: /admin/planning-templates/create');
@@ -33,7 +36,12 @@ class PlanningTemplateController
         }
 
         $model = new PlanningTemplate();
-        $id = $model->create($_POST);
+        $data = [
+            'title'       => trim($_POST['title'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'is_active'   => (int)($_POST['is_active'] ?? 1),
+        ];
+        $id = $model->create($data);
 
         if ($id) {
             $_SESSION['success_message'] = 'Template criado! Agora adicione as seções e campos.';
@@ -65,6 +73,8 @@ class PlanningTemplateController
 
     public function update($id)
     {
+        Csrf::verify();
+
         $model = new PlanningTemplate();
         if (!$model->find($id)) {
             $_SESSION['error_message'] = 'Template não encontrado.';
@@ -78,7 +88,12 @@ class PlanningTemplateController
             exit;
         }
 
-        if ($model->update($id, $_POST)) {
+        $data = [
+            'title'       => trim($_POST['title'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'is_active'   => (int)($_POST['is_active'] ?? 1),
+        ];
+        if ($model->update($id, $data)) {
             $_SESSION['success_message'] = 'Template atualizado com sucesso!';
         } else {
             $_SESSION['error_message'] = 'Erro ao atualizar template.';
@@ -103,6 +118,8 @@ class PlanningTemplateController
 
     public function addSection($templateId)
     {
+        Csrf::verify();
+
         $model = new PlanningTemplate();
         if (!$model->find($templateId)) {
             $_SESSION['error_message'] = 'Template não encontrado.';
@@ -116,8 +133,13 @@ class PlanningTemplateController
             exit;
         }
 
-        $_POST['template_id'] = $templateId;
-        if ($model->createSection($_POST)) {
+        $data = [
+            'template_id' => $templateId,
+            'title'       => trim($_POST['title'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'sort_order'  => (int)($_POST['sort_order'] ?? 0),
+        ];
+        if ($model->createSection($data)) {
             $_SESSION['success_message'] = 'Seção adicionada!';
         } else {
             $_SESSION['error_message'] = 'Erro ao adicionar seção.';
@@ -128,6 +150,8 @@ class PlanningTemplateController
 
     public function updateSection($sectionId)
     {
+        Csrf::verify();
+
         $model = new PlanningTemplate();
         $section = $model->findSection($sectionId);
         if (!$section) {
@@ -136,7 +160,12 @@ class PlanningTemplateController
             exit;
         }
 
-        $model->updateSection($sectionId, $_POST);
+        $data = [
+            'title'       => trim($_POST['title'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'sort_order'  => (int)($_POST['sort_order'] ?? 0),
+        ];
+        $model->updateSection($sectionId, $data);
         $_SESSION['success_message'] = 'Seção atualizada!';
         header("Location: /admin/planning-templates/{$section['template_id']}/edit");
         exit;
@@ -162,6 +191,8 @@ class PlanningTemplateController
 
     public function addField($sectionId)
     {
+        Csrf::verify();
+
         $model = new PlanningTemplate();
         $section = $model->findSection($sectionId);
         if (!$section) {
@@ -176,15 +207,25 @@ class PlanningTemplateController
             exit;
         }
 
-        $_POST['section_id'] = $sectionId;
+        $optionsText = trim($_POST['options_text'] ?? '');
+        $fieldType   = $_POST['field_type'] ?? '';
+
+        $data = [
+            'section_id'   => $sectionId,
+            'label'        => trim($_POST['label'] ?? ''),
+            'field_type'   => $fieldType,
+            'options_text' => $optionsText,
+            'sort_order'   => (int)($_POST['sort_order'] ?? 0),
+            'is_required'  => (int)($_POST['is_required'] ?? 0),
+        ];
 
         // Process options for checklist/select/radio fields
-        if (!empty($_POST['options_text']) && in_array($_POST['field_type'] ?? '', ['checklist_group', 'select', 'radio', 'checkbox'])) {
-            $options = array_filter(array_map('trim', explode("\n", $_POST['options_text'])));
-            $_POST['options_json'] = json_encode(array_values($options), JSON_UNESCAPED_UNICODE);
+        if (!empty($optionsText) && in_array($fieldType, ['checklist_group', 'select', 'radio', 'checkbox'])) {
+            $options = array_filter(array_map('trim', explode("\n", $optionsText)));
+            $data['options_json'] = json_encode(array_values($options), JSON_UNESCAPED_UNICODE);
         }
 
-        if ($model->createField($_POST)) {
+        if ($model->createField($data)) {
             $_SESSION['success_message'] = 'Campo adicionado!';
         } else {
             $_SESSION['error_message'] = 'Erro ao adicionar campo.';

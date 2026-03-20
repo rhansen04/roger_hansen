@@ -3,9 +3,11 @@
 namespace App\Controllers\Admin;
 
 use App\Models\User;
+use App\Core\Security\Csrf;
 
 class UserController
 {
+    private const ALLOWED_ROLES = ['admin', 'professor', 'coordenador', 'student', 'parent'];
     /**
      * Listar todos os usuários
      */
@@ -30,6 +32,7 @@ class UserController
      */
     public function store()
     {
+        Csrf::verify();
         // Validação básica
         $errors = [];
 
@@ -49,9 +52,10 @@ class UserController
             $errors[] = 'A senha deve ter no mínimo 6 caracteres.';
         }
 
-        if (empty($_POST['role'])) {
+        $role = trim($_POST['role'] ?? '');
+        if (empty($role)) {
             $errors[] = 'O perfil é obrigatório.';
-        } elseif (!in_array($_POST['role'], ['admin', 'professor', 'coordenador', 'student', 'parent'])) {
+        } elseif (!in_array($role, self::ALLOWED_ROLES)) {
             $errors[] = 'Perfil inválido.';
         }
 
@@ -67,7 +71,12 @@ class UserController
 
         if (!empty($errors)) {
             $_SESSION['error_message'] = implode('<br>', $errors);
-            $_SESSION['old_input'] = $_POST;
+            $_SESSION['old_input'] = [
+                'name'  => trim($_POST['name'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+                'role'  => $role,
+                // never include password in old_input
+            ];
             header('Location: /admin/users/create');
             exit;
         }
@@ -76,7 +85,7 @@ class UserController
             'name' => trim($_POST['name']),
             'email' => trim($_POST['email']),
             'password' => $_POST['password'],
-            'role' => $_POST['role']
+            'role' => $role
         ];
 
         $userModel = new User();
@@ -113,6 +122,7 @@ class UserController
      */
     public function update($id)
     {
+        Csrf::verify();
         $userModel = new User();
         $user = $userModel->find($id);
 
@@ -135,9 +145,10 @@ class UserController
             $errors[] = 'Email inválido.';
         }
 
-        if (empty($_POST['role'])) {
+        $role = trim($_POST['role'] ?? '');
+        if (empty($role)) {
             $errors[] = 'O perfil é obrigatório.';
-        } elseif (!in_array($_POST['role'], ['admin', 'professor', 'coordenador', 'student', 'parent'])) {
+        } elseif (!in_array($role, self::ALLOWED_ROLES)) {
             $errors[] = 'Perfil inválido.';
         }
 
@@ -150,14 +161,19 @@ class UserController
         if (empty($errors) && $_POST['email'] !== $user['email']) {
             $existingUser = $userModel->findByEmail($_POST['email']);
 
-            if ($existingUser && $existingUser['id'] != $id) {
+            if ($existingUser && (int)$existingUser['id'] !== (int)$id) {
                 $errors[] = 'Este email já está cadastrado no sistema.';
             }
         }
 
         if (!empty($errors)) {
             $_SESSION['error_message'] = implode('<br>', $errors);
-            $_SESSION['old_input'] = $_POST;
+            $_SESSION['old_input'] = [
+                'name'  => trim($_POST['name'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+                'role'  => $role,
+                // never include password in old_input
+            ];
             header('Location: /admin/users/' . $id . '/edit');
             exit;
         }
@@ -165,7 +181,7 @@ class UserController
         $data = [
             'name' => trim($_POST['name']),
             'email' => trim($_POST['email']),
-            'role' => $_POST['role']
+            'role' => $role
         ];
 
         // Incluir senha apenas se foi fornecida
@@ -189,6 +205,7 @@ class UserController
      */
     public function delete($id)
     {
+        Csrf::verify();
         $userModel = new User();
         $user = $userModel->find($id);
 

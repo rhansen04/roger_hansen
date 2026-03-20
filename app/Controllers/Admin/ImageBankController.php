@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Models\ImageFolder;
 use App\Models\ImageBank;
 use App\Models\Classroom;
+use App\Core\Security\Csrf;
 
 class ImageBankController
 {
@@ -72,6 +73,25 @@ class ImageBankController
             exit;
         }
 
+        $userRole = $_SESSION['user_role'] ?? '';
+        $schoolId = $_SESSION['school_context_id'] ?? $_SESSION['school_id'] ?? null;
+
+        // Verify folder belongs to a classroom in the user's school (for non-admins)
+        if (!in_array($userRole, ['admin'])) {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare(
+                "SELECT f.id FROM image_folders f
+                 JOIN classrooms c ON f.classroom_id = c.id
+                 WHERE f.id = ? AND c.school_id = ? LIMIT 1"
+            );
+            $stmt->execute([$folderId, $schoolId]);
+            if (!$stmt->fetch()) {
+                $_SESSION['error_message'] = 'Pasta não encontrada ou sem permissão.';
+                header('Location: /admin/image-bank');
+                exit;
+            }
+        }
+
         $imageModel = new ImageBank();
         $images = $imageModel->findByFolder($folderId);
 
@@ -95,6 +115,7 @@ class ImageBankController
      */
     public function upload($folderId)
     {
+        Csrf::verify();
         $role = $_SESSION['user_role'] ?? 'admin';
         if ($role === 'coordenador') {
             $_SESSION['error_message'] = 'Voce nao tem permissao para fazer upload.';
@@ -117,7 +138,6 @@ class ImageBankController
             exit;
         }
 
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         $uploadDir = __DIR__ . '/../../../public/uploads/image-bank/' . $folder['classroom_id'] . '/' . $folder['folder_type'] . '/';
 
         if (!is_dir($uploadDir)) {
@@ -126,25 +146,32 @@ class ImageBankController
 
         $imageModel = new ImageBank();
         $uploaded = 0;
-        $errors = 0;
+        $errors = [];
 
         $fileCount = count($_FILES['images']['name']);
         for ($i = 0; $i < $fileCount; $i++) {
             if ($_FILES['images']['error'][$i] !== UPLOAD_ERR_OK) {
-                $errors++;
+                $errors[] = "Erro no upload do arquivo '{$_FILES['images']['name'][$i]}'.";
                 continue;
             }
 
-            $mimeType = $_FILES['images']['type'][$i];
-            if (!in_array($mimeType, $allowedTypes)) {
-                $errors++;
+            if ($_FILES['images']['size'][$i] > 10 * 1024 * 1024) {
+                $errors[] = "Imagem '{$_FILES['images']['name'][$i]}' excede 10MB.";
+                continue;
+            }
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($_FILES['images']['tmp_name'][$i]);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($mimeType, $allowedMimes)) {
+                $errors[] = "Arquivo '{$_FILES['images']['name'][$i]}' não é uma imagem válida.";
                 continue;
             }
 
             $originalName = $_FILES['images']['name'][$i];
             $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg', 'jpeg', 'png'])) {
-                $errors++;
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                $errors[] = "Extensão não permitida para '{$originalName}'.";
                 continue;
             }
 
@@ -164,12 +191,13 @@ class ImageBankController
                 ]);
                 $uploaded++;
             } else {
-                $errors++;
+                $errors[] = "Erro ao processar '{$originalName}'.";
             }
         }
 
+        $errorCount = count($errors);
         if ($uploaded > 0) {
-            $_SESSION['success_message'] = "{$uploaded} imagem(ns) enviada(s) com sucesso!" . ($errors > 0 ? " ({$errors} com erro)" : '');
+            $_SESSION['success_message'] = "{$uploaded} imagem(ns) enviada(s) com sucesso!" . ($errorCount > 0 ? " ({$errorCount} com erro)" : '');
         } else {
             $_SESSION['error_message'] = 'Nenhuma imagem foi enviada. Verifique os formatos (JPG/PNG).';
         }
@@ -183,6 +211,7 @@ class ImageBankController
      */
     public function deleteImage($id)
     {
+        Csrf::verify();
         $role = $_SESSION['user_role'] ?? 'admin';
         if ($role === 'coordenador') {
             $_SESSION['error_message'] = 'Voce nao tem permissao para deletar imagens.';
@@ -216,6 +245,7 @@ class ImageBankController
      */
     public function moveImage($id)
     {
+        Csrf::verify();
         $role = $_SESSION['user_role'] ?? 'admin';
         if ($role === 'coordenador') {
             header('Content-Type: application/json');
@@ -239,6 +269,22 @@ class ImageBankController
             exit;
         }
 
+        // BUG-043: verify both image and target folder belong to the same classroom
+        $db = \App\Core\Database\Connection::getInstance();
+        $stmt = $db->prepare("SELECT f.classroom_id FROM image_bank ib JOIN image_folders f ON ib.folder_id = f.id WHERE ib.id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        $currentFolder = $stmt->fetch();
+
+        $stmt2 = $db->prepare("SELECT classroom_id FROM image_folders WHERE id = ? LIMIT 1");
+        $stmt2->execute([$newFolderId]);
+        $targetFolder = $stmt2->fetch();
+
+        if (!$currentFolder || !$targetFolder || (int)$currentFolder['classroom_id'] !== (int)$targetFolder['classroom_id']) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Pasta de destino inválida.']);
+            exit;
+        }
+
         if ($imageModel->moveToFolder($id, $newFolderId)) {
             $_SESSION['success_message'] = 'Imagem movida com sucesso!';
         } else {
@@ -254,6 +300,7 @@ class ImageBankController
      */
     public function updateCaption($id)
     {
+        Csrf::verify();
         header('Content-Type: application/json');
 
         $role = $_SESSION['user_role'] ?? 'admin';
@@ -263,7 +310,7 @@ class ImageBankController
         }
 
         $imageModel = new ImageBank();
-        $caption = $_POST['caption'] ?? '';
+        $caption = htmlspecialchars(trim($_POST['caption'] ?? ''), ENT_QUOTES, 'UTF-8');
 
         if ($imageModel->updateCaption($id, $caption)) {
             echo json_encode(['success' => true]);
@@ -321,6 +368,18 @@ class ImageBankController
             error_log("Erro ao redimensionar imagem: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * API: retornar imagens de uma turma (JSON)
+     */
+    public function apiByClassroom($classroomId)
+    {
+        header('Content-Type: application/json');
+        $imageBankModel = new ImageBank();
+        $images = $imageBankModel->getByClassroom($classroomId);
+        echo json_encode($images);
+        exit;
     }
 
     protected function render($view, $data = [])

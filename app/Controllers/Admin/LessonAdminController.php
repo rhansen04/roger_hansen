@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Models\Lesson;
 use App\Models\Section;
 use App\Models\Course;
+use App\Core\Security\Csrf;
 
 class LessonAdminController
 {
@@ -31,11 +32,20 @@ class LessonAdminController
 
     public function store($sectionId)
     {
+        Csrf::verify();
         $sectionModel = new Section();
         $section = $sectionModel->find($sectionId);
 
         if (!$section) {
             $_SESSION['error_message'] = 'Seção não encontrada.';
+            header('Location: /admin/courses');
+            exit;
+        }
+
+        $courseModel = new Course();
+        $course = $courseModel->find($section['course_id']);
+        if (!$course) {
+            $_SESSION['error_message'] = 'Seção inválida para este curso.';
             header('Location: /admin/courses');
             exit;
         }
@@ -55,7 +65,14 @@ class LessonAdminController
 
         // Upload material file
         if (isset($_FILES['material_file']) && $_FILES['material_file']['error'] === 0) {
-            $ext = pathinfo($_FILES['material_file']['name'], PATHINFO_EXTENSION);
+            // BUG-048: extension whitelist
+            $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'mp4', 'mp3'];
+            $ext = strtolower(pathinfo($_FILES['material_file']['name'], PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedExts)) {
+                $_SESSION['error_message'] = 'Tipo de arquivo não permitido para material da aula.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                exit;
+            }
             $filename = 'material_' . time() . '.' . $ext;
             $uploadPath = __DIR__ . '/../../../public/uploads/materials/' . $filename;
 
@@ -98,6 +115,7 @@ class LessonAdminController
 
     public function update($id)
     {
+        Csrf::verify();
         $lessonModel = new Lesson();
         $lesson = $lessonModel->find($id);
 
@@ -122,7 +140,14 @@ class LessonAdminController
 
         // Upload new material file
         if (isset($_FILES['material_file']) && $_FILES['material_file']['error'] === 0) {
-            $ext = pathinfo($_FILES['material_file']['name'], PATHINFO_EXTENSION);
+            // BUG-048: extension whitelist
+            $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'mp4', 'mp3'];
+            $ext = strtolower(pathinfo($_FILES['material_file']['name'], PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedExts)) {
+                $_SESSION['error_message'] = 'Tipo de arquivo não permitido para material da aula.';
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin'));
+                exit;
+            }
             $filename = 'material_' . time() . '.' . $ext;
             $uploadPath = __DIR__ . '/../../../public/uploads/materials/' . $filename;
 
@@ -161,6 +186,11 @@ class LessonAdminController
         }
 
         $direction = $_POST['direction'] ?? '';
+        if (!in_array($direction, ['up', 'down'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Direção inválida.']);
+            exit;
+        }
         $lessons = $lessonModel->getBySection($lesson['section_id']);
 
         $currentIndex = null;
@@ -179,8 +209,18 @@ class LessonAdminController
         $currentOrder = $lessons[$currentIndex]['sort_order'];
         $targetOrder = $lessons[$targetIndex]['sort_order'];
 
-        $lessonModel->updateSortOrder($lessons[$currentIndex]['id'], $targetOrder);
-        $lessonModel->updateSortOrder($lessons[$targetIndex]['id'], $currentOrder);
+        $db = \App\Core\Database\Connection::getInstance();
+        $db->beginTransaction();
+        try {
+            $lessonModel->updateSortOrder($lessons[$currentIndex]['id'], $targetOrder);
+            $lessonModel->updateSortOrder($lessons[$targetIndex]['id'], $currentOrder);
+            $db->commit();
+        } catch (\Exception $e) {
+            $db->rollBack();
+            http_response_code(500);
+            echo json_encode(['error' => 'Erro ao reordenar.']);
+            exit;
+        }
 
         echo json_encode(['success' => true]);
     }

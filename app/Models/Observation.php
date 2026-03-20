@@ -96,13 +96,14 @@ class Observation
     }
 
     /**
-     * Criar nova observacao (compatibilidade)
+     * @deprecated Use createWithAxes() instead.
+     * Legacy fields (category, description, observation_date) kept for backward compatibility only.
      */
     public function create($data)
     {
         try {
-            $sql = "INSERT INTO observations (student_id, user_id, category, title, description, observation_date, created_at, updated_at)
-                    VALUES (:student_id, :user_id, :category, :title, :description, :observation_date, :created_at, :updated_at)";
+            $sql = "INSERT INTO observations (student_id, user_id, category, title, description, observation_date, observation_general, axis_movement, axis_manual, axis_music, axis_stories, axis_pca, created_at, updated_at)
+                    VALUES (:student_id, :user_id, :category, :title, :description, :observation_date, :observation_general, :axis_movement, :axis_manual, :axis_music, :axis_stories, :axis_pca, :created_at, :updated_at)";
 
             $stmt = $this->db->prepare($sql);
             $now = date('Y-m-d H:i:s');
@@ -114,6 +115,12 @@ class Observation
                 ':title' => $data['title'],
                 ':description' => $data['description'] ?? '',
                 ':observation_date' => $data['observation_date'] ?? date('Y-m-d'),
+                ':observation_general' => $data['observation_general'] ?? '',
+                ':axis_movement' => $data['axis_movement'] ?? '',
+                ':axis_manual' => $data['axis_manual'] ?? '',
+                ':axis_music' => $data['axis_music'] ?? '',
+                ':axis_stories' => $data['axis_stories'] ?? '',
+                ':axis_pca' => $data['axis_pca'] ?? '',
                 ':created_at' => $now,
                 ':updated_at' => $now
             ]);

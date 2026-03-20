@@ -210,56 +210,86 @@
             $isAdmin = ($role === 'admin');
             $isProfessor = ($role === 'professor');
             $isCoordenador = ($role === 'coordenador');
+            $schoolCtx = $_SESSION['admin_school_context'] ?? null;
+            $hasSchoolCtx = $isAdmin && !$isSimulating && !empty($schoolCtx);
         ?>
         <a href="/admin/dashboard" class="nav-link-admin <?= $isActive('/admin/dashboard') ?>"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
 
-        <?php if ($isAdmin): ?>
-        <div class="sidebar-section">Cadastros</div>
-        <a href="/admin/students" class="nav-link-admin <?= $isActive('/admin/students') ?>"><i class="fas fa-user-graduate"></i> Alunos</a>
+        <?php if ($isAdmin && !$isSimulating): ?>
+        <!-- ── MENU GLOBAL DO ADMIN ── -->
+        <div class="sidebar-section">Global</div>
         <a href="/admin/schools" class="nav-link-admin <?= $isActive('/admin/schools') ?>"><i class="fas fa-school"></i> Escolas</a>
         <a href="/admin/users" class="nav-link-admin <?= $isActive('/admin/users') ?>"><i class="fas fa-users"></i> Usuários</a>
-        <a href="/admin/parents" class="nav-link-admin <?= $isActive('/admin/parents') ?>"><i class="fas fa-user-friends"></i> Responsáveis</a>
-        <?php endif; ?>
-
-        <div class="sidebar-section">Ensino</div>
-        <?php if ($isAdmin || $isProfessor): ?>
         <?php $coursesActive = $isActive('/admin/courses') || $isActive('/admin/sections') || $isActive('/admin/lessons'); ?>
         <a href="/admin/courses" class="nav-link-admin <?= $coursesActive ? 'active' : '' ?>"><i class="fas fa-book"></i> Cursos</a>
-        <?php endif; ?>
-        <?php if ($isAdmin): ?>
         <a href="/admin/enrollments" class="nav-link-admin <?= $isActive('/admin/enrollments') ?>"><i class="fas fa-user-check"></i> Matrículas</a>
-        <?php endif; ?>
-        <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
-        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
-        <a href="/admin/classrooms" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard"></i> Turmas</a>
-        <?php if ($isAdmin): ?>
-        <a href="/admin/planning-templates" class="nav-link-admin <?= $isActive('/admin/planning-templates') ?>"><i class="fas fa-file-alt"></i> Templates Planej.</a>
-        <?php endif; ?>
-        <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
-        <a href="/admin/planning" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt"></i> Planejamentos</a>
-        <a href="/admin/image-bank" class="nav-link-admin <?= $isActive('/admin/image-bank') ?>"><i class="fas fa-images"></i> Banco de Imagens</a>
-        <a href="/admin/portfolios" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfolios</a>
         <a href="/admin/support-materials" class="nav-link-admin <?= $isActive('/admin/support-materials') ?>"><i class="fas fa-folder-open"></i> Material de Apoio</a>
 
-        <div class="sidebar-section">Comunicacao</div>
-        <a href="/admin/notifications" class="nav-link-admin <?= $isActive('/admin/notifications') ?>"><i class="fas fa-bell"></i> Notificacoes</a>
-        <?php if ($isAdmin): ?>
+        <?php if ($hasSchoolCtx): ?>
+        <!-- ── CONTEXTO DE ESCOLA ── -->
+        <div class="sidebar-section" style="color:rgba(255,200,80,.8);">
+            <i class="fas fa-school me-1" style="font-size:.65rem;"></i>
+            <?= htmlspecialchars(mb_strtoupper(mb_substr($schoolCtx['name'], 0, 22))) ?>
+        </div>
+        <?php $sid = $schoolCtx['id']; ?>
+        <a href="/admin/classrooms?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard"></i> Turmas</a>
+        <a href="/admin/students?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/students') ?>"><i class="fas fa-user-graduate"></i> Alunos</a>
+        <a href="/admin/observations?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
+        <a href="/admin/descriptive-reports?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
+        <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
+        <a href="/admin/planning?school_id=<?= $sid ?>" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt"></i> Planejamentos</a>
+        <a href="/admin/portfolios?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfólios</a>
+        <a href="/admin/image-bank?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/image-bank') ?>"><i class="fas fa-images"></i> Banco de Imagens</a>
+        <a href="/admin/planning-templates" class="nav-link-admin <?= $isActive('/admin/planning-templates') ?>"><i class="fas fa-file-alt"></i> Templates Planej.</a>
+        <form method="POST" action="/admin/schools/exit-context" class="mx-2 mt-2 mb-1">
+            <button type="submit" class="btn btn-sm w-100 fw-bold"
+                style="background:rgba(255,200,80,.15);color:rgba(255,200,80,.9);border:1px solid rgba(255,200,80,.3);">
+                <i class="fas fa-sign-out-alt me-1"></i> Sair do Ambiente
+            </button>
+        </form>
+        <?php endif; ?>
+
+        <?php elseif ($isProfessor || $isSimulating): ?>
+        <!-- ── MENU DO PROFESSOR ── -->
+        <div class="sidebar-section">Ensino</div>
+        <a href="/admin/classrooms" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard"></i> Turmas</a>
+        <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
+        <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
+        <a href="/admin/planning" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt"></i> Planejamentos</a>
+        <a href="/admin/planning" class="nav-link-admin sub-item <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-clipboard-check"></i> Rotina Semanal</a>
+        <a href="/admin/support-materials" class="nav-link-admin <?= $isActive('/admin/support-materials') ?>"><i class="fas fa-folder-open"></i> Material de Apoio</a>
+        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
+        <a href="/admin/portfolios" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfólios</a>
+        <a href="/admin/image-bank" class="nav-link-admin <?= $isActive('/admin/image-bank') ?>"><i class="fas fa-images"></i> Banco de Imagens</a>
+
+        <?php elseif ($isCoordenador): ?>
+        <!-- ── MENU DO COORDENADOR ── -->
+        <div class="sidebar-section">Pedagógico</div>
+        <a href="/admin/classrooms" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard"></i> Turmas</a>
+        <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
+        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
+        <a href="/admin/portfolios" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfólios</a>
+        <div class="sidebar-section">Gestão</div>
+        <a href="/admin/users" class="nav-link-admin <?= $isActive('/admin/users') ?>"><i class="fas fa-user-plus"></i> Professores</a>
+        <?php endif; ?>
+
+        <div class="sidebar-section">Comunicação</div>
+        <a href="/admin/notifications" class="nav-link-admin <?= $isActive('/admin/notifications') ?>"><i class="fas fa-bell"></i> Notificações</a>
+        <?php if ($isAdmin && !$isSimulating): ?>
         <a href="/admin/contacts" class="nav-link-admin <?= $isActive('/admin/contacts') ?>"><i class="fas fa-envelope"></i> Contatos</a>
         <a href="/admin/messages" class="nav-link-admin <?= $isActive('/admin/messages') ?>"><i class="fas fa-comments"></i> Perguntas</a>
         <?php endif; ?>
 
         <?php if ($isAdmin || $isCoordenador): ?>
         <div class="sidebar-section">Análises</div>
-        <?php if ($isAdmin): ?>
+        <?php if ($isAdmin && !$isSimulating): ?>
         <a href="/admin/video-dashboard" class="nav-link-admin <?= $isActive('/admin/video-dashboard') ?>"><i class="fas fa-play-circle"></i> Vídeos / Tracking</a>
         <?php endif; ?>
         <a href="/admin/reports" class="nav-link-admin <?= $isActive('/admin/reports') ?>"><i class="fas fa-chart-bar"></i> Relatórios</a>
-        <?php if ($isAdmin): ?>
+        <?php if ($isAdmin && !$isSimulating): ?>
         <a href="/admin/reports/low-scores" class="nav-link-admin sub-item <?= $isActive('/admin/reports/low-scores') ?>"><i class="fas fa-exclamation-triangle" style="color:rgba(255,180,180,.8)"></i> Notas Baixas</a>
         <?php endif; ?>
-        <?php if ($isAdmin || $isCoordenador): ?>
-        <a href="/admin/reports/courses" class="nav-link-admin sub-item <?= $isActive('/admin/reports/courses') ?>"><i class="fas fa-graduation-cap"></i> Cursos</a>
-        <?php endif; ?>
+        <a href="/admin/reports/courses" class="nav-link-admin <?= $isCoordenador ? '' : 'sub-item' ?> <?= $isActive('/admin/reports/courses') ?>"><i class="fas fa-graduation-cap"></i> Acompanhamento de Cursos</a>
         <?php endif; ?>
 
         <div class="sidebar-section">Ajuda</div>

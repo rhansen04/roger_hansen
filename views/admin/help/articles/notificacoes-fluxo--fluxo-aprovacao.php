@@ -179,9 +179,54 @@
     </table>
 </div>
 
+<h5 class="mt-4 mb-3"><i class="fas fa-comment-alt me-2 text-success"></i>Feedbacks da Coordenação</h5>
+
+<p>Além do fluxo formal de aprovação, o coordenador pode usar os <strong>Feedbacks da Coordenação</strong> como canal de comunicação direta com o professor, sem precisar reabrir ou bloquear o documento:</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Recurso</th>
+                <th>Feedbacks da Coordenação</th>
+                <th>Solicitação de Revisão</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Disponível em</strong></td>
+                <td>Observações, Pareceres, Portfólios</td>
+                <td>Pareceres, Portfólios, Planejamentos</td>
+            </tr>
+            <tr>
+                <td><strong>Bloqueia edição do professor?</strong></td>
+                <td class="text-center text-danger"><i class="fas fa-times"></i> Não</td>
+                <td class="text-center text-success"><i class="fas fa-check"></i> Sim (requer refinalização)</td>
+            </tr>
+            <tr>
+                <td><strong>Notifica o professor?</strong></td>
+                <td class="text-center text-success"><i class="fas fa-check"></i> Sim, automaticamente</td>
+                <td class="text-center text-success"><i class="fas fa-check"></i> Sim, automaticamente</td>
+            </tr>
+            <tr>
+                <td><strong>Histórico</strong></td>
+                <td>Sim, cronológico com data e autor</td>
+                <td>Sim, notas de revisão</td>
+            </tr>
+            <tr>
+                <td><strong>Ideal para</strong></td>
+                <td>Orientações complementares, elogios, sugestões leves</td>
+                <td>Correções obrigatórias antes da aprovação</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<p>Os <strong>Feedbacks da Coordenação</strong> estão disponíveis na seção inferior da página de visualização de cada documento. O professor pode ler os feedbacks diretamente no documento sem precisar acessar as notificações.</p>
+
 <div class="help-tip help-tip-success">
     <i class="fas fa-check-circle me-2"></i>
-    <strong>Dica para coordenadores:</strong> Ao solicitar revisão, seja específico nas notas — indique exatamente quais partes precisam de ajuste e o que espera como melhoria. Isso reduz o número de rodadas de revisão e agiliza a aprovação.
+    <strong>Dica para coordenadores:</strong> Ao solicitar revisão, seja específico nas notas — indique exatamente quais partes precisam de ajuste e o que espera como melhoria. Para orientações gerais e positivas, use os Feedbacks da Coordenação para não interromper o fluxo de aprovação.
 </div>
 
 <div class="help-tip">

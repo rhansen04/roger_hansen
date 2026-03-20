@@ -86,11 +86,11 @@ $statusBadge = [
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4 py-3">ID</th>
-                        <th class="py-3">Template</th>
                         <th class="py-3">Professor</th>
                         <th class="py-3">Turma</th>
                         <th class="py-3">Quinzena</th>
                         <th class="py-3">Status</th>
+                        <th class="py-3">Registros do Período</th>
                         <th class="py-3">Criado em</th>
                         <th class="py-3 text-center">Ações</th>
                     </tr>
@@ -99,6 +99,7 @@ $statusBadge = [
                     <?php if (empty($submissions)): ?>
                         <tr>
                             <td colspan="8" class="text-center py-5 text-muted">
+
                                 <i class="fas fa-clipboard fa-3x mb-3"></i><br>
                                 Nenhum planejamento encontrado.
                             </td>
@@ -107,7 +108,6 @@ $statusBadge = [
                         <?php foreach ($submissions as $sub): ?>
                         <tr>
                             <td class="ps-4"><?= $sub['id'] ?></td>
-                            <td><?= htmlspecialchars($sub['template_title'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($sub['teacher_name'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($sub['classroom_name'] ?? '-') ?></td>
                             <td>
@@ -116,6 +116,17 @@ $statusBadge = [
                             <td>
                                 <?php $badge = $statusBadge[$sub['status']] ?? ['bg-secondary', $sub['status']]; ?>
                                 <span class="badge <?= $badge[0] ?>"><?= $badge[1] ?></span>
+                            </td>
+                            <td>
+                                <?php if (!empty($sub['period_record_id'])): ?>
+                                    <a href="/admin/planning/<?= $sub['id'] ?>/record" class="badge bg-success text-decoration-none">
+                                        <i class="fas fa-check-circle me-1"></i>Concluído
+                                    </a>
+                                <?php else: ?>
+                                    <a href="/admin/planning/<?= $sub['id'] ?>/record/create" class="badge bg-warning text-dark text-decoration-none">
+                                        <i class="fas fa-clock me-1"></i>Pendente
+                                    </a>
+                                <?php endif; ?>
                             </td>
                             <td class="small"><?= date('d/m/Y', strtotime($sub['created_at'])) ?></td>
                             <td class="text-center">

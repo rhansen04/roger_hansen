@@ -40,8 +40,8 @@
     <div class="article-step">
         <div class="step-number">2</div>
         <div class="step-content">
-            <h6>Status dos cards de dia</h6>
-            <p>Cada card de dia exibe um ícone e cor que indica o estado do preenchimento:</p>
+            <h6>Status dos cards de dia — Compactos e Coloridos</h6>
+            <p>Os cards de dia são exibidos em formato compacto com cores que indicam o estado do preenchimento:</p>
         </div>
     </div>
 </div>
@@ -51,29 +51,23 @@
         <thead class="table-dark">
             <tr>
                 <th class="text-center">Status</th>
-                <th class="text-center">Ícone</th>
+                <th class="text-center">Cor do card</th>
                 <th>Descrição</th>
                 <th>Quando aparece</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td class="text-center"><strong>Vazio</strong></td>
-                <td class="text-center text-muted"><i class="fas fa-circle"></i> Círculo cinza</td>
-                <td>O dia ainda não foi preenchido</td>
-                <td>Nenhum dado salvo para este dia</td>
+                <td class="text-center"><strong>Pendente</strong></td>
+                <td class="text-center" style="background:#fff3cd; color:#856404"><strong>Amarelo</strong></td>
+                <td>O dia ainda não foi preenchido ou está em rascunho</td>
+                <td>Nenhum dado finalizado para este dia</td>
             </tr>
             <tr>
-                <td class="text-center"><strong>Rascunho</strong></td>
-                <td class="text-center text-warning"><i class="fas fa-edit"></i> Ícone amarelo</td>
-                <td>O dia foi parcialmente preenchido e salvo</td>
-                <td>Dados salvos, mas o planejamento ainda está em Rascunho</td>
-            </tr>
-            <tr>
-                <td class="text-center"><strong>Preenchido</strong></td>
-                <td class="text-center text-success"><i class="fas fa-check-circle"></i> Check verde</td>
-                <td>O dia foi preenchido por completo</td>
-                <td>Todos os campos obrigatórios do dia foram salvos</td>
+                <td class="text-center"><strong>Concluído</strong></td>
+                <td class="text-center" style="background:#d1e7dd; color:#0f5132"><strong>Verde</strong></td>
+                <td>O dia foi preenchido e salvo com sucesso</td>
+                <td>Dados do dia salvos e concluídos</td>
             </tr>
         </tbody>
     </table>
@@ -131,7 +125,7 @@
         <i class="fas fa-calendar-week fa-3x" style="color:#6f42c1"></i>
         <p class="text-muted mt-2">Grade quinzenal com cards de dias organizados por semana</p>
     </div>
-    <figcaption>Exemplo da visualização quinzenal mostrando 10 dias úteis com diferentes status (Vazio, Rascunho, Preenchido) e o badge HOJE no dia atual</figcaption>
+    <figcaption>Exemplo da visualização quinzenal mostrando 10 dias úteis com cards compactos coloridos — amarelo (Pendente) e verde (Concluído) — e o badge HOJE no dia atual</figcaption>
 </figure>
 
 <h6 class="fw-bold mt-4 mb-3">Resumo visual dos estados da grade</h6>

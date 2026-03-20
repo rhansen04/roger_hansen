@@ -6,7 +6,9 @@ use App\Models\DescriptiveReport;
 use App\Models\Student;
 use App\Models\Classroom;
 use App\Models\Observation;
+use App\Models\CoordinatorComment;
 use App\Services\GeminiService;
+use App\Core\Security\Csrf;
 use Exception;
 
 class DescriptiveReportController
@@ -91,6 +93,8 @@ Equipe Pedagogica';
      */
     public function store()
     {
+        Csrf::verify();
+
         if (empty($_POST['student_id']) || empty($_POST['semester']) || empty($_POST['year'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatorios.';
             header('Location: /admin/descriptive-reports/create');
@@ -110,28 +114,7 @@ Equipe Pedagogica';
             $observation = $obsModel->find($observationId);
 
             if ($observation) {
-                $parts = [];
-
-                if (!empty($observation['observation_general'])) {
-                    $parts[] = $observation['observation_general'];
-                }
-                if (!empty($observation['axis_movement'])) {
-                    $parts[] = "Atividade de Movimento:\n" . $observation['axis_movement'];
-                }
-                if (!empty($observation['axis_manual'])) {
-                    $parts[] = "Atividade Manual:\n" . $observation['axis_manual'];
-                }
-                if (!empty($observation['axis_music'])) {
-                    $parts[] = "Atividade Musical:\n" . $observation['axis_music'];
-                }
-                if (!empty($observation['axis_stories'])) {
-                    $parts[] = "Atividade de Contos:\n" . $observation['axis_stories'];
-                }
-                if (!empty($observation['axis_pca'])) {
-                    $parts[] = "Programa Comunicacao Ativa (PCA):\n" . $observation['axis_pca'];
-                }
-
-                $studentText = implode("\n\n", $parts);
+                $studentText = $this->compileObservationText($observation);
             }
         } else {
             // Se nao foi selecionada uma observacao especifica, buscar a mais recente do semestre
@@ -141,28 +124,7 @@ Equipe Pedagogica';
             foreach ($observations as $obs) {
                 if (isset($obs['semester']) && $obs['semester'] == $semester
                     && isset($obs['year']) && $obs['year'] == $year) {
-                    $parts = [];
-
-                    if (!empty($obs['observation_general'])) {
-                        $parts[] = $obs['observation_general'];
-                    }
-                    if (!empty($obs['axis_movement'])) {
-                        $parts[] = "Atividade de Movimento:\n" . $obs['axis_movement'];
-                    }
-                    if (!empty($obs['axis_manual'])) {
-                        $parts[] = "Atividade Manual:\n" . $obs['axis_manual'];
-                    }
-                    if (!empty($obs['axis_music'])) {
-                        $parts[] = "Atividade Musical:\n" . $obs['axis_music'];
-                    }
-                    if (!empty($obs['axis_stories'])) {
-                        $parts[] = "Atividade de Contos:\n" . $obs['axis_stories'];
-                    }
-                    if (!empty($obs['axis_pca'])) {
-                        $parts[] = "Programa Comunicacao Ativa (PCA):\n" . $obs['axis_pca'];
-                    }
-
-                    $studentText = implode("\n\n", $parts);
+                    $studentText = $this->compileObservationText($obs);
                     $observationId = $obs['id'];
                     break;
                 }
@@ -189,7 +151,7 @@ Equipe Pedagogica';
             $studentModel2 = new Student();
             $studentInfo = $studentModel2->find($studentId);
             $studentName = $studentInfo ? htmlspecialchars($studentInfo['name']) : 'este aluno';
-            $_SESSION['error_message'] = 'Nenhuma observacao encontrada para ' . $studentName . ' no ' . $semester . 'o semestre de ' . $year . '. <a href="/admin/observations/create?student_id=' . $studentId . '" class="alert-link">Criar observacao primeiro</a>.';
+            $_SESSION['error_message'] = 'Nenhuma observacao encontrada para ' . $studentName . ' no ' . $semester . 'o semestre de ' . $year . '. <a href="/admin/observations/create?student_id=' . (int)$studentId . '" class="alert-link">Criar observacao primeiro</a>.';
             header('Location: /admin/descriptive-reports/create');
             exit;
         }
@@ -232,8 +194,12 @@ Equipe Pedagogica';
             exit;
         }
 
+        $commentModel = new CoordinatorComment();
+        $comments = $commentModel->findByContent('descriptive_report', (int) $id);
+
         return $this->render('descriptive-reports/show', [
-            'report' => $report
+            'report'   => $report,
+            'comments' => $comments,
         ]);
     }
 
@@ -267,6 +233,8 @@ Equipe Pedagogica';
      */
     public function update($id)
     {
+        Csrf::verify();
+
         $reportModel = new DescriptiveReport();
         $report = $reportModel->find($id);
 
@@ -323,6 +291,8 @@ Equipe Pedagogica';
      */
     public function finalize($id)
     {
+        Csrf::verify();
+
         $reportModel = new DescriptiveReport();
         $report = $reportModel->find($id);
 
@@ -349,6 +319,8 @@ Equipe Pedagogica';
      */
     public function reopen($id)
     {
+        Csrf::verify();
+
         $role = $_SESSION['user_role'] ?? '';
         if (!in_array($role, ['admin', 'coordenador'])) {
             $_SESSION['error_message'] = 'Sem permissao para reabrir pareceres.';
@@ -376,10 +348,42 @@ Equipe Pedagogica';
     }
 
     /**
+     * Deletar parecer descritivo
+     */
+    public function delete($id)
+    {
+        Csrf::verify();
+
+        $reportModel = new DescriptiveReport();
+        $report = $reportModel->find($id);
+
+        if (!$report) {
+            $_SESSION['error_message'] = 'Parecer nao encontrado.';
+            header('Location: /admin/descriptive-reports');
+            exit;
+        }
+
+        // Limpar comentários de coordenacao vinculados
+        $commentModel = new \App\Models\CoordinatorComment();
+        $commentModel->deleteByContent('descriptive_report', (int)$id);
+
+        if ($reportModel->delete($id)) {
+            $_SESSION['success_message'] = 'Parecer excluido com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao excluir parecer.';
+        }
+
+        header('Location: /admin/descriptive-reports');
+        exit;
+    }
+
+    /**
      * Solicitar revisao (apenas coordenador/admin)
      */
     public function requestRevision($id)
     {
+        Csrf::verify();
+
         $role = $_SESSION['user_role'] ?? '';
         if (!in_array($role, ['admin', 'coordenador'])) {
             $_SESSION['error_message'] = 'Sem permissao para solicitar revisao.';
@@ -427,6 +431,21 @@ Equipe Pedagogica';
             exit;
         }
 
+        // BUG-040: permission check — professor can only export their own classroom's reports
+        $userRole = $_SESSION['user_role'] ?? '';
+        $userId   = (int)($_SESSION['user_id'] ?? 0);
+        if ($userRole === 'professor') {
+            $db = \App\Core\Database\Connection::getInstance();
+            $stmt = $db->prepare("SELECT c.teacher_id FROM descriptive_reports dr LEFT JOIN classrooms c ON dr.classroom_id = c.id WHERE dr.id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            $row = $stmt->fetch();
+            if (!$row || (int)$row['teacher_id'] !== $userId) {
+                $_SESSION['error_message'] = 'Sem permissao para exportar este parecer.';
+                header('Location: /admin/descriptive-reports');
+                exit;
+            }
+        }
+
         $studentModel = new Student();
         $student = $studentModel->find($report['student_id']);
 
@@ -435,7 +454,14 @@ Equipe Pedagogica';
 
         try {
             $pdfService = new \App\Services\PdfExportService();
+            // BUG-039: verify content before sending headers
             $pdfContent = $pdfService->generateDescriptiveReportPdf($report, $student, $classroom);
+
+            if (empty($pdfContent)) {
+                $_SESSION['error_message'] = 'Erro ao gerar PDF. Tente novamente.';
+                header('Location: /admin/descriptive-reports/' . $id);
+                exit;
+            }
 
             header('Content-Type: application/pdf');
             header('Content-Disposition: attachment; filename="parecer_' . $report['id'] . '.pdf"');
@@ -454,6 +480,8 @@ Equipe Pedagogica';
      */
     public function recompile($id)
     {
+        Csrf::verify();
+
         header('Content-Type: application/json');
 
         $reportModel = new DescriptiveReport();
@@ -478,27 +506,7 @@ Equipe Pedagogica';
         }
 
         // Compilar texto dos eixos
-        $parts = [];
-        if (!empty($observation['observation_general'])) {
-            $parts[] = $observation['observation_general'];
-        }
-        if (!empty($observation['axis_movement'])) {
-            $parts[] = "Atividade de Movimento:\n" . $observation['axis_movement'];
-        }
-        if (!empty($observation['axis_manual'])) {
-            $parts[] = "Atividade Manual:\n" . $observation['axis_manual'];
-        }
-        if (!empty($observation['axis_music'])) {
-            $parts[] = "Atividade Musical:\n" . $observation['axis_music'];
-        }
-        if (!empty($observation['axis_stories'])) {
-            $parts[] = "Atividade de Contos:\n" . $observation['axis_stories'];
-        }
-        if (!empty($observation['axis_pca'])) {
-            $parts[] = "Programa Comunicacao Ativa (PCA):\n" . $observation['axis_pca'];
-        }
-
-        $studentText = implode("\n\n", $parts);
+        $studentText = $this->compileObservationText($observation);
 
         if (empty($studentText)) {
             echo json_encode(['success' => false, 'error' => 'A observacao vinculada nao possui texto nos eixos.']);
@@ -520,6 +528,8 @@ Equipe Pedagogica';
      */
     public function correctText($id)
     {
+        Csrf::verify();
+
         header('Content-Type: application/json');
 
         $reportModel = new DescriptiveReport();
@@ -545,11 +555,42 @@ Equipe Pedagogica';
             $reportModel->updateText($id, $corrected);
 
             echo json_encode(['success' => true, 'text' => $corrected]);
+        } catch (\App\Services\GeminiException $e) {
+            http_response_code(503);
+            echo json_encode(['error' => 'Servico de IA temporariamente indisponivel.']);
         } catch (Exception $e) {
-            error_log("Erro na correcao IA do parecer: " . $e->getMessage());
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            error_log('correctText error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Erro interno ao corrigir texto.']);
         }
         exit;
+    }
+
+    /**
+     * Compila o texto de um parecer a partir dos campos de eixo de uma observacao.
+     */
+    private function compileObservationText(array $observation): string
+    {
+        $parts = [];
+        if (!empty($observation['observation_general'])) {
+            $parts[] = $observation['observation_general'];
+        }
+        if (!empty($observation['axis_movement'])) {
+            $parts[] = "Atividade de Movimento:\n" . $observation['axis_movement'];
+        }
+        if (!empty($observation['axis_manual'])) {
+            $parts[] = "Atividade Manual:\n" . $observation['axis_manual'];
+        }
+        if (!empty($observation['axis_music'])) {
+            $parts[] = "Atividade Musical:\n" . $observation['axis_music'];
+        }
+        if (!empty($observation['axis_stories'])) {
+            $parts[] = "Atividade de Contos:\n" . $observation['axis_stories'];
+        }
+        if (!empty($observation['axis_pca'])) {
+            $parts[] = "Programa Comunicacao Ativa (PCA):\n" . $observation['axis_pca'];
+        }
+        return implode("\n\n", $parts);
     }
 
     protected function render($view, $data = [])

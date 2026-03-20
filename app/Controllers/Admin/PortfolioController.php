@@ -4,6 +4,9 @@ namespace App\Controllers\Admin;
 
 use App\Models\Portfolio;
 use App\Models\Classroom;
+use App\Models\ImageBank;
+use App\Models\CoordinatorComment;
+use App\Core\Security\Csrf;
 
 class PortfolioController
 {
@@ -57,6 +60,7 @@ class PortfolioController
         return $this->render('portfolios/form', [
             'portfolio' => null,
             'classrooms' => $classrooms,
+            'bankImages' => [],
             'isEdit' => false
         ]);
     }
@@ -66,6 +70,8 @@ class PortfolioController
      */
     public function store()
     {
+        Csrf::verify();
+
         $data = [
             'classroom_id' => $_POST['classroom_id'] ?? null,
             'semester' => $_POST['semester'] ?? 1,
@@ -78,15 +84,15 @@ class PortfolioController
             'axis_pca_description' => trim($_POST['axis_pca_description'] ?? '')
         ];
 
-        // Upload cover photo
-        if (isset($_FILES['cover_photo']) && $_FILES['cover_photo']['error'] === UPLOAD_ERR_OK) {
-            $data['cover_photo_url'] = $this->uploadPhoto($_FILES['cover_photo'], 'covers');
+        // Foto de capa via banco de imagens
+        if (!empty($_POST['cover_photo_bank_url'])) {
+            $data['cover_photo_url'] = $_POST['cover_photo_bank_url'];
         }
 
-        // Upload axis photos (JSON arrays)
+        // Fotos dos eixos via banco de imagens
         $axes = ['movement', 'manual', 'stories', 'music', 'pca'];
         foreach ($axes as $axis) {
-            $photos = $this->uploadAxisPhotos($axis);
+            $photos = $this->collectBankPhotos($axis);
             if (!empty($photos)) {
                 $data["axis_{$axis}_photos"] = json_encode($photos);
             }
@@ -130,11 +136,17 @@ class PortfolioController
         $axes = ['movement', 'manual', 'stories', 'music', 'pca'];
         foreach ($axes as $axis) {
             $key = "axis_{$axis}_photos";
-            $portfolio[$key] = !empty($portfolio[$key]) ? json_decode($portfolio[$key], true) : [];
+            $photos = json_decode($portfolio[$key] ?? '', true);
+            if (!is_array($photos)) $photos = [];
+            $portfolio[$key] = $photos;
         }
 
+        $commentModel = new CoordinatorComment();
+        $comments = $commentModel->findByContent('portfolio', (int) $id);
+
         return $this->render('portfolios/show', [
-            'portfolio' => $portfolio
+            'portfolio' => $portfolio,
+            'comments'  => $comments,
         ]);
     }
 
@@ -162,15 +174,21 @@ class PortfolioController
         $axes = ['movement', 'manual', 'stories', 'music', 'pca'];
         foreach ($axes as $axis) {
             $key = "axis_{$axis}_photos";
-            $portfolio[$key] = !empty($portfolio[$key]) ? json_decode($portfolio[$key], true) : [];
+            $photos = json_decode($portfolio[$key] ?? '', true);
+            if (!is_array($photos)) $photos = [];
+            $portfolio[$key] = $photos;
         }
 
         $classroomModel = new Classroom();
         $classrooms = $classroomModel->all();
 
+        $imageBankModel = new ImageBank();
+        $bankImages = $imageBankModel->getByClassroom($portfolio['classroom_id']);
+
         return $this->render('portfolios/form', [
             'portfolio' => $portfolio,
             'classrooms' => $classrooms,
+            'bankImages' => $bankImages,
             'isEdit' => true
         ]);
     }
@@ -180,6 +198,8 @@ class PortfolioController
      */
     public function update($id)
     {
+        Csrf::verify();
+
         $portfolioModel = new Portfolio();
         $portfolio = $portfolioModel->find($id);
 
@@ -198,16 +218,17 @@ class PortfolioController
             'axis_pca_description' => trim($_POST['axis_pca_description'] ?? '')
         ];
 
-        // Upload cover photo
-        if (isset($_FILES['cover_photo']) && $_FILES['cover_photo']['error'] === UPLOAD_ERR_OK) {
-            $data['cover_photo_url'] = $this->uploadPhoto($_FILES['cover_photo'], 'covers');
+        // Foto de capa via banco de imagens
+        if (!empty($_POST['cover_photo_bank_url'])) {
+            $data['cover_photo_url'] = $_POST['cover_photo_bank_url'];
         }
 
-        // Upload axis photos - merge with existing
+        // Fotos dos eixos via banco de imagens
         $axes = ['movement', 'manual', 'stories', 'music', 'pca'];
         foreach ($axes as $axis) {
+            $newPhotos = $this->collectBankPhotos($axis);
             $existingKey = "axis_{$axis}_photos";
-            $existing = !empty($portfolio[$existingKey]) ? json_decode($portfolio[$existingKey], true) : [];
+            $existing = json_decode($portfolio[$existingKey] ?? '', true);
             if (!is_array($existing)) $existing = [];
 
             // Remover fotos marcadas
@@ -219,11 +240,10 @@ class PortfolioController
                 $existing = array_values($existing);
             }
 
-            // Adicionar novas fotos
-            $newPhotos = $this->uploadAxisPhotos($axis);
             $merged = array_merge($existing, $newPhotos);
-
-            $data[$existingKey] = json_encode(array_slice($merged, 0, 3)); // max 3 per axis
+            // BUG-042: enforce per-axis photo limit
+            $merged = array_values(array_slice($merged, 0, 6));
+            $data[$existingKey] = json_encode($merged);
         }
 
         if ($portfolioModel->update($id, $data)) {
@@ -242,6 +262,8 @@ class PortfolioController
      */
     public function finalize($id)
     {
+        Csrf::verify();
+
         $portfolioModel = new Portfolio();
         if ($portfolioModel->finalize($id, $_SESSION['user_id'])) {
             $_SESSION['success_message'] = 'Portfolio finalizado com sucesso!';
@@ -257,6 +279,8 @@ class PortfolioController
      */
     public function requestRevision($id)
     {
+        Csrf::verify();
+
         $notes = trim($_POST['revision_notes'] ?? '');
         if (empty($notes)) {
             $_SESSION['error_message'] = 'Informe as observacoes da revisao.';
@@ -279,6 +303,8 @@ class PortfolioController
      */
     public function reopen($id)
     {
+        Csrf::verify();
+
         $portfolioModel = new Portfolio();
         if ($portfolioModel->reopen($id)) {
             $_SESSION['success_message'] = 'Portfolio reaberto com sucesso!';
@@ -286,6 +312,36 @@ class PortfolioController
             $_SESSION['error_message'] = 'Erro ao reabrir portfolio.';
         }
         header("Location: /admin/portfolios/{$id}");
+        exit;
+    }
+
+    /**
+     * Deletar portfolio
+     */
+    public function delete($id)
+    {
+        Csrf::verify();
+
+        $portfolioModel = new Portfolio();
+        $portfolio = $portfolioModel->find($id);
+
+        if (!$portfolio) {
+            $_SESSION['error_message'] = 'Portfolio nao encontrado.';
+            header('Location: /admin/portfolios');
+            exit;
+        }
+
+        // Limpar comentários de coordenacao vinculados
+        $commentModel = new \App\Models\CoordinatorComment();
+        $commentModel->deleteByContent('portfolio', (int)$id);
+
+        if ($portfolioModel->delete($id)) {
+            $_SESSION['success_message'] = 'Portfolio excluido com sucesso!';
+        } else {
+            $_SESSION['error_message'] = 'Erro ao excluir portfolio.';
+        }
+
+        header('Location: /admin/portfolios');
         exit;
     }
 
@@ -327,6 +383,8 @@ class PortfolioController
      */
     public function correctText($id)
     {
+        Csrf::verify();
+
         header('Content-Type: application/json');
 
         try {
@@ -351,61 +409,23 @@ class PortfolioController
     }
 
     /**
-     * Upload de foto individual
+     * Coletar fotos selecionadas do banco de imagens para um eixo
      */
-    private function uploadPhoto($file, $subdir)
+    private function collectBankPhotos($axis)
     {
-        $uploadDir = __DIR__ . '/../../../public/uploads/portfolios/' . $subdir . '/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0775, true);
-        }
-
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $filename = uniqid('port_') . '.' . $ext;
-        $destPath = $uploadDir . $filename;
-
-        if (move_uploaded_file($file['tmp_name'], $destPath)) {
-            return '/uploads/portfolios/' . $subdir . '/' . $filename;
-        }
-        return null;
-    }
-
-    /**
-     * Upload de fotos de eixo (multiplas)
-     */
-    private function uploadAxisPhotos($axis)
-    {
-        $fieldName = "axis_{$axis}_photos";
+        $urls = $_POST["axis_{$axis}_bank_urls"] ?? [];
+        $captions = $_POST["axis_{$axis}_bank_captions"] ?? [];
         $photos = [];
 
-        if (empty($_FILES[$fieldName]) || !is_array($_FILES[$fieldName]['name'])) {
-            return $photos;
+        if (!is_array($urls)) return $photos;
+
+        foreach ($urls as $i => $url) {
+            if (empty($url)) continue;
+            $photos[] = [
+                'url' => $url,
+                'caption' => $captions[$i] ?? ''
+            ];
         }
-
-        $uploadDir = __DIR__ . '/../../../public/uploads/portfolios/axes/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0775, true);
-        }
-
-        $fileCount = count($_FILES[$fieldName]['name']);
-        for ($i = 0; $i < $fileCount; $i++) {
-            if ($_FILES[$fieldName]['error'][$i] !== UPLOAD_ERR_OK) continue;
-
-            $ext = strtolower(pathinfo($_FILES[$fieldName]['name'][$i], PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg', 'jpeg', 'png'])) continue;
-
-            $filename = uniqid("axis_{$axis}_") . '.' . $ext;
-            $destPath = $uploadDir . $filename;
-
-            if (move_uploaded_file($_FILES[$fieldName]['tmp_name'][$i], $destPath)) {
-                $caption = $_POST["axis_{$axis}_captions"][$i] ?? '';
-                $photos[] = [
-                    'url' => '/uploads/portfolios/axes/' . $filename,
-                    'caption' => $caption
-                ];
-            }
-        }
-
         return $photos;
     }
 

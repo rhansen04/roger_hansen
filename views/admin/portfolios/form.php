@@ -47,7 +47,7 @@
     ];
 ?>
 
-<form method="POST" action="<?= $action ?>" enctype="multipart/form-data">
+<form method="POST" action="<?= $action ?>">
 
     <!-- Navigation Tabs -->
     <ul class="nav nav-pills mb-4 flex-wrap" id="portfolioTabs" role="tablist">
@@ -127,13 +127,21 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Foto de Capa</label>
-                        <?php if ($isEdit && !empty($portfolio['cover_photo_url'])): ?>
-                        <div class="mb-2">
-                            <img src="<?= htmlspecialchars($portfolio['cover_photo_url']) ?>" class="img-thumbnail" style="max-height:200px;">
+                        <div id="cover-preview" class="mb-2 <?= empty($portfolio['cover_photo_url']) ? 'd-none' : '' ?>">
+                            <img src="<?= htmlspecialchars($portfolio['cover_photo_url'] ?? '') ?>" class="img-thumbnail" id="cover-preview-img" style="max-height:200px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearCover()">
+                                <i class="fas fa-times"></i> Remover
+                            </button>
                         </div>
+                        <input type="hidden" name="cover_photo_bank_url" id="cover_photo_bank_url" value="<?= htmlspecialchars($portfolio['cover_photo_url'] ?? '') ?>">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImagePicker('cover', null)">
+                            <i class="fas fa-images me-1"></i> Selecionar do Banco de Imagens
+                        </button>
+                        <?php if (empty($bankImages)): ?>
+                        <div class="form-text text-warning"><i class="fas fa-info-circle me-1"></i>Nenhuma imagem encontrada no banco desta turma. Adicione imagens pelo Banco de Imagens primeiro.</div>
+                        <?php else: ?>
+                        <div class="form-text"><?= count($bankImages) ?> imagem(ns) disponíveis no banco da turma.</div>
                         <?php endif; ?>
-                        <input type="file" name="cover_photo" class="form-control" accept="image/jpeg,image/png">
-                        <div class="form-text">Imagem JPG/PNG para a capa do portfolio.</div>
                     </div>
                 </div>
             </div>
@@ -258,9 +266,9 @@
                             placeholder="Descreva as atividades realizadas neste eixo..."><?= htmlspecialchars($portfolio["axis_{$key}_description"] ?? '') ?></textarea>
                     </div>
 
-                    <!-- Fotos do eixo (max 3) -->
+                    <!-- Fotos do eixo (max 3) via Banco de Imagens -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Fotos (max 3 por eixo)</label>
+                        <label class="form-label fw-bold">Fotos (max 3 por eixo) — Banco de Imagens</label>
 
                         <?php
                             $existingPhotos = $portfolio["axis_{$key}_photos"] ?? [];
@@ -269,11 +277,11 @@
 
                         <!-- Fotos existentes -->
                         <?php if (!empty($existingPhotos)): ?>
-                        <div class="row g-2 mb-3">
+                        <div class="row g-2 mb-3" id="existing-<?= $key ?>">
                             <?php foreach ($existingPhotos as $idx => $photo): ?>
                             <div class="col-md-4">
                                 <div class="card border">
-                                    <img src="<?= htmlspecialchars($photo['url'] ?? '') ?>" class="card-img-top" style="height:150px;object-fit:cover;">
+                                    <img src="<?= htmlspecialchars($photo['url'] ?? '') ?>" class="card-img-top" style="height:120px;object-fit:cover;">
                                     <div class="card-body p-2">
                                         <small class="text-muted"><?= htmlspecialchars($photo['caption'] ?? '') ?></small>
                                         <div class="form-check mt-1">
@@ -287,10 +295,16 @@
                         </div>
                         <?php endif; ?>
 
+                        <!-- Novas fotos via banco -->
+                        <div id="new-photos-<?= $key ?>" class="row g-2 mb-2"></div>
+                        <input type="hidden" name="axis_<?= $key ?>_photo_count" id="count-<?= $key ?>" value="0">
+
                         <?php $remaining = 3 - count($existingPhotos); ?>
                         <?php if ($remaining > 0): ?>
-                        <input type="file" name="axis_<?= $key ?>_photos[]" class="form-control mb-2" accept="image/jpeg,image/png" multiple>
-                        <div class="form-text">Voce pode adicionar ate <?= $remaining ?> foto(s) neste eixo. JPG/PNG.</div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="openImagePicker('axis', '<?= $key ?>')">
+                            <i class="fas fa-images me-1"></i> Adicionar foto do Banco de Imagens
+                        </button>
+                        <div class="form-text">Você pode adicionar até <?= $remaining ?> foto(s) neste eixo. Selecione do banco de imagens da turma.</div>
                         <?php else: ?>
                         <div class="form-text text-warning">Limite de 3 fotos atingido. Remova alguma para adicionar novas.</div>
                         <?php endif; ?>
@@ -314,6 +328,123 @@
         </div>
     </div>
 </form>
+
+<!-- Modal Banco de Imagens -->
+<div class="modal fade" id="imageBankModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-images me-2"></i>Selecionar do Banco de Imagens</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <?php if (!$isEdit): ?>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Selecione a turma primeiro para ver as imagens disponíveis.
+                    <select id="classroomPickerSelect" class="form-select form-select-sm mt-2" onchange="loadBankImages(this.value)">
+                        <option value="">Escolha a turma...</option>
+                        <?php foreach ($classrooms as $c): ?>
+                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+                <div id="bankImageGrid" class="row g-2">
+                    <?php if (!empty($bankImages)): ?>
+                        <?php foreach ($bankImages as $img): ?>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <div class="card border-2 border-light h-100 image-bank-item" style="cursor:pointer"
+                                 onclick="selectBankImage('<?= htmlspecialchars($img['url']) ?>', '<?= htmlspecialchars(addslashes($img['caption'] ?? $img['original_name'])) ?>')"
+                                 data-url="<?= htmlspecialchars($img['url']) ?>"
+                                 data-caption="<?= htmlspecialchars($img['caption'] ?? $img['original_name']) ?>">
+                                <img src="<?= htmlspecialchars($img['url']) ?>" class="card-img-top" style="height:100px;object-fit:cover;">
+                                <div class="card-body p-1">
+                                    <small class="text-muted" style="font-size:0.7em"><?= htmlspecialchars($img['caption'] ?? $img['original_name']) ?></small>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                    <div class="col-12">
+                        <div id="bankEmptyMsg" class="text-center text-muted py-4">
+                            <i class="fas fa-images fa-3x mb-3"></i><br>
+                            Nenhuma imagem disponível. Adicione imagens pelo Banco de Imagens primeiro.
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var _pickerTarget = null;  // 'cover' or axis key
+var _pickerType = null;    // 'cover' or 'axis'
+
+function openImagePicker(type, axisKey) {
+    _pickerType = type;
+    _pickerTarget = axisKey;
+    var modal = new bootstrap.Modal(document.getElementById('imageBankModal'));
+    modal.show();
+}
+
+function selectBankImage(url, caption) {
+    if (_pickerType === 'cover') {
+        document.getElementById('cover_photo_bank_url').value = url;
+        var img = document.getElementById('cover-preview-img');
+        img.src = url;
+        document.getElementById('cover-preview').classList.remove('d-none');
+    } else if (_pickerType === 'axis') {
+        var key = _pickerTarget;
+        var countEl = document.getElementById('count-' + key);
+        var count = parseInt(countEl.value || '0');
+        var grid = document.getElementById('new-photos-' + key);
+        var col = document.createElement('div');
+        col.className = 'col-md-4';
+        col.innerHTML = '<div class="card border">' +
+            '<img src="' + url + '" class="card-img-top" style="height:120px;object-fit:cover;">' +
+            '<div class="card-body p-1"><small class="text-muted">' + caption + '</small></div>' +
+            '</div>' +
+            '<input type="hidden" name="axis_' + key + '_bank_urls[]" value="' + url + '">' +
+            '<input type="hidden" name="axis_' + key + '_bank_captions[]" value="' + caption + '">';
+        grid.appendChild(col);
+        countEl.value = count + 1;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('imageBankModal')).hide();
+}
+
+function clearCover() {
+    document.getElementById('cover_photo_bank_url').value = '';
+    document.getElementById('cover-preview').classList.add('d-none');
+}
+
+function loadBankImages(classroomId) {
+    if (!classroomId) return;
+    var grid = document.getElementById('bankImageGrid');
+    grid.innerHTML = '<div class="col-12 text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+    fetch('/admin/api/image-bank/classroom/' + classroomId)
+        .then(r => r.json())
+        .then(images => {
+            if (!images.length) {
+                grid.innerHTML = '<div class="col-12"><div class="text-center text-muted py-4"><i class="fas fa-images fa-3x mb-3"></i><br>Nenhuma imagem disponível para esta turma.</div></div>';
+                return;
+            }
+            grid.innerHTML = images.map(img =>
+                '<div class="col-6 col-md-3 col-lg-2">' +
+                '<div class="card border-2 border-light h-100 image-bank-item" style="cursor:pointer" ' +
+                'onclick="selectBankImage(\'' + img.url + '\', \'' + (img.caption || img.original_name || '').replace(/'/g, "\\'") + '\')">' +
+                '<img src="' + img.url + '" class="card-img-top" style="height:100px;object-fit:cover;">' +
+                '<div class="card-body p-1"><small class="text-muted" style="font-size:0.7em">' + (img.caption || img.original_name || '') + '</small></div>' +
+                '</div></div>'
+            ).join('');
+        })
+        .catch(() => { grid.innerHTML = '<div class="col-12 text-center text-danger">Erro ao carregar imagens.</div>'; });
+}
+</script>
 
 <script>
 function correctText(portfolioId) {
