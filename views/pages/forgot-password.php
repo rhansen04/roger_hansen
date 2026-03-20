@@ -23,6 +23,7 @@
                         <?php endif; ?>
 
                         <form action="/esqueci-senha" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                             <div class="mb-4">
                                 <label class="form-label fw-bold">E-mail</label>
                                 <div class="input-group">

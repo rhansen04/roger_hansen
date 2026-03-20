@@ -14,6 +14,7 @@
                         <?php endif; ?>
 
                         <form action="/redefinir-senha" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nova Senha</label>
