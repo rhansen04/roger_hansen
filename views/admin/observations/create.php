@@ -172,7 +172,6 @@
                         <label class="form-label fw-bold mb-2">
                             <span class="badge bg-primary rounded-pill me-2"><?= $qIdx + 1 ?></span>
                             <?= htmlspecialchars($question) ?>
-                            <?php if ($axisData['field'] !== 'axis_pca'): ?><span class="text-danger">*</span><?php endif; ?>
                         </label>
                         <textarea name="<?= $axisData['field'] ?>[<?= $qIdx ?>]"
                                   class="form-control axis-question-field"
@@ -181,7 +180,7 @@
                                   data-axis-label="<?= htmlspecialchars($axisData['name'], ENT_QUOTES) ?>"
                                   data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
-                                  <?php echo ($axisData['field'] !== 'axis_pca') ? 'required' : ''; ?>></textarea>
+                                  ></textarea>
                         <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
                     </div>
                     <?php endforeach; ?>
@@ -192,14 +191,11 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <span class="text-danger">*</span>
-            <small class="text-muted">Campos obrigatorios</small>
-        </div>
+        <div></div>
         <div>
             <a href="/admin/observations" class="btn btn-light me-2">Cancelar</a>
             <button type="submit" class="btn btn-hansen px-5">
-                <i class="fas fa-save me-2"></i> CRIAR OBSERVACAO
+                <i class="fas fa-save me-2"></i> SALVAR OBSERVACAO
             </button>
         </div>
     </div>
@@ -238,15 +234,7 @@
     }
 
     function isFieldRequired(fieldName) {
-        if (fieldName === 'axis_pca') {
-            return false;
-        }
-
-        if (!focusedAxis) {
-            return true;
-        }
-
-        return fieldName === focusedAxis;
+        return false;
     }
 
     function syncPcaVisibility() {

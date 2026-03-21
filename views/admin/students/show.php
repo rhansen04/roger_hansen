@@ -240,9 +240,16 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <a href="/admin/observations/<?php echo $obs['id']; ?>" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                <div class="btn-group">
+                                    <a href="/admin/observations/<?php echo $obs['id']; ?>" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <?php if (($obs['status'] ?? 'in_progress') !== 'finalized'): ?>
+                                        <a href="/admin/observations/<?php echo $obs['id']; ?>/edit" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>

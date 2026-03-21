@@ -71,7 +71,7 @@ class PlanningController
     {
         Csrf::verify();
 
-        if (empty($_POST['template_id']) || empty($_POST['classroom_id']) || empty($_POST['period_start']) || empty($_POST['period_end'])) {
+        if (empty($_POST['classroom_id']) || empty($_POST['period_start']) || empty($_POST['period_end'])) {
             $_SESSION['error_message'] = 'Preencha todos os campos obrigatórios.';
             header('Location: /admin/planning/create');
             exit;

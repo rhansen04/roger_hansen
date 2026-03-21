@@ -85,50 +85,34 @@ $statusBadge = [
             <table class="table table-hover mb-0 align-middle">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4 py-3">ID</th>
-                        <th class="py-3">Professor</th>
+                        <th class="ps-4 py-3">No</th>
                         <th class="py-3">Turma</th>
-                        <th class="py-3">Quinzena</th>
+                        <th class="py-3">Início</th>
+                        <th class="py-3">Fim</th>
                         <th class="py-3">Status</th>
-                        <th class="py-3">Registros do Período</th>
-                        <th class="py-3">Criado em</th>
                         <th class="py-3 text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($submissions)): ?>
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
 
                                 <i class="fas fa-clipboard fa-3x mb-3"></i><br>
                                 Nenhum planejamento encontrado.
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($submissions as $sub): ?>
+                        <?php foreach ($submissions as $idx => $sub): ?>
                         <tr>
-                            <td class="ps-4"><?= $sub['id'] ?></td>
-                            <td><?= htmlspecialchars($sub['teacher_name'] ?? '-') ?></td>
+                            <td class="ps-4"><?= $idx + 1 ?></td>
                             <td><?= htmlspecialchars($sub['classroom_name'] ?? '-') ?></td>
-                            <td>
-                                <?= date('d/m', strtotime($sub['period_start'])) ?> - <?= date('d/m/Y', strtotime($sub['period_end'])) ?>
-                            </td>
+                            <td><?= date('d/m/Y', strtotime($sub['period_start'])) ?></td>
+                            <td><?= date('d/m/Y', strtotime($sub['period_end'])) ?></td>
                             <td>
                                 <?php $badge = $statusBadge[$sub['status']] ?? ['bg-secondary', $sub['status']]; ?>
                                 <span class="badge <?= $badge[0] ?>"><?= $badge[1] ?></span>
                             </td>
-                            <td>
-                                <?php if (!empty($sub['period_record_id'])): ?>
-                                    <a href="/admin/planning/<?= $sub['id'] ?>/record" class="badge bg-success text-decoration-none">
-                                        <i class="fas fa-check-circle me-1"></i>Concluído
-                                    </a>
-                                <?php else: ?>
-                                    <a href="/admin/planning/<?= $sub['id'] ?>/record/create" class="badge bg-warning text-dark text-decoration-none">
-                                        <i class="fas fa-clock me-1"></i>Pendente
-                                    </a>
-                                <?php endif; ?>
-                            </td>
-                            <td class="small"><?= date('d/m/Y', strtotime($sub['created_at'])) ?></td>
                             <td class="text-center">
                                 <div class="btn-group">
                                     <a href="/admin/planning/<?= $sub['id'] ?>" class="btn btn-sm btn-outline-primary" title="Ver">

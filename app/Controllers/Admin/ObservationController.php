@@ -33,7 +33,7 @@ class ObservationController
         // Professor ve apenas suas observacoes; coordenador e admin veem todas
         $roleRestrict = ($userRole === 'professor');
 
-        $observations = $obsModel->allFiltered($filters, $userId, $roleRestrict);
+        $studentRows = $obsModel->allGroupedByStudent($filters, $userId, $roleRestrict);
 
         // Buscar todos os alunos para o dropdown de filtro
         $students = $studentModel->all();
@@ -43,7 +43,7 @@ class ObservationController
         $years = range($currentYear, $currentYear - 3);
 
         return $this->render('observations/index', [
-            'observations' => $observations,
+            'studentRows' => $studentRows,
             'students' => $students,
             'filters' => $filters,
             'years' => $years,

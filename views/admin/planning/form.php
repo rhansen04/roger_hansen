@@ -23,16 +23,9 @@ $template = $template ?? null;
     <div class="card-header bg-white fw-bold"><i class="fas fa-cog me-2"></i> Configuração</div>
     <div class="card-body">
         <form action="/admin/planning" method="POST" id="planningForm">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+            <input type="hidden" name="template_id" value="<?= !empty($templates) ? $templates[0]['id'] : '1' ?>">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold">Template <span class="text-danger">*</span></label>
-                    <select name="template_id" class="form-select" required id="templateSelect">
-                        <option value="">Selecione...</option>
-                        <?php foreach ($templates as $t): ?>
-                            <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['title']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Turma <span class="text-danger">*</span></label>
                     <select name="classroom_id" class="form-select" required>
@@ -42,11 +35,11 @@ $template = $template ?? null;
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Início <span class="text-danger">*</span></label>
                     <input type="date" name="period_start" class="form-control" required>
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Fim <span class="text-danger">*</span></label>
                     <input type="date" name="period_end" class="form-control" required>
                 </div>

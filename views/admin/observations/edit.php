@@ -211,7 +211,6 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <label class="form-label fw-bold mb-2">
                             <span class="badge bg-primary rounded-pill me-2"><?= $qIdx + 1 ?></span>
                             <?= htmlspecialchars($question) ?>
-                            <?php if ($axisData['field'] !== 'axis_pca'): ?><span class="text-danger">*</span><?php endif; ?>
                         </label>
                         <textarea name="<?= $axisData['field'] ?>[<?= $qIdx ?>]"
                                   class="form-control axis-question-field"
@@ -221,7 +220,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                                   data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
                                   <?php echo $readonlyAttr; ?>
-                                  <?php echo (!$isFinalized && $axisData['field'] !== 'axis_pca') ? 'required' : ''; ?>><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
+                                  ><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
                         <?php if (!$isFinalized): ?>
                             <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
                         <?php endif; ?>
@@ -242,7 +241,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         <?php if (!$isFinalized): ?>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-hansen px-4">
-                    <i class="fas fa-save me-2"></i> SALVAR ALTERACOES
+                    <i class="fas fa-save me-2"></i> SALVAR OBSERVACAO
                 </button>
                 <button type="button" class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#finalizeModal">
                     <i class="fas fa-check-circle me-2"></i> FINALIZAR REGISTRO

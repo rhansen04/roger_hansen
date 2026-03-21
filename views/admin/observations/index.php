@@ -154,18 +154,19 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4 py-3">Aluno</th>
+                        <th class="ps-4 py-3" style="width:50px;">No</th>
+                        <th class="py-3">Aluno</th>
                         <th class="py-3">Semestre / Ano</th>
-                        <th class="py-3">Professor</th>
+                        <th class="py-3 text-center">No Observacoes</th>
                         <th class="py-3">Status</th>
                         <th class="py-3">Atualizado em</th>
                         <th class="py-3 text-center">Acoes</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($observations)): ?>
+                    <?php if (empty($studentRows)): ?>
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fas fa-clipboard-list fa-3x mb-3 d-block"></i>
                                 Nenhuma observacao encontrada.
                                 <br><a href="/admin/observations/create" class="btn btn-sm btn-outline-primary mt-3">
@@ -174,32 +175,29 @@
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($observations as $obs): ?>
+                        <?php foreach ($studentRows as $idx => $row): ?>
                         <tr>
-                            <td class="ps-4">
-                                <a href="/admin/students/<?php echo $obs['student_id']; ?>" class="text-decoration-none fw-bold" style="color: var(--primary-color, #007e66);">
+                            <td class="ps-4 text-muted small"><?php echo $idx + 1; ?></td>
+                            <td>
+                                <a href="/admin/students/<?php echo $row['student_id']; ?>" class="text-decoration-none fw-bold" style="color: var(--primary-color, #007e66);">
                                     <i class="fas fa-user-graduate me-1"></i>
-                                    <?php echo htmlspecialchars($obs['student_name']); ?>
+                                    <?php echo htmlspecialchars($row['student_name']); ?>
                                 </a>
                             </td>
                             <td>
-                                <?php if ($obs['semester'] && $obs['year']): ?>
+                                <?php if ($row['semester'] && $row['year']): ?>
                                     <span class="badge bg-light text-dark border">
-                                        <?php echo $obs['semester']; ?>o Sem / <?php echo $obs['year']; ?>
+                                        <?php echo $row['semester']; ?>o Sem / <?php echo $row['year']; ?>
                                     </span>
                                 <?php else: ?>
                                     <span class="text-muted small">-</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="small">
-                                <i class="fas fa-user-tie me-1"></i>
-                                <?php echo htmlspecialchars($obs['teacher_name']); ?>
+                            <td class="text-center">
+                                <span class="badge bg-info text-white"><?php echo (int) $row['observation_count']; ?></span>
                             </td>
                             <td>
-                                <?php
-                                $status = $obs['status'] ?? 'in_progress';
-                                if ($status === 'finalized'):
-                                ?>
+                                <?php if ($row['aggregated_status'] === 'finalized'): ?>
                                     <span class="badge bg-success">
                                         <i class="fas fa-check-circle me-1"></i> Finalizado
                                     </span>
@@ -211,23 +209,16 @@
                             </td>
                             <td class="small text-muted">
                                 <i class="fas fa-clock me-1"></i>
-                                <?php echo date('d/m/Y H:i', strtotime($obs['updated_at'])); ?>
+                                <?php echo date('d/m/Y H:i', strtotime($row['last_updated'])); ?>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <a href="/admin/observations/<?php echo $obs['id']; ?>" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                    <a href="/admin/observations?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-outline-primary" title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <?php if ($status !== 'finalized' && $userRole !== 'coordenador'): ?>
-                                        <a href="/admin/observations/<?php echo $obs['id']; ?>/edit" class="btn btn-sm btn-outline-secondary" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                    <?php if ($status !== 'finalized' && $userRole !== 'coordenador'): ?>
-                                        <button onclick="confirmDelete(<?php echo $obs['id']; ?>, '<?php echo htmlspecialchars(addslashes($obs['student_name'])); ?>')" class="btn btn-sm btn-outline-danger" title="Excluir">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    <?php endif; ?>
+                                    <a href="/admin/observations/create?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

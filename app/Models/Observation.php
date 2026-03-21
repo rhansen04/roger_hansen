@@ -663,6 +663,65 @@ class Observation
         return implode("\n\n", $parts);
     }
 
+    /**
+     * Listar observacoes agrupadas por aluno
+     */
+    public function allGroupedByStudent($filters = [], $userId = null, $roleRestrict = false)
+    {
+        try {
+            $where = [];
+            $params = [];
+
+            if ($roleRestrict && $userId) {
+                $where[] = "o.user_id = ?";
+                $params[] = $userId;
+            }
+            if (!empty($filters['student_id'])) {
+                $where[] = "o.student_id = ?";
+                $params[] = $filters['student_id'];
+            }
+            if (!empty($filters['semester'])) {
+                $where[] = "o.semester = ?";
+                $params[] = $filters['semester'];
+            }
+            if (!empty($filters['year'])) {
+                $where[] = "o.year = ?";
+                $params[] = $filters['year'];
+            }
+            if (!empty($filters['status'])) {
+                $where[] = "o.status = ?";
+                $params[] = $filters['status'];
+            }
+
+            $whereClause = !empty($where) ? " WHERE " . implode(" AND ", $where) : "";
+
+            $sql = "SELECT
+                        s.id as student_id,
+                        s.name as student_name,
+                        MAX(o.semester) as semester,
+                        MAX(o.year) as year,
+                        COUNT(o.id) as observation_count,
+                        MAX(o.updated_at) as last_updated,
+                        CASE
+                            WHEN SUM(CASE WHEN o.status = 'in_progress' THEN 1 ELSE 0 END) > 0
+                            THEN 'in_progress'
+                            ELSE 'finalized'
+                        END as aggregated_status
+                    FROM observations o
+                    LEFT JOIN students s ON o.student_id = s.id
+                    {$whereClause}
+                    GROUP BY s.id, s.name
+                    ORDER BY s.name ASC";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao listar observacoes agrupadas: " . $e->getMessage());
+            return [];
+        }
+    }
+
     private function normalizeAxisValue($value): string
     {
         if ($value === null || $value === '') {
