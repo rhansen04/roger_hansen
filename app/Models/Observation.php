@@ -701,6 +701,8 @@ class Observation
                         MAX(o.semester) as semester,
                         MAX(o.year) as year,
                         COUNT(o.id) as observation_count,
+                        MAX(o.id) as latest_observation_id,
+                        MAX(CASE WHEN o.status = 'in_progress' THEN o.id ELSE NULL END) as latest_editable_observation_id,
                         MAX(o.updated_at) as last_updated,
                         CASE
                             WHEN SUM(CASE WHEN o.status = 'in_progress' THEN 1 ELSE 0 END) > 0
@@ -725,7 +727,7 @@ class Observation
     /**
      * Alterar status de todas as observacoes de um aluno
      */
-    public function setStatusForStudent(int $studentId, string $status, int $userId): bool
+    public function setStatusForStudent(int $studentId, int $semester, int $year, string $status, int $userId): bool
     {
         try {
             $now = date('Y-m-d H:i:s');
@@ -736,13 +738,18 @@ class Observation
                             finalized_at = :now,
                             finalized_by = :user_id,
                             updated_at = :updated_at
-                        WHERE student_id = :student_id AND status = 'in_progress'";
+                        WHERE student_id = :student_id
+                          AND semester = :semester
+                          AND year = :year
+                          AND status = 'in_progress'";
                 $stmt = $this->db->prepare($sql);
                 return $stmt->execute([
                     ':now' => $now,
                     ':user_id' => $userId,
                     ':updated_at' => $now,
                     ':student_id' => $studentId,
+                    ':semester' => $semester,
+                    ':year' => $year,
                 ]);
             } else {
                 $sql = "UPDATE observations
@@ -750,11 +757,16 @@ class Observation
                             finalized_at = NULL,
                             finalized_by = NULL,
                             updated_at = :updated_at
-                        WHERE student_id = :student_id AND status = 'finalized'";
+                        WHERE student_id = :student_id
+                          AND semester = :semester
+                          AND year = :year
+                          AND status = 'finalized'";
                 $stmt = $this->db->prepare($sql);
                 return $stmt->execute([
                     ':updated_at' => $now,
                     ':student_id' => $studentId,
+                    ':semester' => $semester,
+                    ':year' => $year,
                 ]);
             }
         } catch (PDOException $e) {

@@ -7,11 +7,30 @@
     </ol>
 </nav>
 
+<?php if (isset($_SESSION['success_message'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i><?php echo $_SESSION['success_message']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php unset($_SESSION['success_message']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i><?php echo $_SESSION['error_message']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php unset($_SESSION['error_message']); ?>
+<?php endif; ?>
+
 <div class="mb-4">
     <a href="/admin/observations" class="text-decoration-none text-muted"><i class="fas fa-arrow-left me-2"></i> Voltar para listagem</a>
     <h2 class="fw-bold mt-3" style="color: var(--primary-color, #007e66);">
-        <i class="fas fa-plus-circle me-2"></i>NOVA OBSERVACAO PEDAGOGICA
+        <i class="fas fa-plus-circle me-2"></i><?php echo !empty($existingObservation) ? 'OBSERVACAO PEDAGOGICA EM ANDAMENTO' : 'NOVA OBSERVACAO PEDAGOGICA'; ?>
     </h2>
+    <?php if (!empty($existingObservation)): ?>
+        <p class="text-muted mb-0">Este registro ja existe para o periodo selecionado. Continue preenchendo os eixos abaixo.</p>
+    <?php endif; ?>
 </div>
 
 <form action="/admin/observations" method="POST" id="observationForm" novalidate>
@@ -112,10 +131,14 @@
                                 }
                             }
                         ?>
-                        <div class="border rounded-3 p-3 bg-light-subtle">
+                        <?php $isCurrentHistory = !empty($existingObservation) && (int) $history['id'] === (int) $existingObservation['id']; ?>
+                        <div class="border rounded-3 p-3 <?php echo $isCurrentHistory ? 'border-primary bg-primary-subtle' : 'bg-light-subtle'; ?>">
                             <div class="d-flex justify-content-between align-items-start gap-3">
                                 <div>
-                                    <div class="fw-semibold">Observacao #<?php echo (int) $history['id']; ?></div>
+                                    <div class="fw-semibold">
+                                        Observacao #<?php echo (int) $history['id']; ?>
+                                        <?php if ($isCurrentHistory): ?><span class="badge bg-primary ms-2">Registro atual</span><?php endif; ?>
+                                    </div>
                                     <div class="small text-muted">
                                         Criada em <?php echo date('d/m/Y H:i', strtotime($history['created_at'])); ?>
                                         por <?php echo htmlspecialchars($history['teacher_name'] ?? 'Usuario'); ?>
@@ -128,9 +151,16 @@
                             <p class="mb-2 mt-3 text-muted">
                                 <?php echo htmlspecialchars($preview !== '' ? mb_strimwidth($preview, 0, 220, '...') : 'Sem texto resumido na observacao geral.'); ?>
                             </p>
-                            <a href="/admin/observations/<?php echo (int) $history['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-eye me-1"></i> Ver registro
-                            </a>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="/admin/observations/<?php echo (int) $history['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i> Ver registro
+                                </a>
+                                <?php if (($history['status'] ?? 'in_progress') !== 'finalized'): ?>
+                                    <a href="/admin/observations/<?php echo (int) $history['id']; ?>/edit" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -162,7 +192,9 @@
             </ul>
 
             <div class="tab-content pt-4" id="axesTabContent">
-                <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData): ?>
+                <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData):
+                    $savedAnswers = parseAxisAnswers($existingObservation[$axisData['field']] ?? '', count($axisData['questions']));
+                ?>
                 <div class="tab-pane fade <?= $first ? 'show active' : '' ?>" id="<?= $axisData['tab_id'] ?>" role="tabpanel"
                      data-axis-field="<?= $axisData['field'] ?>"
                      <?php echo ($axisData['field'] === 'axis_pca') ? 'data-pca-pane="1"' : ''; ?>>
@@ -180,7 +212,7 @@
                                   data-axis-label="<?= htmlspecialchars($axisData['name'], ENT_QUOTES) ?>"
                                   data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
-                                  ></textarea>
+                                  ><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
                         <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
                     </div>
                     <?php endforeach; ?>

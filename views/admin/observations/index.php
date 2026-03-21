@@ -199,24 +199,24 @@
                             <td>
                                 <div class="dropdown">
                                     <?php if ($row['aggregated_status'] === 'finalized'): ?>
-                                        <button class="badge bg-success border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" data-student-id="<?php echo $row['student_id']; ?>">
+                                        <button class="badge bg-success border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" data-student-id="<?php echo $row['student_id']; ?>" data-semester="<?php echo (int) $row['semester']; ?>" data-year="<?php echo (int) $row['year']; ?>">
                                             <i class="fas fa-check-circle me-1"></i> Finalizado
                                         </button>
                                     <?php else: ?>
-                                        <button class="badge bg-warning text-dark border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" data-student-id="<?php echo $row['student_id']; ?>">
+                                        <button class="badge bg-warning text-dark border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" data-student-id="<?php echo $row['student_id']; ?>" data-semester="<?php echo (int) $row['semester']; ?>" data-year="<?php echo (int) $row['year']; ?>">
                                             <i class="fas fa-edit me-1"></i> Em andamento
                                         </button>
                                     <?php endif; ?>
                                     <ul class="dropdown-menu">
                                         <li>
                                             <a class="dropdown-item status-option <?php echo ($row['aggregated_status'] !== 'finalized') ? 'active' : ''; ?>"
-                                               href="#" data-student-id="<?php echo $row['student_id']; ?>" data-status="in_progress">
+                                               href="#" data-student-id="<?php echo $row['student_id']; ?>" data-semester="<?php echo (int) $row['semester']; ?>" data-year="<?php echo (int) $row['year']; ?>" data-status="in_progress">
                                                 <i class="fas fa-edit me-2 text-warning"></i> Em andamento
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item status-option <?php echo ($row['aggregated_status'] === 'finalized') ? 'active' : ''; ?>"
-                                               href="#" data-student-id="<?php echo $row['student_id']; ?>" data-status="finalized">
+                                               href="#" data-student-id="<?php echo $row['student_id']; ?>" data-semester="<?php echo (int) $row['semester']; ?>" data-year="<?php echo (int) $row['year']; ?>" data-status="finalized">
                                                 <i class="fas fa-check-circle me-2 text-success"></i> Finalizado
                                             </a>
                                         </li>
@@ -229,10 +229,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <a href="/admin/observations?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                    <a href="/admin/observations/<?php echo (int) $row['latest_observation_id']; ?>" class="btn btn-sm btn-outline-primary" title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="/admin/observations/create?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                    <a href="<?php echo !empty($row['latest_editable_observation_id']) ? '/admin/observations/' . (int) $row['latest_editable_observation_id'] . '/edit' : '#'; ?>" class="btn btn-sm btn-outline-secondary <?php echo empty($row['latest_editable_observation_id']) ? 'disabled' : ''; ?>" title="<?php echo empty($row['latest_editable_observation_id']) ? 'Nenhuma observacao editavel neste periodo' : 'Editar'; ?>" <?php echo empty($row['latest_editable_observation_id']) ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </div>
@@ -264,6 +264,8 @@ document.querySelectorAll('.status-option').forEach(function(item) {
     item.addEventListener('click', function(e) {
         e.preventDefault();
         var studentId = this.dataset.studentId;
+        var semester = this.dataset.semester;
+        var year = this.dataset.year;
         var newStatus = this.dataset.status;
         var dropdownBtn = this.closest('.dropdown').querySelector('.dropdown-toggle');
         var csrfToken = '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>';
@@ -274,7 +276,7 @@ document.querySelectorAll('.status-option').forEach(function(item) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify({ student_id: studentId, status: newStatus, csrf_token: csrfToken })
+            body: JSON.stringify({ student_id: studentId, semester: semester, year: year, status: newStatus, csrf_token: csrfToken })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {

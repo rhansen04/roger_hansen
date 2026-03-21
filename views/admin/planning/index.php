@@ -36,7 +36,7 @@
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body p-3">
         <form method="GET" action="/admin/planning" class="row g-3 align-items-end">
-            <?php if ($userRole !== 'teacher'): ?>
+            <?php if ($userRole !== 'professor'): ?>
             <div class="col-md-3">
                 <label class="form-label small fw-bold mb-1">Professor</label>
                 <input type="text" name="teacher_id" class="form-control form-control-sm"

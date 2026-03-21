@@ -25,14 +25,14 @@ class PlanningController
             'template_id' => $_GET['template_id'] ?? null,
         ];
 
-        // Teachers only see their own
+        // Professores veem apenas seus proprios planejamentos
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher') {
+        if ($role === 'professor') {
             $filters['teacher_id'] = $_SESSION['user_id'];
         }
 
         $submissions = $subModel->all($filters);
-        $classrooms = ($role === 'teacher')
+        $classrooms = ($role === 'professor')
             ? $classModel->getByTeacher($_SESSION['user_id'])
             : $classModel->all();
         $templates = $tplModel->allActive();
@@ -49,20 +49,17 @@ class PlanningController
     public function create()
     {
         $classModel = new Classroom();
-        $tplModel = new PlanningTemplate();
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        $classrooms = ($role === 'teacher')
+        $classrooms = ($role === 'professor')
             ? $classModel->getByTeacher($_SESSION['user_id'])
             : $classModel->all();
-        $templates = $tplModel->allActive();
 
         return $this->render('planning/form', [
             'submission' => null,
             'template' => null,
             'answers' => [],
             'classrooms' => $classrooms,
-            'templates' => $templates,
             'mode' => 'create'
         ]);
     }
@@ -87,9 +84,16 @@ class PlanningController
             exit;
         }
 
+        $templateId = $this->getDefaultTemplateId();
+        if ($templateId === null) {
+            $_SESSION['error_message'] = 'Nenhum template de planejamento ativo foi encontrado.';
+            header('Location: /admin/planning/create');
+            exit;
+        }
+
         $subModel = new PlanningSubmission();
         $data = [
-            'template_id' => $_POST['template_id'],
+            'template_id' => $templateId,
             'teacher_id' => $_SESSION['user_id'],
             'classroom_id' => $_POST['classroom_id'],
             'period_start' => $periodStart,
@@ -114,7 +118,7 @@ class PlanningController
             $_SESSION['success_message'] = 'Rascunho salvo com sucesso!';
         }
 
-        header('Location: /admin/planning');
+        header('Location: /admin/planning/' . $submissionId . '/days');
         exit;
     }
 
@@ -130,9 +134,9 @@ class PlanningController
             exit;
         }
 
-        // Teachers can only see their own
+        // Professores podem ver apenas seus proprios planejamentos
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -170,7 +174,7 @@ class PlanningController
 
         // Only draft/submitted can be edited
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -179,7 +183,7 @@ class PlanningController
         $template = $tplModel->getWithSectionsAndFields($submission['template_id']);
         $answers = $subModel->getAnswersIndexed($id);
 
-        $classrooms = ($role === 'teacher')
+        $classrooms = ($role === 'professor')
             ? $classModel->getByTeacher($_SESSION['user_id'])
             : $classModel->all();
 
@@ -258,7 +262,7 @@ class PlanningController
         if ($year < 2020 || $year > 2030) $year = (int)date('Y');
 
         // Get classrooms for filter
-        $classrooms = ($role === 'teacher')
+        $classrooms = ($role === 'professor')
             ? $classModel->getByTeacher($_SESSION['user_id'])
             : $classModel->all();
 
@@ -269,7 +273,7 @@ class PlanningController
         $monthEnd = date('Y-m-t', strtotime($monthStart));
 
         $filters = [];
-        if ($role === 'teacher') {
+        if ($role === 'professor') {
             $filters['teacher_id'] = $_SESSION['user_id'];
         }
         if (!empty($classroomId)) {
@@ -351,7 +355,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -368,7 +372,7 @@ class PlanningController
         ];
 
         $canEdit = ($submission['status'] !== 'registered')
-            && ($role !== 'teacher' || $submission['teacher_id'] == $_SESSION['user_id']);
+            && ($role !== 'professor' || $submission['teacher_id'] == $_SESSION['user_id']);
 
         return $this->render('planning/routine', [
             'submission' => $submission,
@@ -393,7 +397,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -445,7 +449,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -503,7 +507,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -567,7 +571,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -618,7 +622,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -668,7 +672,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -714,7 +718,7 @@ class PlanningController
         }
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -763,7 +767,7 @@ class PlanningController
         $submission = $subModel->find($entry['submission_id']);
 
         $role = $_SESSION['user_role'] ?? 'admin';
-        if ($role === 'teacher' && $submission && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
+        if ($role === 'professor' && $submission && (int)$submission['teacher_id'] !== (int)$_SESSION['user_id']) {
             $_SESSION['error_message'] = 'Acesso negado.';
             header('Location: /admin/planning');
             exit;
@@ -953,5 +957,17 @@ class PlanningController
         $content = ob_get_clean();
 
         include __DIR__ . "/../../../views/layouts/admin.php";
+    }
+
+    private function getDefaultTemplateId(): ?int
+    {
+        $tplModel = new PlanningTemplate();
+        $templates = $tplModel->allActive();
+
+        if (empty($templates)) {
+            return null;
+        }
+
+        return (int) $templates[0]['id'];
     }
 }

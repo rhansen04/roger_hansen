@@ -24,7 +24,6 @@ $template = $template ?? null;
     <div class="card-body">
         <form action="/admin/planning" method="POST" id="planningForm">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-            <input type="hidden" name="template_id" value="<?= !empty($templates) ? $templates[0]['id'] : '1' ?>">
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Turma <span class="text-danger">*</span></label>
@@ -47,7 +46,7 @@ $template = $template ?? null;
 
             <div class="alert alert-info small">
                 <i class="fas fa-info-circle me-2"></i>
-                Após criar o planejamento, você poderá preencher as seções do formulário. Salve como rascunho ou envie quando estiver pronto.
+                Após criar o planejamento, você poderá preencher as seções do formulário. O modelo pedagógico ativo será aplicado automaticamente.
             </div>
 
             <hr>

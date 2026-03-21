@@ -165,9 +165,19 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                                     <?php echo (($history['status'] ?? '') === 'finalized') ? 'Finalizada' : 'Em andamento'; ?>
                                 </span>
                             </div>
-                            <p class="mb-0 mt-3 text-muted">
+                            <p class="mb-2 mt-3 text-muted">
                                 <?php echo htmlspecialchars($preview !== '' ? mb_strimwidth($preview, 0, 220, '...') : 'Sem texto resumido na observacao geral.'); ?>
                             </p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="/admin/observations/<?php echo (int) $history['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i> Ver registro
+                                </a>
+                                <?php if (!$isCurrentHistory && ($history['status'] ?? 'in_progress') !== 'finalized'): ?>
+                                    <a href="/admin/observations/<?php echo (int) $history['id']; ?>/edit" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>

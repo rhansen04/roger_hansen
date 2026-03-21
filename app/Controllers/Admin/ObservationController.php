@@ -23,10 +23,14 @@ class ObservationController
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Filtros
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('m');
+        $defaultSemester = ($currentMonth <= 6) ? 1 : 2;
+
         $filters = [
             'student_id' => $_GET['student_id'] ?? null,
-            'semester' => $_GET['semester'] ?? null,
-            'year' => $_GET['year'] ?? null,
+            'semester' => $_GET['semester'] ?? (string) $defaultSemester,
+            'year' => $_GET['year'] ?? (string) $currentYear,
             'status' => $_GET['status'] ?? null,
         ];
 
@@ -39,7 +43,6 @@ class ObservationController
         $students = $studentModel->all();
 
         // Ano corrente e lista de anos para filtro
-        $currentYear = (int) date('Y');
         $years = range($currentYear, $currentYear - 3);
 
         return $this->render('observations/index', [
@@ -75,6 +78,7 @@ class ObservationController
 
         $pcaEnabledByStudent = $this->buildPcaEnabledByStudent($students);
         $observationHistory = [];
+        $existingObservation = null;
 
         if ($selectedStudentId) {
             $observationHistory = $obsModel->findByStudentAndSemester((int) $selectedStudentId, $selectedSemester, $selectedYear);
@@ -83,6 +87,11 @@ class ObservationController
                     return (int) $item['user_id'] === (int) $userId;
                 }));
             }
+
+            $existingObservation = $this->findEditableObservationForContext(
+                $observationHistory,
+                $roleRestrict ? $userId : null
+            );
         }
 
         return $this->render('observations/create', [
@@ -95,6 +104,7 @@ class ObservationController
             'years' => $years,
             'pcaEnabledByStudent' => $pcaEnabledByStudent,
             'observationHistory' => $observationHistory,
+            'existingObservation' => $existingObservation,
             'maxObservationsPerSemester' => 5,
         ]);
     }
@@ -119,7 +129,12 @@ class ObservationController
         $semester = (int) $_POST['semester'];
         $year = (int) $_POST['year'];
 
-        if ($obsModel->countForStudentSemester($studentId, $semester, $year) >= 5) {
+        $existingObservation = $this->findEditableObservationForContext(
+            $obsModel->findByStudentAndSemester($studentId, $semester, $year),
+            (int) $_SESSION['user_id']
+        );
+
+        if (!$existingObservation && $obsModel->countForStudentSemester($studentId, $semester, $year) >= 5) {
             $_SESSION['error_message'] = 'Limite atingido: este aluno ja possui 5 observacoes cadastradas neste semestre/ano.';
             header('Location: /admin/observations/create?student_id=' . $studentId . '&semester=' . $semester . '&year=' . $year);
             exit;
@@ -140,11 +155,22 @@ class ObservationController
             'axis_pca' => $pcaEnabled ? $this->encodeAxisField('axis_pca') : '',
         ];
 
-        $newId = $obsModel->createWithAxes($data);
-        if ($newId) {
+        $observationId = null;
+
+        if ($existingObservation) {
+            $observationId = (int) $existingObservation['id'];
+            $saved = $obsModel->updateWithAxes($observationId, $data);
+        } else {
+            $saved = $obsModel->createWithAxes($data);
+            $observationId = $saved ? (int) $saved : null;
+        }
+
+        if ($saved && $observationId) {
             $this->syncDescriptiveReportsForObservationContext($studentId, $semester, $year);
-            $_SESSION['success_message'] = 'Observacao criada com sucesso!';
-            header('Location: /admin/observations/' . $newId . '/edit');
+            $_SESSION['success_message'] = $existingObservation
+                ? 'Observacao salva com sucesso! Continue preenchendo os eixos nesta mesma tela.'
+                : 'Observacao criada com sucesso! Continue preenchendo os eixos nesta mesma tela.';
+            header('Location: /admin/observations/create?student_id=' . $studentId . '&semester=' . $semester . '&year=' . $year);
             exit;
         }
 
@@ -544,9 +570,11 @@ class ObservationController
         }
 
         $studentId = (int) ($input['student_id'] ?? 0);
+        $semester = (int) ($input['semester'] ?? 0);
+        $year = (int) ($input['year'] ?? 0);
         $newStatus = ($input['status'] ?? '') === 'finalized' ? 'finalized' : 'in_progress';
 
-        if ($studentId <= 0) {
+        if ($studentId <= 0 || $semester <= 0 || $year <= 0) {
             echo json_encode(['success' => false, 'message' => 'Aluno invalido.']);
             exit;
         }
@@ -554,7 +582,7 @@ class ObservationController
         $obsModel = new Observation();
         $userId = $_SESSION['user_id'] ?? 0;
 
-        $result = $obsModel->setStatusForStudent($studentId, $newStatus, $userId);
+        $result = $obsModel->setStatusForStudent($studentId, $semester, $year, $newStatus, $userId);
 
         if ($result) {
             echo json_encode([
@@ -575,6 +603,23 @@ class ObservationController
             return json_encode(array_values(array_map('trim', $raw)));
         }
         return trim((string) $raw);
+    }
+
+    private function findEditableObservationForContext(array $observations, ?int $userId = null): ?array
+    {
+        foreach ($observations as $observation) {
+            if (($observation['status'] ?? 'in_progress') !== 'in_progress') {
+                continue;
+            }
+
+            if ($userId !== null && (int) ($observation['user_id'] ?? 0) !== $userId) {
+                continue;
+            }
+
+            return $observation;
+        }
+
+        return null;
     }
 
     private function buildPcaEnabledByStudent(array $students): array
