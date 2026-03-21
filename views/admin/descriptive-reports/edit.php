@@ -271,7 +271,8 @@ function recompileFromObservation() {
 
     fetch('/admin/descriptive-reports/<?php echo $report['id']; ?>/recompile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>' },
+        body: JSON.stringify({ csrf_token: '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>' })
     })
     .then(r => r.json())
     .then(data => {
@@ -308,8 +309,10 @@ function correctTextAI() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>'
+        },
+        body: JSON.stringify({ csrf_token: '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>' })
     })
     .then(response => response.json())
     .then(data => {

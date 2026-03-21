@@ -197,15 +197,31 @@
                                 <span class="badge bg-info text-white"><?php echo (int) $row['observation_count']; ?></span>
                             </td>
                             <td>
-                                <?php if ($row['aggregated_status'] === 'finalized'): ?>
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle me-1"></i> Finalizado
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-edit me-1"></i> Em andamento
-                                    </span>
-                                <?php endif; ?>
+                                <div class="dropdown">
+                                    <?php if ($row['aggregated_status'] === 'finalized'): ?>
+                                        <button class="badge bg-success border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" data-student-id="<?php echo $row['student_id']; ?>">
+                                            <i class="fas fa-check-circle me-1"></i> Finalizado
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="badge bg-warning text-dark border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" data-student-id="<?php echo $row['student_id']; ?>">
+                                            <i class="fas fa-edit me-1"></i> Em andamento
+                                        </button>
+                                    <?php endif; ?>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item status-option <?php echo ($row['aggregated_status'] !== 'finalized') ? 'active' : ''; ?>"
+                                               href="#" data-student-id="<?php echo $row['student_id']; ?>" data-status="in_progress">
+                                                <i class="fas fa-edit me-2 text-warning"></i> Em andamento
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item status-option <?php echo ($row['aggregated_status'] === 'finalized') ? 'active' : ''; ?>"
+                                               href="#" data-student-id="<?php echo $row['student_id']; ?>" data-status="finalized">
+                                                <i class="fas fa-check-circle me-2 text-success"></i> Finalizado
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </td>
                             <td class="small text-muted">
                                 <i class="fas fa-clock me-1"></i>
@@ -243,4 +259,42 @@ function confirmDelete(id, studentName) {
         form.submit();
     }
 }
+
+document.querySelectorAll('.status-option').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+        e.preventDefault();
+        var studentId = this.dataset.studentId;
+        var newStatus = this.dataset.status;
+        var dropdownBtn = this.closest('.dropdown').querySelector('.dropdown-toggle');
+        var csrfToken = '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>';
+
+        fetch('/admin/observations/toggle-student-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ student_id: studentId, status: newStatus, csrf_token: csrfToken })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                if (data.status === 'finalized') {
+                    dropdownBtn.className = 'badge bg-success border-0 dropdown-toggle';
+                    dropdownBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Finalizado';
+                } else {
+                    dropdownBtn.className = 'badge bg-warning text-dark border-0 dropdown-toggle';
+                    dropdownBtn.innerHTML = '<i class="fas fa-edit me-1"></i> Em andamento';
+                }
+                var items = dropdownBtn.closest('.dropdown').querySelectorAll('.dropdown-item');
+                items.forEach(function(opt) {
+                    opt.classList.toggle('active', opt.dataset.status === data.status);
+                });
+            } else {
+                alert(data.message || 'Erro ao atualizar status.');
+            }
+        })
+        .catch(function() { alert('Erro de conexao. Tente novamente.'); });
+    });
+});
 </script>

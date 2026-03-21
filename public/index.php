@@ -160,6 +160,7 @@ $router->post('/admin/observations/{id}/auto-save', [AdminObservationController:
 $router->post('/admin/observations/{id}/finalize', [AdminObservationController::class, 'finalize']);
 $router->post('/admin/observations/{id}/reopen', [AdminObservationController::class, 'reopen']);
 $router->post('/admin/observations/{id}/delete', [AdminObservationController::class, 'delete']);
+$router->post('/admin/observations/toggle-student-status', [AdminObservationController::class, 'toggleStudentStatus']);
 
 // Rotas de Usuários
 $router->get('/admin/users', [AdminUserController::class, 'index']);

@@ -722,6 +722,47 @@ class Observation
         }
     }
 
+    /**
+     * Alterar status de todas as observacoes de um aluno
+     */
+    public function setStatusForStudent(int $studentId, string $status, int $userId): bool
+    {
+        try {
+            $now = date('Y-m-d H:i:s');
+
+            if ($status === 'finalized') {
+                $sql = "UPDATE observations
+                        SET status = 'finalized',
+                            finalized_at = :now,
+                            finalized_by = :user_id,
+                            updated_at = :updated_at
+                        WHERE student_id = :student_id AND status = 'in_progress'";
+                $stmt = $this->db->prepare($sql);
+                return $stmt->execute([
+                    ':now' => $now,
+                    ':user_id' => $userId,
+                    ':updated_at' => $now,
+                    ':student_id' => $studentId,
+                ]);
+            } else {
+                $sql = "UPDATE observations
+                        SET status = 'in_progress',
+                            finalized_at = NULL,
+                            finalized_by = NULL,
+                            updated_at = :updated_at
+                        WHERE student_id = :student_id AND status = 'finalized'";
+                $stmt = $this->db->prepare($sql);
+                return $stmt->execute([
+                    ':updated_at' => $now,
+                    ':student_id' => $studentId,
+                ]);
+            }
+        } catch (PDOException $e) {
+            error_log("Erro ao alterar status por aluno: " . $e->getMessage());
+            return false;
+        }
+    }
+
     private function normalizeAxisValue($value): string
     {
         if ($value === null || $value === '') {

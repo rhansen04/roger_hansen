@@ -526,6 +526,48 @@ class ObservationController
         exit;
     }
 
+    /**
+     * Toggle status de todas as observacoes de um aluno (AJAX)
+     */
+    public function toggleStudentStatus()
+    {
+        header('Content-Type: application/json');
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+        $csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($input['csrf_token'] ?? '');
+        $expected = $_SESSION['csrf_token'] ?? '';
+        if (empty($expected) || !hash_equals($expected, $csrfToken)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Token invalido.']);
+            exit;
+        }
+
+        $studentId = (int) ($input['student_id'] ?? 0);
+        $newStatus = ($input['status'] ?? '') === 'finalized' ? 'finalized' : 'in_progress';
+
+        if ($studentId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Aluno invalido.']);
+            exit;
+        }
+
+        $obsModel = new Observation();
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        $result = $obsModel->setStatusForStudent($studentId, $newStatus, $userId);
+
+        if ($result) {
+            echo json_encode([
+                'success' => true,
+                'status' => $newStatus,
+                'message' => $newStatus === 'finalized' ? 'Observacoes finalizadas.' : 'Observacoes reabertas.'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao atualizar status.']);
+        }
+        exit;
+    }
+
     private function encodeAxisField(string $fieldName): string
     {
         $raw = $_POST[$fieldName] ?? [];
