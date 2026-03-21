@@ -235,9 +235,11 @@
         <a href="/admin/classrooms?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard"></i> Turmas</a>
         <a href="/admin/students?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/students') ?>"><i class="fas fa-user-graduate"></i> Alunos</a>
         <a href="/admin/observations?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
-        <a href="/admin/descriptive-reports?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
         <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
         <a href="/admin/planning?school_id=<?= $sid ?>" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt"></i> Planejamentos</a>
+        <a href="/admin/support-materials" class="nav-link-admin <?= $isActive('/admin/support-materials') ?>"><i class="fas fa-folder-open"></i> Material de Apoio</a>
+        <a href="/admin/planning?school_id=<?= $sid ?>" class="nav-link-admin sub-item <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-clipboard-check"></i> Rotina Semanal</a>
+        <a href="/admin/descriptive-reports?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Parecer</a>
         <a href="/admin/portfolios?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfólios</a>
         <a href="/admin/image-bank?school_id=<?= $sid ?>" class="nav-link-admin <?= $isActive('/admin/image-bank') ?>"><i class="fas fa-images"></i> Banco de Imagens</a>
         <a href="/admin/planning-templates" class="nav-link-admin <?= $isActive('/admin/planning-templates') ?>"><i class="fas fa-file-alt"></i> Templates Planej.</a>
@@ -256,9 +258,9 @@
         <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
         <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
         <a href="/admin/planning" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt"></i> Planejamentos</a>
-        <a href="/admin/planning" class="nav-link-admin sub-item <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-clipboard-check"></i> Rotina Semanal</a>
         <a href="/admin/support-materials" class="nav-link-admin <?= $isActive('/admin/support-materials') ?>"><i class="fas fa-folder-open"></i> Material de Apoio</a>
-        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
+        <a href="/admin/planning" class="nav-link-admin sub-item <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-clipboard-check"></i> Rotina Semanal</a>
+        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Parecer</a>
         <a href="/admin/portfolios" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfólios</a>
         <a href="/admin/image-bank" class="nav-link-admin <?= $isActive('/admin/image-bank') ?>"><i class="fas fa-images"></i> Banco de Imagens</a>
 
@@ -267,10 +269,13 @@
         <div class="sidebar-section">Pedagógico</div>
         <a href="/admin/classrooms" class="nav-link-admin <?= $isActive('/admin/classrooms') ?>"><i class="fas fa-chalkboard"></i> Turmas</a>
         <a href="/admin/observations" class="nav-link-admin <?= $isActive('/admin/observations') ?>"><i class="fas fa-clipboard-list"></i> Observações</a>
-        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Pareceres</a>
+        <?php $planningActive = str_starts_with($uri, '/admin/planning') && !str_starts_with($uri, '/admin/planning-templates'); ?>
+        <a href="/admin/planning" class="nav-link-admin <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-calendar-alt"></i> Planejamentos</a>
+        <a href="/admin/support-materials" class="nav-link-admin <?= $isActive('/admin/support-materials') ?>"><i class="fas fa-folder-open"></i> Material de Apoio</a>
+        <a href="/admin/planning" class="nav-link-admin sub-item <?= $planningActive ? 'active' : '' ?>"><i class="fas fa-clipboard-check"></i> Rotina Semanal</a>
+        <a href="/admin/descriptive-reports" class="nav-link-admin <?= $isActive('/admin/descriptive-reports') ?>"><i class="fas fa-file-signature"></i> Parecer</a>
         <a href="/admin/portfolios" class="nav-link-admin <?= $isActive('/admin/portfolios') ?>"><i class="fas fa-book-open"></i> Portfólios</a>
-        <div class="sidebar-section">Gestão</div>
-        <a href="/admin/users" class="nav-link-admin <?= $isActive('/admin/users') ?>"><i class="fas fa-user-plus"></i> Professores</a>
+        <a href="/admin/image-bank" class="nav-link-admin <?= $isActive('/admin/image-bank') ?>"><i class="fas fa-images"></i> Banco de Imagens</a>
         <?php endif; ?>
 
         <div class="sidebar-section">Comunicação</div>

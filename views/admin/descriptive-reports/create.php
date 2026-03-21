@@ -60,7 +60,7 @@
                             <label for="year" class="form-label fw-bold">
                                 <i class="fas fa-calendar me-1 text-primary"></i> Ano <span class="text-danger">*</span>
                             </label>
-                            <input type="number" name="year" id="year" class="form-control" value="<?php echo date('Y'); ?>" min="2020" max="2030" required>
+                            <input type="number" name="year" id="year" class="form-control" value="<?php echo (int) ($selectedYear ?? date('Y')); ?>" min="2020" max="2030" required onchange="loadObservations()">
                         </div>
                     </div>
 
@@ -79,45 +79,29 @@
                         <div class="form-text">Se nao selecionada, sera detectada automaticamente.</div>
                     </div>
 
-                    <!-- Observacoes disponiveis -->
-                    <div class="mb-4" id="observationsSection" style="display:none;">
-                        <label class="form-label fw-bold">
-                            <i class="fas fa-clipboard-list me-1 text-primary"></i> Observacao Vinculada
-                        </label>
-                        <div id="observationsList">
-                            <!-- Preenchido dinamicamente -->
-                        </div>
-                        <input type="hidden" name="observation_id" id="observation_id" value="<?php echo $selectedObservationId ?? ''; ?>">
-                    </div>
-
                     <?php if (!empty($selectedStudentId) && !empty($observations)): ?>
-                    <!-- Mostrar observacoes pre-carregadas (se veio com student_id na URL) -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">
-                            <i class="fas fa-clipboard-list me-1 text-primary"></i> Observacoes Disponiveis
+                            <i class="fas fa-clipboard-list me-1 text-primary"></i> Observacoes que serao compiladas
                         </label>
+                        <div class="small text-muted mb-2">
+                            O parecer sera gerado a partir de <strong>todas</strong> as observacoes encontradas para este aluno no semestre/ano selecionado, em ordem cronologica.
+                        </div>
                         <?php foreach ($observations as $obs): ?>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="observation_id" value="<?php echo $obs['id']; ?>" id="obs_<?php echo $obs['id']; ?>"
-                                    <?php echo ($selectedObservationId == $obs['id']) ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="obs_<?php echo $obs['id']; ?>">
-                                    <strong><?php echo htmlspecialchars($obs['title'] ?? 'Observacao #' . $obs['id']); ?></strong>
-                                    <br><small class="text-muted">
-                                        <?php if (!empty($obs['observation_date'])): ?>
-                                            <?php echo date('d/m/Y', strtotime($obs['observation_date'])); ?> &middot;
-                                        <?php endif; ?>
-                                        <?php echo htmlspecialchars($obs['category'] ?? 'Geral'); ?>
-                                        <?php if (!empty($obs['semester'])): ?>
-                                            &middot; <?php echo $obs['semester']; ?>o Sem/<?php echo $obs['year']; ?>
-                                        <?php endif; ?>
-                                        <?php if (($obs['status'] ?? '') === 'finalized'): ?>
-                                            <span class="badge bg-success ms-1">Finalizada</span>
-                                        <?php endif; ?>
-                                    </small>
-                                </label>
+                            <div class="border rounded p-3 mb-2 bg-light">
+                                <strong><?php echo htmlspecialchars($obs['title'] ?? 'Observacao #' . $obs['id']); ?></strong>
+                                <br><small class="text-muted">
+                                    Criada em <?php echo date('d/m/Y H:i', strtotime($obs['created_at'])); ?>
+                                    <?php if (!empty($obs['semester'])): ?>
+                                        &middot; <?php echo $obs['semester']; ?>o Sem/<?php echo $obs['year']; ?>
+                                    <?php endif; ?>
+                                    <?php if (($obs['status'] ?? '') === 'finalized'): ?>
+                                        <span class="badge bg-success ms-1">Finalizada</span>
+                                    <?php endif; ?>
+                                </small>
                             </div>
                         <?php endforeach; ?>
-                        <div class="form-text">Selecione a observacao cujos textos serao compilados no parecer.</div>
+                        <div class="form-text">Total encontrado: <?php echo count($observations); ?> observacao(oes).</div>
                     </div>
                     <?php elseif (!empty($selectedStudentId) && empty($observations)): ?>
                     <div class="alert alert-warning mb-4">
@@ -134,7 +118,7 @@
 
                     <div class="alert alert-info small">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Como funciona:</strong> O sistema ira compilar automaticamente os textos dos eixos pedagogicos da observacao selecionada, gerando o texto base do parecer descritivo. Voce podera editar o texto na tela seguinte.
+                        <strong>Como funciona:</strong> O sistema ira compilar automaticamente os textos de todas as observacoes do aluno no semestre/ano selecionado, gerando o texto base do parecer descritivo. Voce podera editar o texto na tela seguinte.
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
@@ -153,13 +137,14 @@
 function loadObservations() {
     const studentId = document.getElementById('student_id').value;
     const semester = document.getElementById('semester').value;
+    const year = document.getElementById('year').value;
 
     if (!studentId) return;
 
-    // Redirecionar para a mesma pagina com o student_id para carregar observacoes
     const url = new URL(window.location.href);
     url.searchParams.set('student_id', studentId);
     if (semester) url.searchParams.set('semester', semester);
+    if (year) url.searchParams.set('year', year);
     window.location.href = url.toString();
 }
 </script>

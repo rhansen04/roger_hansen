@@ -88,6 +88,22 @@ class DescriptiveReport
         }
     }
 
+    public function findByStudentSemester($studentId, $semester, $year)
+    {
+        try {
+            $sql = "SELECT dr.*
+                    FROM descriptive_reports dr
+                    WHERE dr.student_id = ? AND dr.semester = ? AND dr.year = ?
+                    ORDER BY dr.created_at ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$studentId, $semester, $year]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar pareceres por aluno/semestre: " . $e->getMessage());
+            return [];
+        }
+    }
+
     /**
      * Buscar pareceres por turma
      */

@@ -17,7 +17,7 @@
 <form action="/admin/observations" method="POST" id="observationForm" novalidate>
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
     <div id="validationSummary" class="alert alert-danger d-none" role="alert"></div>
-    <!-- Dados basicos -->
+
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
             <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
@@ -29,19 +29,24 @@
                 <div class="col-md-5 mb-3">
                     <label class="form-label fw-bold">Aluno <span class="text-danger">*</span></label>
                     <?php if (!empty($selectedStudentId)):
-                        // Encontrar nome do aluno selecionado
                         $selectedName = '';
+                        $selectedPcaEnabled = false;
                         foreach ($students as $s) {
-                            if ($s['id'] == $selectedStudentId) { $selectedName = $s['name']; break; }
+                            if ($s['id'] == $selectedStudentId) {
+                                $selectedName = $s['name'];
+                                $selectedPcaEnabled = !empty($pcaEnabledByStudent[$s['id']]);
+                                break;
+                            }
                         }
                     ?>
                         <input type="hidden" name="student_id" id="student_id" value="<?php echo $selectedStudentId; ?>">
+                        <input type="hidden" id="selected_student_pca_enabled" value="<?php echo $selectedPcaEnabled ? '1' : '0'; ?>">
                         <input type="text" class="form-control" value="<?php echo htmlspecialchars($selectedName); ?>" readonly>
                     <?php else: ?>
                         <select name="student_id" id="student_id" class="form-select" required>
                             <option value="">Selecione um aluno</option>
                             <?php foreach ($students as $student): ?>
-                                <option value="<?php echo $student['id']; ?>">
+                                <option value="<?php echo $student['id']; ?>" data-pca-enabled="<?php echo !empty($pcaEnabledByStudent[$student['id']]) ? '1' : '0'; ?>">
                                     <?php echo htmlspecialchars($student['name']); ?>
                                     <?php if (!empty($student['school_name'])): ?>
                                         - <?php echo htmlspecialchars($student['school_name']); ?>
@@ -54,15 +59,15 @@
                 <div class="col-md-3 mb-3">
                     <label class="form-label fw-bold">Semestre <span class="text-danger">*</span></label>
                     <select name="semester" class="form-select" required>
-                        <option value="1" <?php echo ($defaultSemester == 1) ? 'selected' : ''; ?>>1o Semestre</option>
-                        <option value="2" <?php echo ($defaultSemester == 2) ? 'selected' : ''; ?>>2o Semestre</option>
+                        <option value="1" <?php echo ($selectedSemester == 1) ? 'selected' : ''; ?>>1o Semestre</option>
+                        <option value="2" <?php echo ($selectedSemester == 2) ? 'selected' : ''; ?>>2o Semestre</option>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Ano Letivo <span class="text-danger">*</span></label>
                     <select name="year" class="form-select" required>
                         <?php foreach ($years as $y): ?>
-                            <option value="<?php echo $y; ?>" <?php echo ($y == $currentYear) ? 'selected' : ''; ?>>
+                            <option value="<?php echo $y; ?>" <?php echo ($y == $selectedYear) ? 'selected' : ''; ?>>
                                 <?php echo $y; ?>
                             </option>
                         <?php endforeach; ?>
@@ -74,7 +79,65 @@
 
     <?php include __DIR__ . '/_questions.php'; ?>
 
-    <!-- Eixos Pedagogicos com Tabs -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
+                <i class="fas fa-history me-2"></i>Historico do Semestre
+            </h5>
+            <span class="badge bg-light text-dark"><?php echo count($observationHistory); ?> / <?php echo (int) $maxObservationsPerSemester; ?> registros</span>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted mb-3">
+                Este aluno pode receber ate <?php echo (int) $maxObservationsPerSemester; ?> observacoes por semestre. Os registros anteriores aparecem aqui para apoiar o preenchimento cumulativo.
+            </p>
+
+            <?php if (empty($selectedStudentId)): ?>
+                <div class="alert alert-light border mb-0">
+                    Selecione aluno, semestre e ano para carregar o historico existente deste periodo.
+                </div>
+            <?php elseif (empty($observationHistory)): ?>
+                <div class="alert alert-light border mb-0">
+                    Nenhuma observacao cadastrada ainda para este aluno no <?php echo (int) $selectedSemester; ?>o semestre de <?php echo (int) $selectedYear; ?>.
+                </div>
+            <?php else: ?>
+                <div class="d-grid gap-3">
+                    <?php foreach ($observationHistory as $history): ?>
+                        <?php
+                            $generalAnswers = parseAxisAnswers($history['observation_general'] ?? '', 8);
+                            $preview = '';
+                            foreach ($generalAnswers as $answer) {
+                                if (trim($answer) !== '') {
+                                    $preview = trim($answer);
+                                    break;
+                                }
+                            }
+                        ?>
+                        <div class="border rounded-3 p-3 bg-light-subtle">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <div class="fw-semibold">Observacao #<?php echo (int) $history['id']; ?></div>
+                                    <div class="small text-muted">
+                                        Criada em <?php echo date('d/m/Y H:i', strtotime($history['created_at'])); ?>
+                                        por <?php echo htmlspecialchars($history['teacher_name'] ?? 'Usuario'); ?>
+                                    </div>
+                                </div>
+                                <span class="badge <?php echo (($history['status'] ?? '') === 'finalized') ? 'bg-success' : 'bg-warning text-dark'; ?>">
+                                    <?php echo (($history['status'] ?? '') === 'finalized') ? 'Finalizada' : 'Em andamento'; ?>
+                                </span>
+                            </div>
+                            <p class="mb-2 mt-3 text-muted">
+                                <?php echo htmlspecialchars($preview !== '' ? mb_strimwidth($preview, 0, 220, '...') : 'Sem texto resumido na observacao geral.'); ?>
+                            </p>
+                            <a href="/admin/observations/<?php echo (int) $history['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i> Ver registro
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
             <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
@@ -82,11 +145,16 @@
             </h5>
         </div>
         <div class="card-body p-4">
+            <div id="pcaDisabledAlert" class="alert alert-warning d-none">
+                O eixo <strong>Programa Comunicacao Ativa (PCA)</strong> esta desabilitado para a escola deste aluno e nao sera exigido nesta observacao.
+            </div>
+
             <ul class="nav nav-tabs flex-wrap" id="axesTabs" role="tablist">
                 <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData): ?>
-                <li class="nav-item" role="presentation">
+                <li class="nav-item <?php echo ($axisData['field'] === 'axis_pca') ? 'axis-pca-nav' : ''; ?>" role="presentation">
                     <button class="nav-link <?= $first ? 'active' : '' ?>" id="<?= $axisData['tab_btn'] ?>"
-                            data-bs-toggle="tab" data-bs-target="#<?= $axisData['tab_id'] ?>" type="button" role="tab">
+                            data-bs-toggle="tab" data-bs-target="#<?= $axisData['tab_id'] ?>" type="button" role="tab"
+                            <?php echo ($axisData['field'] === 'axis_pca') ? 'data-pca-tab="1"' : ''; ?>>
                         <i class="<?= $axisData['icon'] ?> me-1"></i> <?= $axisData['name'] ?>
                     </button>
                 </li>
@@ -96,13 +164,15 @@
             <div class="tab-content pt-4" id="axesTabContent">
                 <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData): ?>
                 <div class="tab-pane fade <?= $first ? 'show active' : '' ?>" id="<?= $axisData['tab_id'] ?>" role="tabpanel"
-                     data-axis-field="<?= $axisData['field'] ?>">
+                     data-axis-field="<?= $axisData['field'] ?>"
+                     <?php echo ($axisData['field'] === 'axis_pca') ? 'data-pca-pane="1"' : ''; ?>>
                     <h6 class="fw-bold mb-3" style="color: var(--primary-color, #007e66);"><?= $axisData['name'] ?></h6>
                     <?php foreach ($axisData['questions'] as $qIdx => $question): ?>
                     <div class="mb-4 p-3 bg-light rounded border-start border-3 border-primary">
                         <label class="form-label fw-bold mb-2">
                             <span class="badge bg-primary rounded-pill me-2"><?= $qIdx + 1 ?></span>
-                            <?= htmlspecialchars($question) ?> <span class="text-danger">*</span>
+                            <?= htmlspecialchars($question) ?>
+                            <?php if ($axisData['field'] !== 'axis_pca'): ?><span class="text-danger">*</span><?php endif; ?>
                         </label>
                         <textarea name="<?= $axisData['field'] ?>[<?= $qIdx ?>]"
                                   class="form-control axis-question-field"
@@ -111,7 +181,7 @@
                                   data-axis-label="<?= htmlspecialchars($axisData['name'], ENT_QUOTES) ?>"
                                   data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
-                                  required></textarea>
+                                  <?php echo ($axisData['field'] !== 'axis_pca') ? 'required' : ''; ?>></textarea>
                         <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
                     </div>
                     <?php endforeach; ?>
@@ -121,7 +191,6 @@
         </div>
     </div>
 
-    <!-- Botoes -->
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <span class="text-danger">*</span>
@@ -137,11 +206,13 @@
 </form>
 
 <script>
-// Validacao do formulario
 (function() {
     var form = document.getElementById('observationForm');
     var studentEl = document.getElementById('student_id');
+    var semesterEl = form.querySelector('select[name="semester"]');
+    var yearEl = form.querySelector('select[name="year"]');
     var summaryEl = document.getElementById('validationSummary');
+    var pcaDisabledAlert = document.getElementById('pcaDisabledAlert');
     var params = new URLSearchParams(window.location.search);
     var focus = params.get('focus');
     var focusMap = {
@@ -154,14 +225,75 @@
     };
     var focusedAxis = focusMap[focus] || null;
 
+    function getSelectedPcaEnabled() {
+        if (!studentEl) return false;
+
+        if (studentEl.tagName === 'SELECT') {
+            var selectedOption = studentEl.options[studentEl.selectedIndex];
+            return !!(selectedOption && selectedOption.getAttribute('data-pca-enabled') === '1');
+        }
+
+        var hiddenPcaInput = document.getElementById('selected_student_pca_enabled');
+        return !!(hiddenPcaInput && hiddenPcaInput.value === '1');
+    }
+
+    function isFieldRequired(fieldName) {
+        if (fieldName === 'axis_pca') {
+            return false;
+        }
+
+        if (!focusedAxis) {
+            return true;
+        }
+
+        return fieldName === focusedAxis;
+    }
+
+    function syncPcaVisibility() {
+        var pcaEnabled = getSelectedPcaEnabled();
+        var pcaNav = document.querySelector('.axis-pca-nav');
+        var pcaPane = document.querySelector('[data-pca-pane="1"]');
+        var pcaTab = document.querySelector('[data-pca-tab="1"]');
+        var pcaFields = document.querySelectorAll('textarea[data-axis="axis_pca"]');
+
+        if (pcaDisabledAlert) {
+            pcaDisabledAlert.classList.toggle('d-none', pcaEnabled);
+        }
+
+        if (pcaNav) pcaNav.classList.toggle('d-none', !pcaEnabled);
+        if (pcaPane) pcaPane.classList.toggle('d-none', !pcaEnabled);
+        if (pcaTab) pcaTab.disabled = !pcaEnabled;
+
+        pcaFields.forEach(function(field) {
+            field.disabled = !pcaEnabled;
+            field.required = false;
+
+            if (!pcaEnabled) {
+                field.value = '';
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!pcaEnabled && focusedAxis === 'axis_pca') {
+            focusedAxis = null;
+        }
+
+        if (!pcaEnabled && pcaPane && pcaPane.classList.contains('show')) {
+            var firstVisibleTab = document.querySelector('#axesTabs .nav-link:not([disabled])');
+            if (firstVisibleTab) {
+                new bootstrap.Tab(firstVisibleTab).show();
+            }
+        }
+    }
+
     function syncRequiredFields() {
-        var textareas = document.querySelectorAll('.axis-question-field');
-        textareas.forEach(function(textarea) {
-            if (!focusedAxis) {
-                textarea.required = true;
+        document.querySelectorAll('.axis-question-field').forEach(function(textarea) {
+            if (textarea.disabled) {
+                textarea.required = false;
                 return;
             }
-            textarea.required = (textarea.getAttribute('data-axis') === focusedAxis);
+
+            textarea.required = isFieldRequired(textarea.getAttribute('data-axis'));
         });
     }
 
@@ -186,8 +318,19 @@
         }
     }
 
+    function reloadWithSelection() {
+        if (!studentEl || !studentEl.value || studentEl.tagName !== 'SELECT') return;
+
+        var url = new URL(window.location.href);
+        url.searchParams.set('student_id', studentEl.value);
+        if (semesterEl && semesterEl.value) url.searchParams.set('semester', semesterEl.value);
+        if (yearEl && yearEl.value) url.searchParams.set('year', yearEl.value);
+        window.location.href = url.toString();
+    }
+
     function validateForm() {
         clearValidationState();
+        syncPcaVisibility();
         syncRequiredFields();
 
         var missing = [];
@@ -200,7 +343,7 @@
         }
 
         document.querySelectorAll('.axis-question-field').forEach(function(textarea) {
-            if (!textarea.required) return;
+            if (!textarea.required || textarea.disabled) return;
             if (textarea.value.trim()) return;
 
             textarea.classList.add('is-invalid');
@@ -243,7 +386,14 @@
         return false;
     }
 
+    syncPcaVisibility();
     syncRequiredFields();
+
+    if (studentEl && studentEl.tagName === 'SELECT') {
+        studentEl.addEventListener('change', reloadWithSelection);
+    }
+    if (semesterEl) semesterEl.addEventListener('change', reloadWithSelection);
+    if (yearEl) yearEl.addEventListener('change', reloadWithSelection);
 
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(tabButton) {
         tabButton.addEventListener('shown.bs.tab', function(event) {
@@ -273,14 +423,13 @@
         });
 
         field.addEventListener('change', function() {
-            if (field.value.trim()) {
+            if (!field.disabled && field.value.trim()) {
                 field.classList.remove('is-invalid');
             }
         });
     });
 })();
 
-// Select2 para busca de alunos (se disponivel e nao for hidden)
 var studentSelect = document.querySelector('select#student_id');
 if (studentSelect && typeof jQuery !== 'undefined' && jQuery.fn.select2) {
     jQuery(studentSelect).select2({
@@ -289,7 +438,6 @@ if (studentSelect && typeof jQuery !== 'undefined' && jQuery.fn.select2) {
     });
 }
 
-// Ativar tab via parametro ?focus= da URL
 (function() {
     var params = new URLSearchParams(window.location.search);
     var focus = params.get('focus');
@@ -305,7 +453,7 @@ if (studentSelect && typeof jQuery !== 'undefined' && jQuery.fn.select2) {
         var tabId = tabMap[focus];
         if (tabId) {
             var tabEl = document.getElementById(tabId);
-            if (tabEl) {
+            if (tabEl && !tabEl.disabled) {
                 var tab = new bootstrap.Tab(tabEl);
                 tab.show();
             }

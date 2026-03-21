@@ -24,7 +24,6 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         </h2>
     </div>
     <div class="d-flex align-items-center gap-3">
-        <!-- Auto-save indicator -->
         <span id="autoSaveIndicator" class="text-muted small" style="display: none;">
             <i class="fas fa-clock me-1"></i>
             <span id="autoSaveText">Salvo automaticamente</span>
@@ -45,7 +44,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 <form action="/admin/observations/<?php echo $observation['id']; ?>/update" method="POST" id="observationForm" novalidate>
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
     <div id="validationSummary" class="alert alert-danger d-none" role="alert"></div>
-    <!-- Dados basicos -->
+
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
             <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
@@ -60,6 +59,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                         <option value="">Selecione um aluno</option>
                         <?php foreach ($students as $student): ?>
                             <option value="<?php echo $student['id']; ?>"
+                                data-pca-enabled="<?php echo !empty($pcaEnabledByStudent[$student['id']]) ? '1' : '0'; ?>"
                                 <?php echo ($observation['student_id'] == $student['id']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($student['name']); ?>
                                 <?php if (!empty($student['school_name'])): ?>
@@ -97,7 +97,6 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                 </div>
             </div>
 
-            <!-- Info de criacao -->
             <div class="row">
                 <div class="col-md-4">
                     <small class="text-muted">
@@ -120,7 +119,62 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 
     <?php include __DIR__ . '/_questions.php'; ?>
 
-    <!-- Eixos Pedagogicos com Tabs -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
+                <i class="fas fa-history me-2"></i>Historico do Semestre
+            </h5>
+            <span class="badge bg-light text-dark"><?php echo count($observationHistory); ?> / <?php echo (int) $maxObservationsPerSemester; ?> registros</span>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted mb-3">
+                Este registro faz parte de um conjunto cumulativo de observacoes do aluno neste semestre.
+            </p>
+
+            <?php if (empty($observationHistory)): ?>
+                <div class="alert alert-light border mb-0">
+                    Nenhum outro registro encontrado para este aluno neste semestre.
+                </div>
+            <?php else: ?>
+                <div class="d-grid gap-3">
+                    <?php foreach ($observationHistory as $history): ?>
+                        <?php
+                            $generalAnswers = parseAxisAnswers($history['observation_general'] ?? '', 8);
+                            $preview = '';
+                            foreach ($generalAnswers as $answer) {
+                                if (trim($answer) !== '') {
+                                    $preview = trim($answer);
+                                    break;
+                                }
+                            }
+                            $isCurrentHistory = ((int) $history['id'] === (int) $observation['id']);
+                        ?>
+                        <div class="border rounded-3 p-3 <?php echo $isCurrentHistory ? 'border-primary bg-primary-subtle' : 'bg-light-subtle'; ?>">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <div class="fw-semibold">
+                                        Observacao #<?php echo (int) $history['id']; ?>
+                                        <?php if ($isCurrentHistory): ?><span class="badge bg-primary ms-2">Registro atual</span><?php endif; ?>
+                                    </div>
+                                    <div class="small text-muted">
+                                        Criada em <?php echo date('d/m/Y H:i', strtotime($history['created_at'])); ?>
+                                        por <?php echo htmlspecialchars($history['teacher_name'] ?? 'Usuario'); ?>
+                                    </div>
+                                </div>
+                                <span class="badge <?php echo (($history['status'] ?? '') === 'finalized') ? 'bg-success' : 'bg-warning text-dark'; ?>">
+                                    <?php echo (($history['status'] ?? '') === 'finalized') ? 'Finalizada' : 'Em andamento'; ?>
+                                </span>
+                            </div>
+                            <p class="mb-0 mt-3 text-muted">
+                                <?php echo htmlspecialchars($preview !== '' ? mb_strimwidth($preview, 0, 220, '...') : 'Sem texto resumido na observacao geral.'); ?>
+                            </p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
             <h5 class="mb-0 fw-bold" style="color: var(--primary-color, #007e66);">
@@ -128,11 +182,16 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
             </h5>
         </div>
         <div class="card-body p-4">
+            <div id="pcaDisabledAlert" class="alert alert-warning d-none">
+                O eixo <strong>Programa Comunicacao Ativa (PCA)</strong> esta desabilitado para a escola deste aluno e nao sera exigido neste registro.
+            </div>
+
             <ul class="nav nav-tabs flex-wrap" id="axesTabs" role="tablist">
                 <?php $first = true; foreach ($axisQuestions as $axisKey => $axisData): ?>
-                <li class="nav-item" role="presentation">
+                <li class="nav-item <?php echo ($axisData['field'] === 'axis_pca') ? 'axis-pca-nav' : ''; ?>" role="presentation">
                     <button class="nav-link <?= $first ? 'active' : '' ?>" id="<?= $axisData['tab_btn'] ?>"
-                            data-bs-toggle="tab" data-bs-target="#<?= $axisData['tab_id'] ?>" type="button" role="tab">
+                            data-bs-toggle="tab" data-bs-target="#<?= $axisData['tab_id'] ?>" type="button" role="tab"
+                            <?php echo ($axisData['field'] === 'axis_pca') ? 'data-pca-tab="1"' : ''; ?>>
                         <i class="<?= $axisData['icon'] ?> me-1"></i> <?= $axisData['name'] ?>
                     </button>
                 </li>
@@ -144,13 +203,15 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                     $savedAnswers = parseAxisAnswers($observation[$axisData['field']] ?? '', count($axisData['questions']));
                 ?>
                 <div class="tab-pane fade <?= $first ? 'show active' : '' ?>" id="<?= $axisData['tab_id'] ?>" role="tabpanel"
-                     data-axis-field="<?= $axisData['field'] ?>">
+                     data-axis-field="<?= $axisData['field'] ?>"
+                     <?php echo ($axisData['field'] === 'axis_pca') ? 'data-pca-pane="1"' : ''; ?>>
                     <h6 class="fw-bold mb-3" style="color: var(--primary-color, #007e66);"><?= $axisData['name'] ?></h6>
                     <?php foreach ($axisData['questions'] as $qIdx => $question): ?>
                     <div class="mb-4 p-3 bg-light rounded border-start border-3 border-primary">
                         <label class="form-label fw-bold mb-2">
                             <span class="badge bg-primary rounded-pill me-2"><?= $qIdx + 1 ?></span>
-                            <?= htmlspecialchars($question) ?> <span class="text-danger">*</span>
+                            <?= htmlspecialchars($question) ?>
+                            <?php if ($axisData['field'] !== 'axis_pca'): ?><span class="text-danger">*</span><?php endif; ?>
                         </label>
                         <textarea name="<?= $axisData['field'] ?>[<?= $qIdx ?>]"
                                   class="form-control axis-question-field"
@@ -160,7 +221,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
                                   data-question="<?= htmlspecialchars($question, ENT_QUOTES) ?>"
                                   placeholder="Sua resposta..."
                                   <?php echo $readonlyAttr; ?>
-                                  <?php echo !$isFinalized ? 'required' : ''; ?>><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
+                                  <?php echo (!$isFinalized && $axisData['field'] !== 'axis_pca') ? 'required' : ''; ?>><?= htmlspecialchars($savedAnswers[$qIdx] ?? '') ?></textarea>
                         <?php if (!$isFinalized): ?>
                             <div class="invalid-feedback">Preencha esta pergunta antes de salvar.</div>
                         <?php endif; ?>
@@ -172,7 +233,6 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         </div>
     </div>
 
-    <!-- Botoes -->
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <a href="/admin/observations/<?php echo $observation['id']; ?>" class="btn btn-light">
@@ -193,7 +253,6 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 </form>
 
 <?php if (!$isFinalized): ?>
-<!-- Modal de Confirmacao de Finalizacao -->
 <div class="modal fade" id="finalizeModal" tabindex="-1" aria-labelledby="finalizeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -234,6 +293,51 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
     const indicator = document.getElementById('autoSaveIndicator');
     const indicatorText = document.getElementById('autoSaveText');
     const summaryEl = document.getElementById('validationSummary');
+    const studentEl = document.getElementById('student_id');
+    const pcaDisabledAlert = document.getElementById('pcaDisabledAlert');
+
+    function getSelectedPcaEnabled() {
+        if (!studentEl) return false;
+        const selectedOption = studentEl.options[studentEl.selectedIndex];
+        return !!(selectedOption && selectedOption.getAttribute('data-pca-enabled') === '1');
+    }
+
+    function syncPcaVisibility() {
+        const pcaEnabled = getSelectedPcaEnabled();
+        const pcaNav = document.querySelector('.axis-pca-nav');
+        const pcaPane = document.querySelector('[data-pca-pane="1"]');
+        const pcaTab = document.querySelector('[data-pca-tab="1"]');
+        const pcaFields = document.querySelectorAll('textarea[data-axis="axis_pca"]');
+
+        if (pcaDisabledAlert) {
+            pcaDisabledAlert.classList.toggle('d-none', pcaEnabled);
+        }
+
+        if (pcaNav) pcaNav.classList.toggle('d-none', !pcaEnabled);
+        if (pcaPane) pcaPane.classList.toggle('d-none', !pcaEnabled);
+        if (pcaTab) pcaTab.disabled = !pcaEnabled;
+
+        pcaFields.forEach(function(field) {
+            field.disabled = !pcaEnabled || isFinalized;
+            field.required = false;
+            if (!pcaEnabled) {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!pcaEnabled && pcaPane && pcaPane.classList.contains('show')) {
+            const firstVisibleTab = document.querySelector('#axesTabs .nav-link:not([disabled])');
+            if (firstVisibleTab) {
+                new bootstrap.Tab(firstVisibleTab).show();
+            }
+        }
+    }
+
+    if (studentEl) {
+        studentEl.addEventListener('change', syncPcaVisibility);
+    }
+
+    syncPcaVisibility();
 
     if (isFinalized) return;
 
@@ -242,7 +346,9 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 
     function getAxisValues(axisField) {
         const textareas = document.querySelectorAll('textarea[data-axis="' + axisField + '"]');
-        return Array.from(textareas).map(function(t) { return t.value.trim(); });
+        return Array.from(textareas)
+            .filter(function(t) { return !t.disabled; })
+            .map(function(t) { return t.value.trim(); });
     }
 
     function clearValidationState() {
@@ -268,20 +374,20 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
 
     function validateForm() {
         clearValidationState();
+        syncPcaVisibility();
 
         const missing = [];
-        const student = document.getElementById('student_id');
 
-        if (student && !student.disabled && !student.value) {
-            student.classList.add('is-invalid');
+        if (studentEl && !studentEl.disabled && !studentEl.value) {
+            studentEl.classList.add('is-invalid');
             missing.push({
-                field: student,
+                field: studentEl,
                 label: 'Selecione um aluno.'
             });
         }
 
         document.querySelectorAll('.axis-question-field[required]').forEach(function(textarea) {
-            if (textarea.value.trim()) return;
+            if (textarea.disabled || textarea.value.trim()) return;
 
             textarea.classList.add('is-invalid');
             missing.push({
@@ -294,7 +400,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
             return true;
         }
 
-        if (missing[0].field !== student) {
+        if (missing[0].field !== studentEl) {
             activateTabForField(missing[0].field);
         }
 
@@ -362,6 +468,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         });
 
         field.addEventListener('blur', function() {
+            if (this.disabled) return;
             const axis = this.getAttribute('data-axis');
             if (saveTimeouts[axis]) clearTimeout(saveTimeouts[axis]);
             autoSaveAxis(axis);
@@ -376,7 +483,7 @@ $disabledAttr = $isFinalized ? 'disabled' : '';
         }
     });
 
-    var form = document.getElementById('observationForm');
+    const form = document.getElementById('observationForm');
     if (form) {
         form.addEventListener('submit', function(e) {
             if (!validateForm()) {

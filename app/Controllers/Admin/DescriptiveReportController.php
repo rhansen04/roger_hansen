@@ -71,12 +71,17 @@ Equipe Pedagogica';
         $classrooms = $classroomModel->all();
 
         $selectedStudentId = $_GET['student_id'] ?? null;
-        $selectedObservationId = $_GET['observation_id'] ?? null;
+        $selectedSemester = !empty($_GET['semester']) ? (int) $_GET['semester'] : null;
+        $selectedYear = !empty($_GET['year']) ? (int) $_GET['year'] : (int) date('Y');
 
-        // Buscar observacoes disponiveis para o aluno selecionado
+        // Buscar observacoes do periodo para o aluno selecionado
         $observations = [];
         if ($selectedStudentId) {
-            $observations = $obsModel->findByStudent($selectedStudentId);
+            if ($selectedSemester) {
+                $observations = $obsModel->findByStudentAndSemester((int) $selectedStudentId, $selectedSemester, $selectedYear);
+            } else {
+                $observations = $obsModel->findByStudent($selectedStudentId);
+            }
         }
 
         return $this->render('descriptive-reports/create', [
@@ -84,7 +89,8 @@ Equipe Pedagogica';
             'classrooms' => $classrooms,
             'observations' => $observations,
             'selectedStudentId' => $selectedStudentId,
-            'selectedObservationId' => $selectedObservationId
+            'selectedSemester' => $selectedSemester,
+            'selectedYear' => $selectedYear
         ]);
     }
 
@@ -105,31 +111,11 @@ Equipe Pedagogica';
         $semester = (int)$_POST['semester'];
         $year = (int)$_POST['year'];
         $classroomId = !empty($_POST['classroom_id']) ? (int)$_POST['classroom_id'] : null;
-        $observationId = !empty($_POST['observation_id']) ? (int)$_POST['observation_id'] : null;
-
-        // Compilar texto a partir da observacao
-        $studentText = '';
-        if ($observationId) {
-            $obsModel = new Observation();
-            $observation = $obsModel->find($observationId);
-
-            if ($observation) {
-                $studentText = $this->compileObservationText($observation);
-            }
-        } else {
-            // Se nao foi selecionada uma observacao especifica, buscar a mais recente do semestre
-            $obsModel = new Observation();
-            $observations = $obsModel->findByStudent($studentId);
-
-            foreach ($observations as $obs) {
-                if (isset($obs['semester']) && $obs['semester'] == $semester
-                    && isset($obs['year']) && $obs['year'] == $year) {
-                    $studentText = $this->compileObservationText($obs);
-                    $observationId = $obs['id'];
-                    break;
-                }
-            }
-        }
+        $obsModel = new Observation();
+        $observations = $obsModel->findByStudentAndSemester($studentId, $semester, $year);
+        $studentText = $obsModel->compileSemesterText($studentId, $semester, $year);
+        $latestObservation = !empty($observations) ? end($observations) : null;
+        $observationId = !empty($latestObservation['id']) ? (int) $latestObservation['id'] : null;
 
         // Detectar turma do aluno se nao informada
         if (!$classroomId) {
@@ -492,29 +478,21 @@ Equipe Pedagogica';
             exit;
         }
 
-        if (empty($report['observation_id'])) {
-            echo json_encode(['success' => false, 'error' => 'Nenhuma observacao vinculada a este parecer.']);
-            exit;
-        }
-
         $obsModel = new Observation();
-        $observation = $obsModel->find($report['observation_id']);
-
-        if (!$observation) {
-            echo json_encode(['success' => false, 'error' => 'Observacao vinculada nao encontrada.']);
-            exit;
-        }
-
-        // Compilar texto dos eixos
-        $studentText = $this->compileObservationText($observation);
+        $observations = $obsModel->findByStudentAndSemester((int) $report['student_id'], (int) $report['semester'], (int) $report['year']);
+        $studentText = $obsModel->compileSemesterText((int) $report['student_id'], (int) $report['semester'], (int) $report['year']);
 
         if (empty($studentText)) {
-            echo json_encode(['success' => false, 'error' => 'A observacao vinculada nao possui texto nos eixos.']);
+            echo json_encode(['success' => false, 'error' => 'Nao existem observacoes com texto para este aluno no semestre informado.']);
             exit;
         }
+
+        $latestObservation = !empty($observations) ? end($observations) : null;
+        $latestObservationId = !empty($latestObservation['id']) ? (int) $latestObservation['id'] : null;
 
         // Atualizar o parecer
         $reportModel->update($id, [
+            'observation_id' => $latestObservationId,
             'student_text' => $studentText,
             'student_text_edited' => $studentText,
         ]);
@@ -564,33 +542,6 @@ Equipe Pedagogica';
             echo json_encode(['error' => 'Erro interno ao corrigir texto.']);
         }
         exit;
-    }
-
-    /**
-     * Compila o texto de um parecer a partir dos campos de eixo de uma observacao.
-     */
-    private function compileObservationText(array $observation): string
-    {
-        $parts = [];
-        if (!empty($observation['observation_general'])) {
-            $parts[] = $observation['observation_general'];
-        }
-        if (!empty($observation['axis_movement'])) {
-            $parts[] = "Atividade de Movimento:\n" . $observation['axis_movement'];
-        }
-        if (!empty($observation['axis_manual'])) {
-            $parts[] = "Atividade Manual:\n" . $observation['axis_manual'];
-        }
-        if (!empty($observation['axis_music'])) {
-            $parts[] = "Atividade Musical:\n" . $observation['axis_music'];
-        }
-        if (!empty($observation['axis_stories'])) {
-            $parts[] = "Atividade de Contos:\n" . $observation['axis_stories'];
-        }
-        if (!empty($observation['axis_pca'])) {
-            $parts[] = "Programa Comunicacao Ativa (PCA):\n" . $observation['axis_pca'];
-        }
-        return implode("\n\n", $parts);
     }
 
     protected function render($view, $data = [])

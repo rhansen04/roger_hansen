@@ -129,6 +129,16 @@
                                 <span class="badge bg-info"><?php echo $school['students_count']; ?> aluno<?php echo $school['students_count'] != 1 ? 's' : ''; ?></span>
                             </p>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Programa Comunicacao Ativa (PCA)</label>
+                            <p class="mb-0">
+                                <?php if (!empty($school['pca_enabled'])): ?>
+                                    <span class="badge bg-success">Habilitado</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Desabilitado</span>
+                                <?php endif; ?>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

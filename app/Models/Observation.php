@@ -80,10 +80,13 @@ class Observation
             $sql = "SELECT o.*,
                            COALESCE(u.name, 'Usuario desconhecido') as teacher_name,
                            COALESCE(s.name, 'Aluno nao encontrado') as student_name,
+                           s.school_id,
+                           COALESCE(sch.pca_enabled, 0) as school_pca_enabled,
                            COALESCE(uf.name, '') as finalized_by_name
                     FROM observations o
                     LEFT JOIN users u ON o.user_id = u.id
                     LEFT JOIN students s ON o.student_id = s.id
+                    LEFT JOIN schools sch ON s.school_id = sch.id
                     LEFT JOIN users uf ON o.finalized_by = uf.id
                     WHERE o.id = ?";
             $stmt = $this->db->prepare($sql);
@@ -356,6 +359,26 @@ class Observation
         }
     }
 
+    public function countForStudentSemester($studentId, $semester, $year, $excludeId = null): int
+    {
+        try {
+            $sql = "SELECT COUNT(*) FROM observations WHERE student_id = ? AND semester = ? AND year = ?";
+            $params = [$studentId, $semester, $year];
+
+            if ($excludeId !== null) {
+                $sql .= " AND id != ?";
+                $params[] = $excludeId;
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return (int) $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Erro ao contar observacoes por aluno/semestre: " . $e->getMessage());
+            return 0;
+        }
+    }
+
     /**
      * Listar com filtros avancados
      */
@@ -596,5 +619,67 @@ class Observation
             error_log("Erro ao verificar existencia: " . $e->getMessage());
             return null;
         }
+    }
+
+    public function compileSemesterText($studentId, $semester, $year): string
+    {
+        $observations = $this->findByStudentAndSemester($studentId, $semester, $year);
+        $parts = [];
+
+        foreach ($observations as $observation) {
+            $compiled = $this->compileObservationText($observation);
+            if ($compiled !== '') {
+                $parts[] = $compiled;
+            }
+        }
+
+        return implode("\n\n", $parts);
+    }
+
+    public function compileObservationText(array $observation): string
+    {
+        $parts = [];
+
+        $general = $this->normalizeAxisValue($observation['observation_general'] ?? '');
+        if ($general !== '') {
+            $parts[] = $general;
+        }
+
+        $axes = [
+            'axis_movement' => 'Atividade de Movimento',
+            'axis_manual' => 'Atividade Manual',
+            'axis_music' => 'Atividade Musical',
+            'axis_stories' => 'Atividade de Contos',
+            'axis_pca' => 'Programa Comunicacao Ativa (PCA)',
+        ];
+
+        foreach ($axes as $field => $label) {
+            $text = $this->normalizeAxisValue($observation[$field] ?? '');
+            if ($text !== '') {
+                $parts[] = $label . ":\n" . $text;
+            }
+        }
+
+        return implode("\n\n", $parts);
+    }
+
+    private function normalizeAxisValue($value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        $decoded = json_decode((string) $value, true);
+        if (is_array($decoded)) {
+            $items = array_values(array_filter(array_map(static function ($item) {
+                return trim((string) $item);
+            }, $decoded), static function ($item) {
+                return $item !== '';
+            }));
+
+            return implode(' ', $items);
+        }
+
+        return trim((string) $value);
     }
 }

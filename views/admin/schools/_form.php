@@ -143,6 +143,18 @@
                         </select>
                         <small class="text-muted">Status do contrato da escola</small>
                     </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="pca_enabled" name="pca_enabled" value="1"
+                                <?php echo (!empty($school['pca_enabled'])) ? 'checked' : ''; ?>>
+                            <label class="form-check-label fw-semibold" for="pca_enabled">
+                                Habilitar Programa Comunicacao Ativa (PCA)
+                            </label>
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            Quando desabilitado, o eixo PCA nao aparece para preenchimento nas observacoes da escola.
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>

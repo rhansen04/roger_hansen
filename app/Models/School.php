@@ -53,9 +53,9 @@ class School
     {
         try {
             $sql = "INSERT INTO schools (name, city, state, address, contact_person, phone, email,
-                    contract_start_date, contract_end_date, logo_url, status, created_at, updated_at)
+                    contract_start_date, contract_end_date, logo_url, status, pca_enabled, created_at, updated_at)
                     VALUES (:name, :city, :state, :address, :contact_person, :phone, :email,
-                    :contract_start_date, :contract_end_date, :logo_url, :status, :created_at, :updated_at)";
+                    :contract_start_date, :contract_end_date, :logo_url, :status, :pca_enabled, :created_at, :updated_at)";
 
             $stmt = $this->db->prepare($sql);
             $now = date('Y-m-d H:i:s');
@@ -72,6 +72,7 @@ class School
                 ':contract_end_date' => $data['contract_end_date'] ?? null,
                 ':logo_url' => $data['logo_url'] ?? null,
                 ':status' => $data['status'] ?? 'active',
+                ':pca_enabled' => !empty($data['pca_enabled']) ? 1 : 0,
                 ':created_at' => $now,
                 ':updated_at' => $now
             ]);
@@ -101,6 +102,7 @@ class School
                         contract_end_date = :contract_end_date,
                         logo_url = :logo_url,
                         status = :status,
+                        pca_enabled = :pca_enabled,
                         updated_at = :updated_at
                     WHERE id = :id";
 
@@ -119,6 +121,7 @@ class School
                 ':contract_end_date' => $data['contract_end_date'] ?? null,
                 ':logo_url' => $data['logo_url'] ?? null,
                 ':status' => $data['status'] ?? 'active',
+                ':pca_enabled' => !empty($data['pca_enabled']) ? 1 : 0,
                 ':updated_at' => date('Y-m-d H:i:s')
             ]);
         } catch (PDOException $e) {
@@ -211,5 +214,11 @@ class School
             error_log("Erro ao buscar alunos da escola: " . $e->getMessage());
             return [];
         }
+    }
+
+    public function isPcaEnabled($schoolId): bool
+    {
+        $school = $this->find($schoolId);
+        return !empty($school['pca_enabled']);
     }
 }

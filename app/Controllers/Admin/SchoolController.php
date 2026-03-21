@@ -100,6 +100,7 @@ class SchoolController
             'contract_start_date' => $contractStart ?: null,
             'contract_end_date' => $contractEnd ?: null,
             'status' => $_POST['status'] ?? 'active',
+            'pca_enabled' => !empty($_POST['pca_enabled']) ? 1 : 0,
             'logo_url' => null
         ];
 
@@ -224,6 +225,7 @@ class SchoolController
             'contract_start_date' => $contractStart ?: null,
             'contract_end_date' => $contractEnd ?: null,
             'status' => $_POST['status'] ?? 'active',
+            'pca_enabled' => !empty($_POST['pca_enabled']) ? 1 : 0,
             'logo_url' => $school['logo_url'] ?? null
         ];
 
