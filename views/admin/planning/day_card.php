@@ -32,7 +32,6 @@
 
     <?php if (!empty($sections)):
         foreach ($sections as $si => $section):
-            // Rename "Eixo de Vivencias" / "Eixo da Vivencia" -> "Eixo de Atividades"
             $sectionTitle = $section['title'];
             $sectionTitle = str_ireplace('Eixo de Vivências', 'Eixo de Atividades', $sectionTitle);
             $sectionTitle = str_ireplace('Eixo da Vivência', 'Eixo de Atividades', $sectionTitle);
@@ -61,29 +60,13 @@
                         $selectedIndices = $decoded['selected'] ?? [];
                     }
 
-                    // Detect if this field label matches a specific eixo (for filtering objectives)
-                    $eixoMap = ['manual' => 'Manual', 'musical' => 'Musical', 'movimento' => 'Movimento', 'contos' => 'Contos', 'pca' => 'PCA'];
-                    $fieldEixo = '';
-
-                    // Rename eixo labels
                     $fieldLabel = $field['label'];
                     $fieldLabel = str_ireplace('Eixo de Vivências', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo da Vivência', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo de Vivencias', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo da Vivencia', 'Eixo de Atividades', $fieldLabel);
-
-                    foreach ($eixoMap as $eixoKey => $eixoName) {
-                        if (stripos($fieldLabel, $eixoName) !== false || stripos($field['label'], $eixoName) !== false) {
-                            $fieldEixo = $eixoKey;
-                            break;
-                        }
-                    }
-
-                    // Detect if this is an eixo/axis radio field -> render as btn-group toggle
-                    $isEixoRadio = ($field['field_type'] === 'radio' &&
-                        (stripos($fieldLabel, 'eixo') !== false || stripos($field['label'], 'eixo') !== false));
             ?>
-                <div class="mb-3" <?= $fieldEixo ? 'data-eixo-group="' . $fieldEixo . '"' : '' ?>>
+                <div class="mb-3">
                     <input type="hidden" name="answer_sections[<?= $field['id'] ?>]" value="<?= $section['id'] ?>">
                     <label class="form-label fw-bold">
                         <?= htmlspecialchars($fieldLabel) ?>
@@ -94,6 +77,8 @@
                     <?php endif; ?>
 
                     <?php
+                    $isEixoRadio = ($field['field_type'] === 'radio' &&
+                        (stripos($fieldLabel, 'eixo') !== false || stripos($field['label'], 'eixo') !== false));
 
                     switch ($field['field_type']):
                         case 'text': ?>
@@ -125,14 +110,13 @@
                         case 'radio':
                             $options = json_decode($field['options_json'] ?? '[]', true) ?: [];
                             if ($isEixoRadio): ?>
-                            <div class="btn-group flex-wrap" role="group" data-eixo-selector="true">
+                            <div class="btn-group flex-wrap" role="group">
                                 <?php foreach ($options as $oi => $opt):
-                                    // Rename eixo option labels too
                                     $optLabel = str_ireplace('Vivência', 'Atividade', $opt);
                                     $optLabel = str_ireplace('Vivencia', 'Atividade', $optLabel);
                                     $isChecked = ($answerText === $opt);
                                 ?>
-                                <input type="radio" class="btn-check eixo-radio" name="<?= $fieldName ?>"
+                                <input type="radio" class="btn-check" name="<?= $fieldName ?>"
                                     value="<?= htmlspecialchars($opt) ?>" id="f<?= $field['id'] ?>_<?= $oi ?>"
                                     autocomplete="off" <?= $isChecked ? 'checked' : '' ?>>
                                 <label class="btn btn-outline-primary" for="f<?= $field['id'] ?>_<?= $oi ?>">
@@ -179,7 +163,6 @@
         </div>
     <?php endif; ?>
 
-    <!-- Action buttons -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body d-flex justify-content-between">
             <a href="/admin/planning/<?= $submission['id'] ?>/days" class="btn btn-light">
@@ -191,38 +174,3 @@
         </div>
     </div>
 </form>
-
-<script>
-// R3-04: Filtrar objetivos de aprendizagem por eixo selecionado
-document.addEventListener('DOMContentLoaded', function() {
-    var eixoRadios = document.querySelectorAll('.eixo-radio');
-    var eixoGroups = document.querySelectorAll('[data-eixo-group]');
-
-    if (eixoRadios.length === 0 || eixoGroups.length === 0) return;
-
-    function filterByEixo(selectedValue) {
-        if (!selectedValue) {
-            eixoGroups.forEach(function(el) { el.style.display = ''; });
-            return;
-        }
-        var sv = selectedValue.toLowerCase();
-        var eixoMap = {manual:'manual', manuais:'manual', musical:'musical', musica:'musical', movimento:'movimento', contos:'contos', pca:'pca'};
-        var matchKey = '';
-        for (var k in eixoMap) {
-            if (sv.indexOf(k) !== -1) { matchKey = eixoMap[k]; break; }
-        }
-        eixoGroups.forEach(function(el) {
-            if (!matchKey) { el.style.display = ''; return; }
-            el.style.display = (el.getAttribute('data-eixo-group') === matchKey) ? '' : 'none';
-        });
-    }
-
-    eixoRadios.forEach(function(radio) {
-        radio.addEventListener('change', function() { filterByEixo(this.value); });
-    });
-
-    // Apply initial filter if an eixo is already selected
-    var checked = document.querySelector('.eixo-radio:checked');
-    if (checked) filterByEixo(checked.value);
-});
-</script>

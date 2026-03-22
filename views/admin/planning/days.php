@@ -61,22 +61,13 @@ $statusLabel = ['draft' => 'Rascunho', 'submitted' => 'Enviado', 'registered' =>
             <i class="fas fa-calendar-day me-2"></i>DIAS DO PLANEJAMENTO
         </h2>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <a href="/admin/planning/<?= $submission['id'] ?>" class="btn btn-outline-primary btn-sm">
+    <div>
+        <a href="/admin/planning/<?= $submission['id'] ?>" class="btn btn-outline-primary btn-sm me-1">
             <i class="fas fa-eye me-1"></i> Ver Completo
         </a>
         <a href="/admin/planning/<?= $submission['id'] ?>/routine" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-clock me-1"></i> Rotina Semanal
         </a>
-        <?php if ($submission['status'] === 'submitted'): ?>
-        <a href="/admin/planning/<?= $submission['id'] ?>/registration" class="btn btn-success btn-sm">
-            <i class="fas fa-clipboard-check me-1"></i> Registro Pos-Vivencia
-        </a>
-        <?php elseif ($submission['status'] === 'registered'): ?>
-        <a href="/admin/planning/<?= $submission['id'] ?>/registration" class="btn btn-outline-success btn-sm">
-            <i class="fas fa-check-double me-1"></i> Ver Registro
-        </a>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -101,36 +92,34 @@ $statusLabel = ['draft' => 'Rascunho', 'submitted' => 'Enviado', 'registered' =>
         $currentWeek = $weekNum;
 
         // Cores e icones por status
-        $cardClass = 'border-warning bg-warning bg-opacity-10';
-        $iconClass = 'fas fa-hourglass-half text-warning';
-        $statusText = 'Pendente';
-        $statusBadgeClass = 'bg-warning text-dark';
+        $cardClass = 'border-light';
+        $iconClass = 'fas fa-circle text-muted';
+        $statusText = 'Vazio';
         if ($dayStatus === 'draft') {
-            $cardClass = 'border-warning bg-warning bg-opacity-10';
+            $cardClass = 'border-warning';
             $iconClass = 'fas fa-edit text-warning';
             $statusText = 'Rascunho';
-            $statusBadgeClass = 'bg-warning text-dark';
         } elseif ($dayStatus === 'filled') {
-            $cardClass = 'border-success bg-success bg-opacity-10';
+            $cardClass = 'border-success';
             $iconClass = 'fas fa-check-circle text-success';
-            $statusText = 'Concluído';
-            $statusBadgeClass = 'bg-success';
+            $statusText = 'Preenchido';
         }
-        if ($isToday) $cardClass .= ' shadow';
+        if ($isToday) {
+            $cardClass .= ' shadow';
+        }
     ?>
-    <div class="col-6 col-md-3 col-lg-2">
-        <a href="/admin/planning/<?= $submission['id'] ?>/day/<?= $date ?>" class="card border-2 <?= $cardClass ?> text-decoration-none <?= ($submission['status'] === 'registered') ? 'pe-none opacity-75' : '' ?>">
-            <div class="card-body text-center py-2 px-2">
+    <div class="col-6 col-md-4 col-lg">
+        <a href="/admin/planning/<?= $submission['id'] ?>/day/<?= $date ?>" class="card border-2 <?= $cardClass ?> text-decoration-none h-100 <?= ($submission['status'] === 'registered') ? 'pe-none opacity-75' : '' ?>">
+            <div class="card-body text-center py-3">
                 <?php if ($isToday): ?>
-                    <span class="badge bg-primary mb-1" style="font-size:0.65em">HOJE</span><br>
+                    <span class="badge bg-primary mb-1">HOJE</span><br>
                 <?php endif; ?>
-                <div class="text-muted fw-bold" style="font-size:0.7em"><?= $dayNames[$dow] ?? '' ?></div>
-                <div class="fw-bold text-dark" style="font-size:1.4em;line-height:1.2"><?= $dt->format('d') ?></div>
-                <div class="text-muted" style="font-size:0.65em"><?= $dt->format('m/Y') ?></div>
-                <div class="mt-1">
-                    <span class="badge <?= $statusBadgeClass ?>" style="font-size:0.6em">
-                        <i class="<?= $iconClass ?> me-1" style="font-size:0.8em"></i><?= $statusText ?>
-                    </span>
+                <div class="text-muted small fw-bold"><?= $dayNames[$dow] ?? '' ?></div>
+                <div class="fs-3 fw-bold text-dark"><?= $dt->format('d') ?></div>
+                <div class="text-muted small"><?= $dt->format('m/Y') ?></div>
+                <div class="mt-2">
+                    <i class="<?= $iconClass ?> me-1"></i>
+                    <span class="small"><?= $statusText ?></span>
                 </div>
             </div>
         </a>
