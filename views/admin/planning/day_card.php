@@ -61,12 +61,27 @@
                         $selectedIndices = $decoded['selected'] ?? [];
                     }
 
+                    // Detect if this field label matches a specific eixo (for filtering objectives)
+                    $eixoMap = ['manual' => 'Manual', 'musical' => 'Musical', 'movimento' => 'Movimento', 'contos' => 'Contos', 'pca' => 'PCA'];
+                    $fieldEixo = '';
+
                     // Rename eixo labels
                     $fieldLabel = $field['label'];
                     $fieldLabel = str_ireplace('Eixo de Vivências', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo da Vivência', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo de Vivencias', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo da Vivencia', 'Eixo de Atividades', $fieldLabel);
+
+                    foreach ($eixoMap as $eixoKey => $eixoName) {
+                        if (stripos($fieldLabel, $eixoName) !== false || stripos($field['label'], $eixoName) !== false) {
+                            $fieldEixo = $eixoKey;
+                            break;
+                        }
+                    }
+
+                    // Detect if this is an eixo/axis radio field -> render as btn-group toggle
+                    $isEixoRadio = ($field['field_type'] === 'radio' &&
+                        (stripos($fieldLabel, 'eixo') !== false || stripos($field['label'], 'eixo') !== false));
             ?>
                 <div class="mb-3" <?= $fieldEixo ? 'data-eixo-group="' . $fieldEixo . '"' : '' ?>>
                     <input type="hidden" name="answer_sections[<?= $field['id'] ?>]" value="<?= $section['id'] ?>">
@@ -79,19 +94,6 @@
                     <?php endif; ?>
 
                     <?php
-                    // Detect if this is an eixo/axis radio field -> render as btn-group toggle
-                    $isEixoRadio = ($field['field_type'] === 'radio' &&
-                        (stripos($fieldLabel, 'eixo') !== false || stripos($field['label'], 'eixo') !== false));
-
-                    // Detect if this field label matches a specific eixo (for filtering objectives)
-                    $eixoMap = ['manual' => 'Manual', 'musical' => 'Musical', 'movimento' => 'Movimento', 'contos' => 'Contos', 'pca' => 'PCA'];
-                    $fieldEixo = '';
-                    foreach ($eixoMap as $eixoKey => $eixoName) {
-                        if (stripos($fieldLabel, $eixoName) !== false || stripos($field['label'], $eixoName) !== false) {
-                            $fieldEixo = $eixoKey;
-                            break;
-                        }
-                    }
 
                     switch ($field['field_type']):
                         case 'text': ?>

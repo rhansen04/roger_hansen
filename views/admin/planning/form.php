@@ -36,11 +36,13 @@ $template = $template ?? null;
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Início <span class="text-danger">*</span></label>
-                    <input type="date" name="period_start" class="form-control" required>
+                    <input type="text" name="period_start" class="form-control planning-date-input" placeholder="DD/MM/AAAA" inputmode="numeric" autocomplete="off" required>
+                    <small class="text-muted d-block mt-1">Informe no formato DD/MM/AAAA ou use o seletor de data.</small>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">Fim <span class="text-danger">*</span></label>
-                    <input type="date" name="period_end" class="form-control" required>
+                    <input type="text" name="period_end" class="form-control planning-date-input" placeholder="DD/MM/AAAA" inputmode="numeric" autocomplete="off" required>
+                    <small class="text-muted d-block mt-1">Informe no formato DD/MM/AAAA ou use o seletor de data.</small>
                 </div>
             </div>
 
@@ -219,6 +221,29 @@ $template = $template ?? null;
 </form>
 
 <script>
+document.querySelectorAll('.planning-date-input').forEach(function(input) {
+    input.addEventListener('focus', function() {
+        if (this.type !== 'date' && this.value === '') {
+            this.type = 'date';
+        }
+    });
+
+    input.addEventListener('blur', function() {
+        if (this.type === 'date') {
+            if (!this.value) {
+                this.type = 'text';
+                return;
+            }
+
+            var parts = this.value.split('-');
+            if (parts.length === 3) {
+                this.type = 'text';
+                this.value = parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+        }
+    });
+});
+
 // Field dependency: show/hide fields based on controlling field value
 document.querySelectorAll('[data-depends-on]').forEach(function(wrapper) {
     var controlId = wrapper.dataset.dependsOn;

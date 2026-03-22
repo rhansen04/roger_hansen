@@ -74,15 +74,18 @@ class PlanningController
             exit;
         }
 
-        $periodStart = $_POST['period_start'];
-        $periodEnd   = $_POST['period_end'];
-        $startDate = \DateTime::createFromFormat('Y-m-d', $periodStart);
-        $endDate   = \DateTime::createFromFormat('Y-m-d', $periodEnd);
+        $periodStartRaw = trim((string) ($_POST['period_start'] ?? ''));
+        $periodEndRaw   = trim((string) ($_POST['period_end'] ?? ''));
+        $startDate = $this->parsePlanningDate($periodStartRaw);
+        $endDate   = $this->parsePlanningDate($periodEndRaw);
         if (!$startDate || !$endDate || $startDate > $endDate) {
             $_SESSION['error_message'] = 'Período inválido: data de início deve ser anterior ao término.';
             header('Location: /admin/planning/create');
             exit;
         }
+
+        $periodStart = $startDate->format('Y-m-d');
+        $periodEnd = $endDate->format('Y-m-d');
 
         $templateId = $this->getDefaultTemplateId();
         if ($templateId === null) {
@@ -969,5 +972,23 @@ class PlanningController
         }
 
         return (int) $templates[0]['id'];
+    }
+
+    private function parsePlanningDate(string $value): ?\DateTime
+    {
+        if ($value === '') {
+            return null;
+        }
+
+        $formats = ['Y-m-d', 'd/m/Y'];
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $value);
+            $errors = \DateTime::getLastErrors();
+            if ($date && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
+                return $date;
+            }
+        }
+
+        return null;
     }
 }

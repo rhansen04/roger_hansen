@@ -71,17 +71,15 @@ Equipe Pedagogica';
         $classrooms = $classroomModel->all();
 
         $selectedStudentId = $_GET['student_id'] ?? null;
-        $selectedSemester = !empty($_GET['semester']) ? (int) $_GET['semester'] : null;
+        $currentMonth = (int) date('m');
+        $defaultSemester = ($currentMonth <= 6) ? 1 : 2;
+        $selectedSemester = !empty($_GET['semester']) ? (int) $_GET['semester'] : $defaultSemester;
         $selectedYear = !empty($_GET['year']) ? (int) $_GET['year'] : (int) date('Y');
 
         // Buscar observacoes do periodo para o aluno selecionado
         $observations = [];
-        if ($selectedStudentId) {
-            if ($selectedSemester) {
-                $observations = $obsModel->findByStudentAndSemester((int) $selectedStudentId, $selectedSemester, $selectedYear);
-            } else {
-                $observations = $obsModel->findByStudent($selectedStudentId);
-            }
+        if ($selectedStudentId && $selectedSemester) {
+            $observations = $obsModel->findByStudentAndSemester((int) $selectedStudentId, $selectedSemester, $selectedYear);
         }
 
         return $this->render('descriptive-reports/create', [
@@ -90,6 +88,7 @@ Equipe Pedagogica';
             'observations' => $observations,
             'selectedStudentId' => $selectedStudentId,
             'selectedSemester' => $selectedSemester,
+            'defaultSemester' => $defaultSemester,
             'selectedYear' => $selectedYear
         ]);
     }

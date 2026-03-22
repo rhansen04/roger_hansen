@@ -49,11 +49,9 @@
                             <label for="semester" class="form-label fw-bold">
                                 <i class="fas fa-calendar-alt me-1 text-primary"></i> Semestre <span class="text-danger">*</span>
                             </label>
-                            <?php $selSemester = $_GET['semester'] ?? ''; ?>
                             <select name="semester" id="semester" class="form-select" required onchange="loadObservations()">
-                                <option value="">Selecione...</option>
-                                <option value="1" <?php echo ($selSemester == '1') ? 'selected' : ''; ?>>1o Semestre</option>
-                                <option value="2" <?php echo ($selSemester == '2') ? 'selected' : ''; ?>>2o Semestre</option>
+                                <option value="1" <?php echo ((int) ($selectedSemester ?? $defaultSemester ?? 1) === 1) ? 'selected' : ''; ?>>1o Semestre</option>
+                                <option value="2" <?php echo ((int) ($selectedSemester ?? $defaultSemester ?? 1) === 2) ? 'selected' : ''; ?>>2o Semestre</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -109,7 +107,7 @@
                         <strong>Nenhuma observacao encontrada</strong> para este aluno.
                         <br><small>Voce precisa criar uma observacao antes de gerar o parecer descritivo.</small>
                         <div class="mt-2">
-                            <a href="/admin/observations/create?student_id=<?php echo $selectedStudentId; ?>" class="btn btn-sm btn-warning">
+                            <a href="/admin/observations/create?student_id=<?php echo $selectedStudentId; ?>&semester=<?php echo (int) $selectedSemester; ?>&year=<?php echo (int) $selectedYear; ?>" class="btn btn-sm btn-warning">
                                 <i class="fas fa-plus me-1"></i> Criar Observacao
                             </a>
                         </div>
@@ -139,7 +137,7 @@ function loadObservations() {
     const semester = document.getElementById('semester').value;
     const year = document.getElementById('year').value;
 
-    if (!studentId) return;
+    if (!studentId || !semester || !year) return;
 
     const url = new URL(window.location.href);
     url.searchParams.set('student_id', studentId);
