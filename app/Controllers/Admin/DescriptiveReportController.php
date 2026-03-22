@@ -113,7 +113,7 @@ Equipe Pedagogica';
         $obsModel = new Observation();
         $observations = $obsModel->findByStudentAndSemester($studentId, $semester, $year);
         $studentText = $obsModel->compileSemesterText($studentId, $semester, $year);
-        $latestObservation = !empty($observations) ? end($observations) : null;
+        $latestObservation = !empty($observations) ? reset($observations) : null;
         $observationId = !empty($latestObservation['id']) ? (int) $latestObservation['id'] : null;
 
         // Detectar turma do aluno se nao informada
@@ -486,7 +486,7 @@ Equipe Pedagogica';
             exit;
         }
 
-        $latestObservation = !empty($observations) ? end($observations) : null;
+        $latestObservation = !empty($observations) ? reset($observations) : null;
         $latestObservationId = !empty($latestObservation['id']) ? (int) $latestObservation['id'] : null;
 
         // Atualizar o parecer

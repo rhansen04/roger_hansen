@@ -669,15 +669,22 @@ class ObservationController
 
         $compiledText = $obsModel->compileSemesterText($studentId, $semester, $year);
         $observations = $obsModel->findByStudentAndSemester($studentId, $semester, $year);
-        $latestObservation = !empty($observations) ? end($observations) : null;
+        $latestObservation = !empty($observations) ? reset($observations) : null;
         $latestObservationId = !empty($latestObservation['id']) ? (int) $latestObservation['id'] : null;
 
         foreach ($reports as $report) {
-            $reportModel->update((int) $report['id'], [
+            $updateData = [
                 'observation_id' => $latestObservationId,
                 'student_text' => $compiledText,
-                'student_text_edited' => $compiledText,
-            ]);
+            ];
+
+            $currentEditedText = trim((string) ($report['student_text_edited'] ?? ''));
+            $currentCompiledText = trim((string) ($report['student_text'] ?? ''));
+            if ($currentEditedText === '' || $currentEditedText === $currentCompiledText) {
+                $updateData['student_text_edited'] = $compiledText;
+            }
+
+            $reportModel->update((int) $report['id'], $updateData);
         }
     }
 

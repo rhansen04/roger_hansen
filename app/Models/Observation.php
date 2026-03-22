@@ -624,6 +624,10 @@ class Observation
     public function compileSemesterText($studentId, $semester, $year): string
     {
         $observations = $this->findByStudentAndSemester($studentId, $semester, $year);
+        usort($observations, static function (array $a, array $b): int {
+            return strcmp((string) ($a['created_at'] ?? ''), (string) ($b['created_at'] ?? ''));
+        });
+
         $parts = [];
 
         foreach ($observations as $observation) {
@@ -656,11 +660,11 @@ class Observation
         foreach ($axes as $field => $label) {
             $text = $this->normalizeAxisValue($observation[$field] ?? '');
             if ($text !== '') {
-                $parts[] = $label . ":\n" . $text;
+                $parts[] = $text;
             }
         }
 
-        return implode("\n\n", $parts);
+        return trim(implode(' ', $parts));
     }
 
     /**

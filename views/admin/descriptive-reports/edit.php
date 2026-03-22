@@ -65,12 +65,12 @@
     <div class="alert alert-info mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <i class="fas fa-info-circle me-2"></i>
-            O texto deste parecer foi compilado da <strong>Observacao #<?php echo $report['observation_id']; ?></strong>.
-            Para editar os eixos individualmente, acesse a observacao original.
+            O texto deste parecer foi compilado a partir de <strong>todas as observacoes do semestre</strong>.
+            O link ao lado abre a observacao mais recente desse conjunto para facilitar ajustes manuais.
         </div>
         <div class="d-flex gap-2">
             <a href="/admin/observations/<?php echo $report['observation_id']; ?>/edit" class="btn btn-outline-primary btn-sm" target="_blank">
-                <i class="fas fa-external-link-alt me-1"></i> Editar Observacao
+                <i class="fas fa-external-link-alt me-1"></i> Editar Observacao Mais Recente
             </a>
             <button type="button" class="btn btn-outline-success btn-sm" onclick="recompileFromObservation()" id="btnRecompile">
                 <i class="fas fa-sync-alt me-1"></i> Recompilar Texto
