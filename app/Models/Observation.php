@@ -629,9 +629,10 @@ class Observation
         });
 
         $parts = [];
+        $seen = [];
 
         foreach ($observations as $observation) {
-            $compiled = $this->compileObservationText($observation);
+            $compiled = $this->compileObservationText($observation, $seen);
             if ($compiled !== '') {
                 $parts[] = $compiled;
             }
@@ -640,31 +641,31 @@ class Observation
         return implode("\n\n", $parts);
     }
 
-    public function compileObservationText(array $observation): string
+    public function compileObservationText(array $observation, array &$seen = []): string
     {
-        $parts = [];
+        $snippets = [];
 
         $general = $this->normalizeAxisValue($observation['observation_general'] ?? '');
         if ($general !== '') {
-            $parts[] = $general;
+            $this->appendUniqueSnippet($snippets, $seen, $general);
         }
 
         $axes = [
-            'axis_movement' => 'Atividade de Movimento',
-            'axis_manual' => 'Atividade Manual',
-            'axis_music' => 'Atividade Musical',
-            'axis_stories' => 'Atividade de Contos',
-            'axis_pca' => 'Programa Comunicacao Ativa (PCA)',
+            'axis_movement',
+            'axis_manual',
+            'axis_music',
+            'axis_stories',
+            'axis_pca',
         ];
 
-        foreach ($axes as $field => $label) {
+        foreach ($axes as $field) {
             $text = $this->normalizeAxisValue($observation[$field] ?? '');
             if ($text !== '') {
-                $parts[] = $text;
+                $this->appendUniqueSnippet($snippets, $seen, $text);
             }
         }
 
-        return trim(implode(' ', $parts));
+        return $this->buildNarrativeParagraph($snippets);
     }
 
     /**
@@ -797,5 +798,55 @@ class Observation
         }
 
         return trim((string) $value);
+    }
+
+    private function appendUniqueSnippet(array &$snippets, array &$seen, string $text): void
+    {
+        $normalizedText = $this->sanitizeNarrativeText($text);
+        if ($normalizedText === '') {
+            return;
+        }
+
+        $key = mb_strtolower(preg_replace('/\s+/u', ' ', $normalizedText));
+        if ($key === '' || isset($seen[$key])) {
+            return;
+        }
+
+        $seen[$key] = true;
+        $snippets[] = $normalizedText;
+    }
+
+    private function buildNarrativeParagraph(array $snippets): string
+    {
+        if (empty($snippets)) {
+            return '';
+        }
+
+        $paragraph = '';
+        foreach ($snippets as $snippet) {
+            if ($paragraph === '') {
+                $paragraph = $snippet;
+                continue;
+            }
+
+            $paragraph .= $this->needsSentenceBreak($paragraph) ? '. ' : ' ';
+            $paragraph .= $snippet;
+        }
+
+        return trim($paragraph);
+    }
+
+    private function sanitizeNarrativeText(string $text): string
+    {
+        $text = trim(preg_replace('/\s+/u', ' ', $text));
+        $text = preg_replace('/^[\-–—:;,.\s]+/u', '', $text);
+        $text = trim($text);
+
+        return $text;
+    }
+
+    private function needsSentenceBreak(string $text): bool
+    {
+        return !preg_match('/[.!?…:]$/u', rtrim($text));
     }
 }
