@@ -80,6 +80,7 @@
 <?php endif; ?>
 
 <form method="POST" action="/admin/descriptive-reports/<?php echo $report['id']; ?>/update" id="editForm">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
 
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">

@@ -64,6 +64,7 @@
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
             <form method="POST" action="/admin/descriptive-reports/<?php echo $report['id']; ?>/finalize" class="d-inline" onsubmit="return confirm('Deseja finalizar este parecer? Ele ficara bloqueado para edicao.')">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-check me-1"></i> Finalizar
                 </button>
@@ -78,6 +79,7 @@
 
         <?php if ($isFinalized && $isCoordenadorOrAdmin): ?>
             <form method="POST" action="/admin/descriptive-reports/<?php echo $report['id']; ?>/reopen" class="d-inline" onsubmit="return confirm('Reabrir este parecer para edicao?')">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                 <button type="submit" class="btn btn-outline-warning">
                     <i class="fas fa-lock-open me-1"></i> Reabrir
                 </button>
@@ -224,6 +226,7 @@ include __DIR__ . '/../observations/_coordinator_feedback.php';
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="/admin/descriptive-reports/<?php echo $report['id']; ?>/request-revision">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-undo me-2"></i>Solicitar Revisao</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

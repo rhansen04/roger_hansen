@@ -29,6 +29,7 @@
 </div>
 
 <form action="/admin/planning/<?= $submission['id'] ?>/day/<?= $date ?>" method="POST" id="dayForm">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
 
     <?php if (!empty($sections)):
         foreach ($sections as $si => $section):
@@ -60,13 +61,23 @@
                         $selectedIndices = $decoded['selected'] ?? [];
                     }
 
+                    $eixoMap = ['manual' => 'Manual', 'musical' => 'Musical', 'movimento' => 'Movimento', 'contos' => 'Contos', 'pca' => 'PCA'];
+                    $fieldEixo = '';
+
                     $fieldLabel = $field['label'];
                     $fieldLabel = str_ireplace('Eixo de Vivências', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo da Vivência', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo de Vivencias', 'Eixo de Atividades', $fieldLabel);
                     $fieldLabel = str_ireplace('Eixo da Vivencia', 'Eixo de Atividades', $fieldLabel);
+
+                    foreach ($eixoMap as $eixoKey => $eixoName) {
+                        if (stripos($fieldLabel, $eixoName) !== false || stripos($field['label'], $eixoName) !== false) {
+                            $fieldEixo = $eixoKey;
+                            break;
+                        }
+                    }
             ?>
-                <div class="mb-3">
+                <div class="mb-3" <?= $fieldEixo ? 'data-eixo-group="' . $fieldEixo . '"' : '' ?>>
                     <input type="hidden" name="answer_sections[<?= $field['id'] ?>]" value="<?= $section['id'] ?>">
                     <label class="form-label fw-bold">
                         <?= htmlspecialchars($fieldLabel) ?>
@@ -110,13 +121,13 @@
                         case 'radio':
                             $options = json_decode($field['options_json'] ?? '[]', true) ?: [];
                             if ($isEixoRadio): ?>
-                            <div class="btn-group flex-wrap" role="group">
+                            <div class="btn-group flex-wrap" role="group" data-eixo-selector="true">
                                 <?php foreach ($options as $oi => $opt):
                                     $optLabel = str_ireplace('Vivência', 'Atividade', $opt);
                                     $optLabel = str_ireplace('Vivencia', 'Atividade', $optLabel);
                                     $isChecked = ($answerText === $opt);
                                 ?>
-                                <input type="radio" class="btn-check" name="<?= $fieldName ?>"
+                                <input type="radio" class="btn-check eixo-radio" name="<?= $fieldName ?>"
                                     value="<?= htmlspecialchars($opt) ?>" id="f<?= $field['id'] ?>_<?= $oi ?>"
                                     autocomplete="off" <?= $isChecked ? 'checked' : '' ?>>
                                 <label class="btn btn-outline-primary" for="f<?= $field['id'] ?>_<?= $oi ?>">
@@ -174,3 +185,36 @@
         </div>
     </div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var eixoRadios = document.querySelectorAll('.eixo-radio');
+    var eixoGroups = document.querySelectorAll('[data-eixo-group]');
+
+    if (eixoRadios.length === 0 || eixoGroups.length === 0) return;
+
+    function filterByEixo(selectedValue) {
+        if (!selectedValue) {
+            eixoGroups.forEach(function(el) { el.style.display = ''; });
+            return;
+        }
+        var sv = selectedValue.toLowerCase();
+        var eixoMap = {manual:'manual', manuais:'manual', musical:'musical', musica:'musical', movimento:'movimento', contos:'contos', pca:'pca'};
+        var matchKey = '';
+        for (var k in eixoMap) {
+            if (sv.indexOf(k) !== -1) { matchKey = eixoMap[k]; break; }
+        }
+        eixoGroups.forEach(function(el) {
+            if (!matchKey) { el.style.display = ''; return; }
+            el.style.display = (el.getAttribute('data-eixo-group') === matchKey) ? '' : 'none';
+        });
+    }
+
+    eixoRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() { filterByEixo(this.value); });
+    });
+
+    var checked = document.querySelector('.eixo-radio:checked');
+    if (checked) filterByEixo(checked.value);
+});
+</script>

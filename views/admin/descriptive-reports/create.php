@@ -30,6 +30,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
                 <form method="POST" action="/admin/descriptive-reports" id="createForm">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                     <div class="mb-4">
                         <label for="student_id" class="form-label fw-bold">
                             <i class="fas fa-user-graduate me-1 text-primary"></i> Aluno <span class="text-danger">*</span>
